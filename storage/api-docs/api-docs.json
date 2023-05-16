@@ -1,0 +1,557 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Your super  ApplicationAPI",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Register"
+                ],
+                "summary": "User Register",
+                "description": "User Register here",
+                "operationId": "Register",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "text"
+                                    },
+                                    "email": {
+                                        "type": "text"
+                                    },
+                                    "password": {
+                                        "type": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Register Successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Register Successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Login"
+                ],
+                "summary": "User Login",
+                "description": "Login User Here",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "email"
+                                    },
+                                    "password": {
+                                        "type": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Login Successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Login Successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                }
+            }
+        },
+        "/v1/portal/categories": {
+            "get": {
+                "tags": [
+                    "Customer Portal"
+                ],
+                "summary": "Get Categories List",
+                "operationId": "getCategoriesList",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/categories/{slug}": {
+            "get": {
+                "tags": [
+                    "Customer Portal"
+                ],
+                "summary": "Get Sub Categories List",
+                "operationId": "getSubCategoriesList",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/categories/{slug}/products": {
+            "get": {
+                "tags": [
+                    "Customer Portal"
+                ],
+                "summary": "Get Category Products",
+                "operationId": "getCategoryProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/filter/categories/{slug}/products": {
+            "post": {
+                "tags": [
+                    "Customer Portal"
+                ],
+                "summary": "Get Filtered Category Products",
+                "operationId": "getFilteredCategoryProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Set Order Shipment Details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "filters": {
+                                        "description": "filters",
+                                        "properties": {
+                                            "price_range": {
+                                                "description": "Price Range",
+                                                "properties": {
+                                                    "min": {
+                                                        "description": "1",
+                                                        "type": "string"
+                                                    },
+                                                    "max": {
+                                                        "description": "1",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            "store_slug": {
+                                                "description": "Filter by store slug",
+                                                "type": "string"
+                                            },
+                                            "sort_by": {
+                                                "description": "Sort by",
+                                                "properties": {
+                                                    "newest_arrival": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "featured": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "price_high_to_low": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "price_low_to_high": {
+                                                        "description": "0",
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/stores/list/{type}": {
+            "get": {
+                "tags": [
+                    "Customer Portal"
+                ],
+                "summary": "Manage Store",
+                "operationId": "getAllStores",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "description": "type",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/stores/{slug}": {
+            "get": {
+                "tags": [
+                    "Customer Portal"
+                ],
+                "summary": "Manage Store",
+                "operationId": "getStore",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "store slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/filter/stores/{slug}/product": {
+            "post": {
+                "tags": [
+                    "Customer Portal"
+                ],
+                "summary": "Store Products",
+                "operationId": "getFilteredStoreProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "store slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Resend OTP",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "filters": {
+                                        "description": "Network Id of customer's phone number",
+                                        "type": "object",
+                                        "example": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/stores/{slug}/product": {
+            "get": {
+                "tags": [
+                    "Customer Portal"
+                ],
+                "summary": "Store Products",
+                "operationId": "getStoreProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "store slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/stores/{slug}/category/{catSlug}": {
+            "get": {
+                "tags": [
+                    "Customer Portal"
+                ],
+                "summary": "Manage Store Category Products",
+                "operationId": "getStoreCategories",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "catSlug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/stores/{slug}/category/{catSlug}/product": {
+            "get": {
+                "tags": [
+                    "Customer Portal"
+                ],
+                "summary": "Manage Store Category Products",
+                "operationId": "getStoreCategoryProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "catSlug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        }
+    },
+    "security": {
+        "passport": {
+            "type": "oauth2",
+            "description": "Laravel passport oauth2 security.",
+            "in": "header",
+            "scheme": "https",
+            "flows": {
+                "password": {
+                    "authorizationUrl": "http://localhost/oauth/authorize",
+                    "tokenUrl": "http://localhost/oauth/token",
+                    "refreshUrl": "http://localhost/token/refresh",
+                    "scopes": []
+                }
+            }
+        }
+    }
+}
