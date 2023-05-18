@@ -1,9 +1,22 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Your super  ApplicationAPI",
-        "version": "1.0.0"
+        "title": "Puraani Jeans APIs",
+        "description": "Puraani Jeans API documentation",
+        "contact": {
+            "email": "developer@pjeans.com"
+        },
+        "license": {
+            "name": "Apache 2.0"
+        },
+        "version": ""
     },
+    "servers": [
+        {
+            "url": "http://puranijeans.test/",
+            "description": "local"
+        }
+    ],
     "paths": {
         "/api/register": {
             "post": {
@@ -145,10 +158,10 @@
                 }
             }
         },
-        "/v1/portal/categories": {
+        "/api/categories": {
             "get": {
                 "tags": [
-                    "Customer Portal"
+                    "Categories"
                 ],
                 "summary": "Get Categories List",
                 "operationId": "getCategoriesList",
@@ -165,10 +178,10 @@
                 ]
             }
         },
-        "/v1/portal/categories/{slug}": {
+        "/api/categories/{slug}": {
             "get": {
                 "tags": [
-                    "Customer Portal"
+                    "Categories"
                 ],
                 "summary": "Get Sub Categories List",
                 "operationId": "getSubCategoriesList",
@@ -196,10 +209,10 @@
                 ]
             }
         },
-        "/v1/portal/categories/{slug}/products": {
+        "/api/categories/{slug}/products": {
             "get": {
                 "tags": [
-                    "Customer Portal"
+                    "Categories"
                 ],
                 "summary": "Get Category Products",
                 "operationId": "getCategoryProducts",
@@ -227,10 +240,10 @@
                 ]
             }
         },
-        "/v1/portal/filter/categories/{slug}/products": {
+        "/api/filter/categories/{slug}/products": {
             "post": {
                 "tags": [
-                    "Customer Portal"
+                    "Categories"
                 ],
                 "summary": "Get Filtered Category Products",
                 "operationId": "getFilteredCategoryProducts",
@@ -316,10 +329,191 @@
                 ]
             }
         },
-        "/v1/portal/stores/list/{type}": {
+        "/api/product/{productId}": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Product detail",
+                "operationId": "getProductDetail",
+                "parameters": [
+                    {
+                        "name": "productId",
+                        "in": "path",
+                        "description": "product id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Get product detail",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "referrer_type": {
+                                        "description": "referrer type",
+                                        "type": "string",
+                                        "example": "Featured Product"
+                                    },
+                                    "customer_address_id": {
+                                        "description": "customer address id",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/featured-products": {
             "get": {
                 "tags": [
-                    "Customer Portal"
+                    "Products"
+                ],
+                "summary": "Get Homepage featured products",
+                "operationId": "getFeaturedProducts",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/recently-viewed/products": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get customer's recently viewed products",
+                "operationId": "getRecentlyViewedProducts",
+                "parameters": [
+                    {
+                        "name": "productId",
+                        "in": "path",
+                        "description": "product id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/filter/featured-products": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get Homepage featured products",
+                "operationId": "getFilteredFeaturedProducts",
+                "requestBody": {
+                    "description": "Set Order Shipment Details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "filters": {
+                                        "description": "filters",
+                                        "properties": {
+                                            "price_range": {
+                                                "description": "Price Range",
+                                                "properties": {
+                                                    "min": {
+                                                        "description": "1",
+                                                        "type": "string"
+                                                    },
+                                                    "max": {
+                                                        "description": "1",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            "store_slug": {
+                                                "description": "Filter by store slug",
+                                                "type": "string"
+                                            },
+                                            "sort_by": {
+                                                "description": "Sort by",
+                                                "properties": {
+                                                    "featured": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "newest_arrival": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "price_high_to_low": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "price_low_to_high": {
+                                                        "description": "0",
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/stores/list/{type}": {
+            "get": {
+                "tags": [
+                    "Closet"
                 ],
                 "summary": "Manage Store",
                 "operationId": "getAllStores",
@@ -347,10 +541,10 @@
                 ]
             }
         },
-        "/v1/portal/stores/{slug}": {
+        "/api/stores/{slug}": {
             "get": {
                 "tags": [
-                    "Customer Portal"
+                    "Closet"
                 ],
                 "summary": "Manage Store",
                 "operationId": "getStore",
@@ -378,10 +572,10 @@
                 ]
             }
         },
-        "/v1/portal/filter/stores/{slug}/product": {
+        "/api/filter/stores/{slug}/product": {
             "post": {
                 "tags": [
-                    "Customer Portal"
+                    "Closet"
                 ],
                 "summary": "Store Products",
                 "operationId": "getFilteredStoreProducts",
@@ -426,10 +620,10 @@
                 ]
             }
         },
-        "/v1/portal/stores/{slug}/product": {
+        "/api/stores/{slug}/product": {
             "get": {
                 "tags": [
-                    "Customer Portal"
+                    "Closet"
                 ],
                 "summary": "Store Products",
                 "operationId": "getStoreProducts",
@@ -457,10 +651,10 @@
                 ]
             }
         },
-        "/v1/portal/stores/{slug}/category/{catSlug}": {
+        "/api/stores/{slug}/category/{catSlug}": {
             "get": {
                 "tags": [
-                    "Customer Portal"
+                    "Closet"
                 ],
                 "summary": "Manage Store Category Products",
                 "operationId": "getStoreCategories",
@@ -497,10 +691,10 @@
                 ]
             }
         },
-        "/v1/portal/stores/{slug}/category/{catSlug}/product": {
+        "/api/stores/{slug}/category/{catSlug}/product": {
             "get": {
                 "tags": [
-                    "Customer Portal"
+                    "Closet"
                 ],
                 "summary": "Manage Store Category Products",
                 "operationId": "getStoreCategoryProducts",
@@ -535,6 +729,28 @@
                         "locale": []
                     }
                 ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "user_access_token": {
+                "type": "apiKey",
+                "description": "user access token",
+                "name": "Authorization",
+                "in": "header"
+            },
+            "client_id": {
+                "type": "apiKey",
+                "description": "client id",
+                "name": "x-client-id",
+                "in": "header"
+            },
+            "client_secret": {
+                "type": "apiKey",
+                "description": "client secret",
+                "name": "x-client-token",
+                "in": "header"
             }
         }
     },

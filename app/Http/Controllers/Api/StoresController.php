@@ -5,20 +5,21 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHandler;
 use App\Helpers\AppException;
 use App\Helpers\Constant;
+use App\Http\Controllers\Controller;
 use App\Models\MerchantStore;
 use App\Models\PimCategory;
 use App\Models\PimProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
-class StoresController
+class StoresController extends Controller
 {
     /**
      * @OA\Get(
      *
-     *     path="/v1/portal/stores/list/{type}",
-     *     tags={"Customer Portal"},
+     *     path="/api/stores/list/{type}",
+     *     tags={"Closet"},
      *     summary="Manage Store",
      *     operationId="getAllStores",
      *
@@ -81,8 +82,8 @@ class StoresController
     /**
      * @OA\Get(
      *
-     *     path="/v1/portal/stores/{slug}",
-     *     tags={"Customer Portal"},
+     *     path="/api/stores/{slug}",
+     *     tags={"Closet"},
      *     summary="Manage Store",
      *     operationId="getStore",
      *
@@ -122,8 +123,6 @@ class StoresController
             if($store) {
                 if(!($store->merchant->canPlaceOrder( env('UNIVERSAL_CHECKOUT_INTEGRATION_TYPE')))){
                     return ApiResponseHandler::failure(__('messages.general.merchant_not_found'), "", ['not_found' => Constant::Yes]);
-                }else if($store->merchant->user->is_active == Constant::No){
-                    return ApiResponseHandler::failure( __('messages.general.inactive_merchant_found'), '', ['not_found' => Constant::Yes] );
                 }
                 $response = self::getCachedStoreConfig($store);
                 return ApiResponseHandler::success($response, __('messages.general.success'));
@@ -140,8 +139,8 @@ class StoresController
     /**
      * @OA\Post(
      *
-     *     path="/v1/portal/filter/stores/{slug}/product",
-     *     tags={"Customer Portal"},
+     *     path="/api/filter/stores/{slug}/product",
+     *     tags={"Closet"},
      *     summary="Store Products",
      *     operationId="getFilteredStoreProducts",
      *
@@ -201,8 +200,6 @@ class StoresController
             if($store) {
                 if(!($store->merchant->canPlaceOrder( env('UNIVERSAL_CHECKOUT_INTEGRATION_TYPE')))){
                     return ApiResponseHandler::failure( __('messages.general.merchant_not_found'), '', ['not_found' => Constant::Yes] );
-                }else if($store->merchant->user->is_active == Constant::No){
-                    return ApiResponseHandler::failure( __('messages.general.inactive_merchant_found'), '', ['not_found' => Constant::Yes] );
                 }
                 $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['STORES_PRODUCTS'];
                 $shipment = $store->merchant->getDefaultShipmentMethodsExceptBykea();
@@ -228,8 +225,8 @@ class StoresController
     /**
      * @OA\Get(
      *
-     *     path="/v1/portal/stores/{slug}/product",
-     *     tags={"Customer Portal"},
+     *     path="/api/stores/{slug}/product",
+     *     tags={"Closet"},
      *     summary="Store Products",
      *     operationId="getStoreProducts",
      *
@@ -265,8 +262,6 @@ class StoresController
             if($store) {
                 if(!($store->merchant->canPlaceOrder( env('UNIVERSAL_CHECKOUT_INTEGRATION_TYPE')))){
                     return ApiResponseHandler::failure( __('messages.general.merchant_not_found'), '', ['not_found' => Constant::Yes] );
-                }else if($store->merchant->user->is_active == Constant::No){
-                    return ApiResponseHandler::failure( __('messages.general.inactive_merchant_found'), '', ['not_found' => Constant::Yes] );
                 }
 
                 $shipment = $store->merchant->getDefaultShipmentMethodsExceptBykea();
@@ -294,7 +289,7 @@ class StoresController
         return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($store) {
             return [
                 'metadata'                  => MerchantStore::__getMetaData($store),
-                'catalog_settings'          => MerchantStore::__getCatalogSettings($store),
+                'catalog_settings'          => [],
                 'categories'                => [],
 //            'categories'                => self::getMerchantPimAvailableCategories($store->merchant_id, $store),
             ];
@@ -320,8 +315,8 @@ class StoresController
     /**
      * @OA\Get(
      *
-     *     path="/v1/portal/stores/{slug}/category/{catSlug}",
-     *     tags={"Customer Portal"},
+     *     path="/api/stores/{slug}/category/{catSlug}",
+     *     tags={"Closet"},
      *     summary="Manage Store Category Products",
      *     operationId="getStoreCategories",
      *
@@ -367,9 +362,6 @@ class StoresController
             if($store) {
                 if(!($store->merchant->canPlaceOrder( env('UNIVERSAL_CHECKOUT_INTEGRATION_TYPE')))){
                     return ApiResponseHandler::failure( __('messages.general.merchant_not_found'), '', ['not_found' => Constant::Yes] );
-                }else if($store->merchant->user->is_active == Constant::No){
-                    return ApiResponseHandler::failure( __('messages.general.inactive_merchant_found'), '', ['not_found' => Constant::Yes] );
-
                 }
                 $category = self::getCachedCategory($catSlug,$store->id);
                 if(empty($category)){
@@ -399,8 +391,8 @@ class StoresController
     /**
      * @OA\Get(
      *
-     *     path="/v1/portal/stores/{slug}/category/{catSlug}/product",
-     *     tags={"Customer Portal"},
+     *     path="/api/stores/{slug}/category/{catSlug}/product",
+     *     tags={"Closet"},
      *     summary="Manage Store Category Products",
      *     operationId="getStoreCategoryProducts",
      *
@@ -444,8 +436,6 @@ class StoresController
             if($store) {
                 if(!($store->merchant->canPlaceOrder( env('UNIVERSAL_CHECKOUT_INTEGRATION_TYPE')))){
                     return ApiResponseHandler::failure( __('messages.general.merchant_not_found'), '', ['not_found' => Constant::Yes] );
-                }else if($store->merchant->user->is_active == Constant::No){
-                    return ApiResponseHandler::failure( __('messages.general.inactive_merchant_found'), '', ['not_found' => Constant::Yes] );
                 }
                 $category = self::getCachedCategory($catSlug,$store->id);
                 if(empty($category)){

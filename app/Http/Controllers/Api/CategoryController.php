@@ -5,20 +5,21 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHandler;
 use App\Helpers\AppException;
 use App\Helpers\Constant;
+use App\Http\Controllers\Controller;
 use App\Models\PimBsCategory;
 use App\Models\PimBsCategoryMapping;
 use App\Models\PimProduct;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
-class CategoryController
+class CategoryController extends Controller
 {
     /**
      * @OA\Get(
      *
-     *     path="/v1/portal/categories",
-     *     tags={"Customer Portal"},
+     *     path="/api/categories",
+     *     tags={"Categories"},
      *     summary="Get Categories List",
      *     operationId="getCategoriesList",
      *
@@ -58,8 +59,8 @@ class CategoryController
     /**
      * @OA\Get(
      *
-     *     path="/v1/portal/categories/{slug}",
-     *     tags={"Customer Portal"},
+     *     path="/api/categories/{slug}",
+     *     tags={"Categories"},
      *     summary="Get Sub Categories List",
      *     operationId="getSubCategoriesList",
      *
@@ -144,8 +145,8 @@ class CategoryController
     /**
      * @OA\Get(
      *
-     *     path="/v1/portal/categories/{slug}/products",
-     *     tags={"Customer Portal"},
+     *     path="/api/categories/{slug}/products",
+     *     tags={"Categories"},
      *     summary="Get Category Products",
      *     operationId="getCategoryProducts",
      *
@@ -235,8 +236,8 @@ class CategoryController
     /**
      * @OA\Post(
      *
-     *     path="/v1/portal/filter/categories/{slug}/products",
-     *     tags={"Customer Portal"},
+     *     path="/api/filter/categories/{slug}/products",
+     *     tags={"Categories"},
      *     summary="Get Filtered Category Products",
      *     operationId="getFilteredCategoryProducts",
      *
