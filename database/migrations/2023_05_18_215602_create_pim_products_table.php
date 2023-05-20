@@ -42,8 +42,6 @@ return new class extends Migration
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by');
             $table->unsignedBigInteger('deleted_by');
-            $table->timestamp('recommended_at');
-            $table->timestamp('featured_by');
             $table->timestamps();
         });
     }
