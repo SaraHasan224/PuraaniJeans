@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use App\Helpers\Constant;
+
 return new class extends Migration
 {
     /**
@@ -13,12 +15,12 @@ return new class extends Migration
     {
         Schema::create('provinces', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('country_id');
+            $table->unsignedBigInteger('country_id');
             $table->string('name');
-            $table->boolean('status')->default(1);
-            $table->integer('created_by')->default(0);
-            $table->integer('updated_by')->default(0);
-            $table->integer('deleted_by')->default(0);
+            $table->boolean('status')->default(Constant::No);
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
             $table->timestamps();
         });
     }

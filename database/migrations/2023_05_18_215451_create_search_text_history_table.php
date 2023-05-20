@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('search_text_history', function (Blueprint $table) {
             $table->id();
+            $table->string('search_text');
+            $table->tinyInteger('referrer_type')->index();
+            $table->string('searched_count');
+            $table->timestamp('last_searched_at')->nullable();
             $table->timestamps();
         });
     }

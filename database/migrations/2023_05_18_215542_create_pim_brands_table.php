@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use App\Helpers\Constant;
+
 return new class extends Migration
 {
     /**
@@ -13,6 +15,11 @@ return new class extends Migration
     {
         Schema::create('pim_brands', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->nullable();
+            $table->unsignedBigInteger('parent_id')->index();
+            $table->unsignedBigInteger('closet_id')->index();
+            $table->text('image');
+            $table->boolean('status')->default(Constant::No);
             $table->timestamps();
         });
     }

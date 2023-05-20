@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('pim_product_attribute_options', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('product_id')->index();
+            $table->unsignedBigInteger('attribute_id')->index();
+            $table->unsignedBigInteger('pim_product_attribute_id')->index();
+            $table->unsignedBigInteger('option_id')->index();
+            $table->string('option_value')->nullable();
             $table->timestamps();
         });
     }

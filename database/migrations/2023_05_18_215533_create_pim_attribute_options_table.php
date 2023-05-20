@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use App\Helpers\Constant;
+
 return new class extends Migration
 {
     /**
@@ -13,6 +15,9 @@ return new class extends Migration
     {
         Schema::create('pim_attribute_options', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('attribute_id')->index();
+            $table->string('option_value')->nullable();
+            $table->boolean('status')->default(Constant::No);
             $table->timestamps();
         });
     }

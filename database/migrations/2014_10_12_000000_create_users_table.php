@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use App\Helpers\Constant;
+
 return new class extends Migration
 {
     /**
@@ -18,15 +20,16 @@ return new class extends Migration
             $table->string('country_code', 7)->index();
             $table->string('phone_number',25)->index();
             $table->string('password');
-            $table->tinyInteger('user_type',false)->index();
+            $table->tinyInteger('user_type')->index();
             $table->timestamp('last_login')->nullable();
-            $table->tinyInteger('login_attempts',false)->index();
-            $table->tinyInteger('status',false)->index();
-            $table->integer('created_by')->index();
+            $table->unsignedBigInteger('login_attempts');
+            $table->boolean('status')->default(Constant::No);
+            $table->unsignedBigInteger('created_by');
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('phone_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

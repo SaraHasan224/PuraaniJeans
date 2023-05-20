@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('pim_product_categories', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('product_id')->index();
+            $table->unsignedBigInteger('category_id')->index();
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */

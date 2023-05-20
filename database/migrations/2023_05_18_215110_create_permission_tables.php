@@ -5,6 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use Spatie\Permission\PermissionRegistrar;
 
+use App\Helpers\Constant;
+
 class CreatePermissionTables extends Migration
 {
     /**
@@ -43,9 +45,9 @@ class CreatePermissionTables extends Migration
             $table->unsignedBigInteger('type_id');       // For MySQL 8.0 use string('name', 125);
             $table->string('name');       // For MySQL 8.0 use string('name', 125);
             $table->string('guard_name');       // For MySQL 8.0 use string('name', 125);
-            $table->tinyInteger('is_default',false);       // For MySQL 8.0 use string('name', 125);
-            $table->tinyInteger('status',false);       // For MySQL 8.0 use string('name', 125);
-            $table->tinyInteger('is_super_admin',false); // For MySQL 8.0 use string('guard_name', 125);
+            $table->boolean('is_default')->default(Constant::No);       // For MySQL 8.0 use string('name', 125);
+            $table->boolean('status')->default(Constant::No);       // For MySQL 8.0 use string('name', 125);
+            $table->boolean('is_super_admin')->default(Constant::No); // For MySQL 8.0 use string('guard_name', 125);
             $table->timestamps();
             if ($teams || config('permission.testing')) {
                 $table->unique([$columnNames['team_foreign_key'], 'name', 'guard_name']);

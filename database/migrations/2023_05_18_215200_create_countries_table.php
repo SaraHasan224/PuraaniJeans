@@ -5,6 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 use App\Helpers\Constant;
+
 return new class extends Migration
 {
     /**
@@ -14,15 +15,15 @@ return new class extends Migration
     {
         Schema::create('countries', function (Blueprint $table) {
                 $table->increments('id');
-                $table->string('name')->nullable();
-                $table->string('code')->nullable();
-                $table->string('currency_code')->nullable();
-                $table->string('country_code')->nullable();
-                $table->string('phone_number_mask')->nullable();
-                $table->tinyInteger('status')->default(Constant::No);
-                $table->integer('created_by')->default(0);
-                $table->integer('updated_by')->default(0);
-                $table->integer('deleted_by')->default(0);
+                $table->string('name',150)->nullable();
+                $table->string('code',20)->nullable();
+                $table->string('currency_code',20)->nullable();
+                $table->string('country_code',10)->nullable();
+                $table->string('phone_number_mask',50)->nullable();
+                $table->boolean('status')->default(Constant::No);
+                $table->unsignedBigInteger('created_by')->nullable();
+                $table->unsignedBigInteger('updated_by')->nullable();
+                $table->unsignedBigInteger('deleted_by')->nullable();
                 $table->timestamps();
                 $table->softDeletes();
         });

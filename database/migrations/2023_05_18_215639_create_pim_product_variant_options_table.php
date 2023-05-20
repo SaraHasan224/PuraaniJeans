@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('pim_product_variant_options', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('product_id')->index();
+            $table->unsignedBigInteger('variant_id')->index();
+            $table->unsignedBigInteger('attribute_id')->index();
+            $table->unsignedBigInteger('option_id')->index();
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */
