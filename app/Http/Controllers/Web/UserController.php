@@ -23,4 +23,34 @@ class UserController extends Controller
             return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
         }
     }
+
+    /**
+     * Show the application users.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function login()
+    {
+        try{
+            return view('auth.login.index');
+        }catch (\Exception $e){
+            AppException::log($e);
+            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
+        }
+    }
+
+    /**
+     * Show the application users.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function forgetPassword()
+    {
+        try{
+            return view('auth.forget_password.index');
+        }catch (\Exception $e){
+            AppException::log($e);
+            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
+        }
+    }
 }

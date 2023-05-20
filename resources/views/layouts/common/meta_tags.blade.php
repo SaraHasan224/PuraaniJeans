@@ -24,3 +24,5 @@
 @endif"/>
 <meta property="og:description" content=""/>
 <meta property="og:image" content="https://uploads-ssl.webflow.com/5eb3d61588ad6f7406a7d827/5f4dfce886232cf2265d5212_Open%20Graph%20Image.jpg"/>
+
+@yield('header_meta')

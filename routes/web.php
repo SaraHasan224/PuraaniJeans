@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/login', 'UserController@login')->name('users.login');
+Route::get('/forget-password', 'UserController@forgetPassword')->name('users.forget_password');
+
+
 Route::get('/', 'HomeController@index')->name('home');
 
 Route::get('/users', 'UserController@index')->name('users');
