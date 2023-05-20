@@ -35,97 +35,95 @@
         <div class="app-sidebar__inner">
             <ul class="vertical-nav-menu">
                 <li class="app-sidebar__heading">Account Management</li>
-                <li class="mm-active">
-                    <a href="#">
-                        <i class="metismenu-icon pe-7s-rocket"></i>
+                <li class="{{ (Request::is('home') ||  Request::is('/')) ? 'mm-active' : '' }}">
+                    <a href="{{ URL::to('/') }}">
+                        <i class="metismenu-icon pe-7s-display2">
+                        </i>Dashboard
+                    </a>
+                </li>
+                <li class="{{ (Request::is('users') ||  Request::is('/users')) ? 'mm-active' : '' }}">
+                    <a href="{{ URL::to('/users') }}">
+                        <i class="metismenu-icon pe-7s-users"></i>
                         Users
                         <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
                     </a>
-                    <ul
-
-
-                    >
+                    <ul class="{{
+                     (Request::is('users') ||  Request::is('/users')) ||
+                     (Request::is('users.add') ||  Request::is('/users/add'))
+                     ? 'mm-active' : '' }}">
                         <li>
-                            <a href="index.html" class="mm-active">
+                            <a href="{{ URL::to('/users') }}" class="mm-active">
                                 <i class="metismenu-icon">
                                 </i>View All
-                            </a>
-                        </li>
-                        <li>
-                            <a href="dashboards-commerce.html">
-                                <i class="metismenu-icon">
-                                </i>Create New Role
                             </a>
                         </li>
                     </ul>
                 </li>
-                <li class="mm-active">
-                    <a href="#">
-                        <i class="metismenu-icon pe-7s-browser"></i>
+                <li class="{{ (Request::is('roles') ||  Request::is('/roles')) ? 'mm-active' : '' }}">
+                    <a href="{{ URL::to('/roles') }}">
+                        <i class="metismenu-icon pe-7s-safe"></i>
                         Roles
                         <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
                     </a>
-                    <ul
-
-
-                    >
+                    <ul class="{{
+                     (Request::is('roles') ||  Request::is('/roles')) ||
+                     (Request::is('roles.add') ||  Request::is('/roles/add'))
+                     ? 'mm-active' : '' }}">
                         <li>
-                            <a href="index.html" class="mm-active">
+                            <a href="{{ URL::to('/roles') }}" class="mm-active">
                                 <i class="metismenu-icon">
                                 </i>View All
-                            </a>
-                        </li>
-                        <li>
-                            <a href="dashboards-commerce.html">
-                                <i class="metismenu-icon">
-                                </i>Create User
                             </a>
                         </li>
                     </ul>
                 </li>
                 <li class="app-sidebar__heading">Manage Puraani Jeans Website</li>
-                <li
-
-
-                >
+                <li class="
+                {{  (Request::is('closet') ||  Request::is('/closet')) ||
+                    (Request::is('closet-orders') ||  Request::is('/closet/orders')) ||
+                    (Request::is('closet-pim') ||  Request::is('/closet/pim')) ||
+                    (Request::is('customers') ||  Request::is('/customers'))
+                ? 'mm-active' : '' }}">
                     <a href="#">
                         <i class="metismenu-icon pe-7s-diamond"></i>
                         Application
                         <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
                     </a>
-                    <ul
-
-
-                    >
-                        <li
-
-
-                        >
-                            <a href="#">
+                    <ul class="
+                        {{  (Request::is('closet') ||  Request::is('/closet')) ||
+                            (Request::is('closet-orders') ||  Request::is('/closet/orders')) ||
+                            (Request::is('closet-pim') ||  Request::is('/closet/pim'))
+                        ? 'mm-active' : '' }}">
+                        <li class="{{ (Request::is('closet') ||  Request::is('/closet')) ? 'mm-active' : '' }}">
+                            <a href="{{ URL::to('/closet') }}">
                                 <i class="metismenu-icon"></i>
-                                Closet
+                                Closet Management
                                 <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
                             </a>
                             <ul
-
-
                             >
-                                <li>
-                                    <a href="elements-buttons-standard.html">
+                                <li class="{{ (Request::is('closet') ||  Request::is('/closet')) ? 'mm-active' : '' }}">
+                                    <a href="{{ URL::to('/closet') }}">
+                                        <i class="metismenu-icon">
+                                        </i>Closets
+                                    </a>
+                                </li>
+                                <li class="{{ (Request::is('closet/orders') ||  Request::is('/closet/orders')) ? 'mm-active' : '' }}">
+                                    <a href="{{ URL::to('/closet/orders') }}">
                                         <i class="metismenu-icon">
                                         </i>Orders
                                     </a>
                                 </li>
-                                <li>
-                                    <a href="elements-buttons-standard.html">
+                                <li class="{{ (Request::is('closet/pim') ||  Request::is('/closet/pim')) ? 'mm-active' : '' }}">
+                                    <a href="{{ URL::to('/closet/pim') }}">
                                         <i class="metismenu-icon">
                                         </i>Product Inventory
                                     </a>
                                 </li>
                             </ul>
                         </li>
-                        <li>
-                            <a href="elements-utilities.html">
+                        <li class="{{ (Request::is('customers') ||  Request::is('/customers')) ? 'mm-active' : '' }}">
+                            <a href="{{ URL::to('/customers') }}">
                                 <i class="metismenu-icon">
                                 </i>Customers
                             </a>

@@ -29,15 +29,6 @@ class HomeController extends Controller
     public function index()
     {
         try{
-            $featureAlert          = '';
-            $featureAlertIsExpired = '';
-            $showAlertNotification = '';
-
-//            if(auth::user()->user_type == Constant::USER_TYPES['Merchant']){
-                /* Feature Alert  */
-//                $merchantId            = auth::user()->merchant_id;
-//            }
-
             return view('dashboard.index');
         }catch (\Exception $e){
             AppException::log($e);

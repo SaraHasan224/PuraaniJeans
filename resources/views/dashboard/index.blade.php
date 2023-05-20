@@ -1,7 +1,11 @@
 @extends('layouts.master')
 
-@section('content')
+@section('page_title',env('APP_NAME').' - Users')
 
+@section('parent_module_icon','lnr-apartment')
+@section('parent_module_title','Dashboard')
+
+@section('content')
     <div class="tabs-animation">
         <div class="mb-3 card">
             <div class="card-header-tab card-header">
