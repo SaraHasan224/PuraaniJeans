@@ -22,9 +22,9 @@ return new class extends Migration
             $table->string('password');
             $table->tinyInteger('user_type')->index();
             $table->timestamp('last_login')->nullable();
-            $table->unsignedBigInteger('login_attempts');
+            $table->unsignedBigInteger('login_attempts')->default(Constant::No);
             $table->boolean('status')->default(Constant::No);
-            $table->unsignedBigInteger('created_by');
+            $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('phone_verified_at')->nullable();
             $table->rememberToken();

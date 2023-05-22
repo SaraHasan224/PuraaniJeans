@@ -44,5 +44,8 @@
         </div>
     @endif
 </div>
+@include('layouts.common.confg_mapping')
+@include('common.model.index')
+@yield('scripts')
 </body>
 </html>

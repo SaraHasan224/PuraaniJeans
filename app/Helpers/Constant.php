@@ -5,8 +5,29 @@ namespace App\Helpers;
 class Constant
 {
     const timezone = 'Asia/Karachi';
+    const OTP_EXPIRE_TIME = 5;
+    const LocalCountryCode = 92;
 
     const unSerializableFields = [];
+
+    const USER_TYPES = [
+        'Admin'       => 1,
+        'Closet'      => 2,
+        'Customer'    => 3,
+    ];
+
+    const USER_STATUS = [
+        0 => "In Active",
+        1 => "Active",
+    ];
+    const OTP_MODULES = [
+        'users'     => 'User',
+        'customers' => 'Customer'
+    ];
+
+    const OTP_MESSAGE_TEXT = [
+        'login'        => 'is your verification OTP for bSecure',
+    ];
 
     const DISCOUNT_TYPE = [
         'flat'       => 1,
@@ -36,4 +57,5 @@ class Constant
     const Yes = 1;
     const No = 0;
     const DEFAULT_VARIANT = 'Default Variant';
+
 }

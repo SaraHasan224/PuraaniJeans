@@ -22,8 +22,8 @@ return new class extends Migration
             $table->unsignedBigInteger('quantity')->nullable();
             $table->string('discount')->nullable();
             $table->tinyInteger('discount_type')->nullable();
-            $table->unsignedBigInteger('image_id');
-            $table->unsignedBigInteger('position');
+            $table->unsignedBigInteger('image_id')->nullable();
+            $table->unsignedBigInteger('position')->nullable();
             $table->string('short_description')->nullable();
             $table->boolean('status')->default(Constant::No);
             $table->timestamps();

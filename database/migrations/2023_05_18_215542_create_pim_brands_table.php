@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->unsignedBigInteger('parent_id')->index();
             $table->unsignedBigInteger('closet_id')->index();
-            $table->text('image');
+            $table->text('image')->nullable();
             $table->boolean('status')->default(Constant::No);
             $table->timestamps();
         });

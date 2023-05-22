@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->unsignedBigInteger('parent_id')->index();
             $table->unsignedBigInteger('closet_id')->index();
-            $table->text('description');
-            $table->string('pim_cat_reference');
-            $table->string('image');
+            $table->text('description')->nullable();
+            $table->string('pim_cat_reference')->nullable();
+            $table->string('image')->nullable();
             $table->boolean('is_full_banner')->default(Constant::No);
             $table->boolean('status')->default(Constant::No);
             $table->boolean('is_default')->default(Constant::No);

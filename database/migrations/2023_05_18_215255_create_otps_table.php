@@ -15,24 +15,24 @@ return new class extends Migration
     {
         Schema::create('otps', function (Blueprint $table) {
             $table->id();
-            $table->string('model',50);
-            $table->unsignedBigInteger('model_id');
-            $table->string('reference_id');
-            $table->string('country_code', 7)->index();
-            $table->string('phone_number',25)->index();
+            $table->string('model',50)->nullable();
+            $table->unsignedBigInteger('model_id')->nullable();
+            $table->string('reference_id')->nullable();
+            $table->string('country_code', 7)->index()->nullable();
+            $table->string('phone_number',25)->index()->nullable();
             $table->timestamp('phone_verified_at')->nullable();
             $table->string('email')->unique()->index();
             $table->timestamp('email_verified_at')->nullable();
             $table->boolean('otp_provider')->default(Constant::No);
-            $table->string('phone_otp',8);
-            $table->string('email_otp',8);
+            $table->string('phone_otp',8)->nullable();
+            $table->string('email_otp',8)->nullable();
             $table->tinyInteger('action')->nullable();
             $table->boolean('is_used')->default(Constant::No);
             $table->boolean('is_verified')->default(Constant::No);
             $table->timestamp('verified_at')->nullable();
-            $table->string('user_agent');
-            $table->string('country');
-            $table->string('ip');
+            $table->string('user_agent')->nullable();
+            $table->string('country')->nullable();
+            $table->string('ip')->nullable();
             $table->timestamps();
         });
     }

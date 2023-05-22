@@ -1,6 +1,26 @@
 <?php
 
+use App\Http\Controllers\Web\CountryController;
+use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\ProfileController;
+use App\Http\Controllers\Web\RoleController;
+use App\Http\Controllers\Web\UserController;
+use App\Http\Controllers\Web\CustomerController;
+use App\Http\Controllers\Web\Closet\OrderController;
+use App\Http\Controllers\Web\Closet\PIMController;
+
+use App\Http\Controllers\Web\Auth\PasswordController;
+use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Web\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Web\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Web\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Web\Auth\NewPasswordController;
+use App\Http\Controllers\Web\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Web\Auth\RegisteredUserController;
+use App\Http\Controllers\Web\Auth\VerifyEmailController;
+
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,26 +33,73 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/login', 'UserController@login')->name('users.login');
-Route::get('/forget-password', 'UserController@forgetPassword')->name('users.forget_password');
-
-
-Route::get('/', 'HomeController@index')->name('home');
-
-Route::get('/users', 'UserController@index')->name('users');
-Route::get('/roles', 'RoleController@index')->name('roles');
-
-Route::get('/closet', 'Closet\OrderController@index')->name('closet');
-Route::get('/closet/orders', 'Closet\OrderController@index')->name('closet-orders');
-Route::get('/closet/pim', 'Closet\PIMController@index')->name('closet-pim');
-
-Route::get('/customers', 'CustomerController@index')->name('customers');
-
 //Route::get('/', function () {
 //    return view('welcome');
 //});
-Route::get('/welcome', function () {
-    return view('welcome');
+
+Route::get('/test-mail', function () {
+    Mail::send(new \App\Mail\UserCreated());
+});
+Route::get('/get-active-countries/{countryCode?}', [CountryController::class, 'getActiveCountries'])->name('active.countries');
+
+Route::middleware('guest')->group(function () {
+    Route::get('register', [RegisteredUserController::class, 'create'])
+        ->name('register');
+    Route::post('register', [RegisteredUserController::class, 'store']);
+
+    Route::get('/', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('signin', [AuthenticatedSessionController::class, 'store'])->name('signin');
+
+    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->name('password.request');
+    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
+
+    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->name('password.reset');
+    Route::post('reset-password', [NewPasswordController::class, 'store'])
+        ->name('password.store');
 });
 
+Route::middleware('auth')->group(function () {
+    Route::get('verify-email', EmailVerificationPromptController::class)
+        ->name('verification.notice');
+    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
 
+    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+
+    Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
+        ->name('password.confirm');
+    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
+
+    Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
+
+    Route::get('/profile',  [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
+
+    Route::get('/users', [UserController::class, 'index'])->name('users');
+    //User Management
+    Route::resources([
+        'users' => UserController::class,
+    ]);
+    Route::get('/users-list', [UserController::class, 'getListingRecord'])->name('users-list');
+    Route::post('/users-delete', [UserController::class, 'deleteRecords'])->name('users-delete');
+
+    Route::get('/roles', [RoleController::class, 'index'])->name('roles');
+    Route::get('/closet', [OrderController::class, 'index'])->name('closet');
+    Route::get('/closet/orders', [OrderController::class, 'index'])->name('closet-orders');
+    Route::get('/closet/pim', [PIMController::class, 'index'])->name('closet-pim');
+
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers');
+
+
+
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->name('logout');
+});

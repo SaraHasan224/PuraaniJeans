@@ -15,9 +15,9 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->string('username');
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('username')->nullable();
             $table->string('email')->unique()->index();
             $table->string('country_code', 7)->index();
             $table->string('phone_number',25)->index();
@@ -25,9 +25,9 @@ return new class extends Migration
             $table->tinyInteger('user_type')->index();
             $table->boolean('status')->default(Constant::No);
             $table->boolean('subscription_status')->default(Constant::No);
-            $table->string('identifier');
+            $table->string('identifier')->nullable();
             $table->timestamp('last_login')->nullable();
-            $table->unsignedBigInteger('login_attempts');
+            $table->unsignedBigInteger('login_attempts')->nullable();
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('phone_verified_at')->nullable();

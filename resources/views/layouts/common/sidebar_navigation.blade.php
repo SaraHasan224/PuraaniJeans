@@ -5,9 +5,9 @@
             <div>
                 <button type="button" class="hamburger close-sidebar-btn hamburger--elastic"
                         data-class="closed-sidebar">
-                                    <span class="hamburger-box">
-                                        <span class="hamburger-inner"></span>
-                                    </span>
+                    <span class="hamburger-box">
+                        <span class="hamburger-inner"></span>
+                    </span>
                 </button>
             </div>
         </div>
@@ -15,21 +15,21 @@
     <div class="app-header__mobile-menu">
         <div>
             <button type="button" class="hamburger hamburger--elastic mobile-toggle-nav">
-                                <span class="hamburger-box">
-                                    <span class="hamburger-inner"></span>
-                                </span>
+                <span class="hamburger-box">
+                    <span class="hamburger-inner"></span>
+                </span>
             </button>
         </div>
     </div>
     <div class="app-header__menu">
-                        <span>
-                            <button type="button"
-                                    class="btn-icon btn-icon-only btn btn-primary btn-sm mobile-toggle-header-nav">
-                                <span class="btn-icon-wrapper">
-                                    <i class="fa fa-ellipsis-v fa-w-6"></i>
-                                </span>
-                            </button>
-                        </span>
+        <span>
+            <button type="button"
+                    class="btn-icon btn-icon-only btn btn-primary btn-sm mobile-toggle-header-nav">
+                <span class="btn-icon-wrapper">
+                    <i class="fa fa-ellipsis-v fa-w-6"></i>
+                </span>
+            </button>
+        </span>
     </div>
     <div class="scrollbar-sidebar">
         <div class="app-sidebar__inner">
@@ -41,18 +41,21 @@
                         </i>Dashboard
                     </a>
                 </li>
-                <li class="{{ (Request::is('users') ||  Request::is('/users')) ? 'mm-active' : '' }}">
+                <li class="{{ (Request::is('profile.edit') ||  Request::is('/profile')) ? 'mm-active' : '' }}">
+                    <a href="{{ URL::to('/profile') }}">
+                        <i class="metismenu-icon pe-7s-display2">
+                        </i>Profile
+                    </a>
+                </li>
+                <li class="{{ (Request::is('users')) ? 'mm-active' : '' }}">
                     <a href="{{ URL::to('/users') }}">
                         <i class="metismenu-icon pe-7s-users"></i>
                         Users
                         <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
                     </a>
-                    <ul class="{{
-                     (Request::is('users') ||  Request::is('/users')) ||
-                     (Request::is('users.add') ||  Request::is('/users/add'))
-                     ? 'mm-active' : '' }}">
+                    <ul class="{{ Request::is('users') ? 'mm-active' : '' }}">
                         <li>
-                            <a href="{{ URL::to('/users') }}" class="mm-active">
+                            <a href="{{ URL::to('/users') }}">
                                 <i class="metismenu-icon">
                                 </i>View All
                             </a>
@@ -70,7 +73,7 @@
                      (Request::is('roles.add') ||  Request::is('/roles/add'))
                      ? 'mm-active' : '' }}">
                         <li>
-                            <a href="{{ URL::to('/roles') }}" class="mm-active">
+                            <a href="{{ URL::to('/roles') }}">
                                 <i class="metismenu-icon">
                                 </i>View All
                             </a>

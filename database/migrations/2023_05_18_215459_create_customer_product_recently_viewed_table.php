@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('customer_product_recently_viewed', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('customer_id')->index();
-            $table->unsignedBigInteger('product_id')->index();
-            $table->tinyInteger('referrer_type');
-            $table->string('viewed_at')->nullable();
+            $table->unsignedBigInteger('customer_id')->index()->nullable();
+            $table->unsignedBigInteger('product_id')->index()->nullable();
+            $table->tinyInteger('referrer_type')->nullable();
+            $table->string('viewed_at')->nullable()->nullable();
             $table->timestamps();
         });
     }

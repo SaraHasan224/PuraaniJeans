@@ -123,6 +123,18 @@ class ApiResponseHandler
         );
     }
 
+    public static function serverError( $exception = null, $message = "" )
+    {
+        $message = empty($message) ? __('messages.general.crashed') : $message;
+        $exceptionMsg = $exception ? $exception->getMessage() : '';
+        return self::send(
+            Http::$Codes[ Http::SERVER_ERROR ],
+            $message,
+            (object) [],
+            $exceptionMsg
+        );
+    }
+
     /**
      * @param $code
      * @param $message

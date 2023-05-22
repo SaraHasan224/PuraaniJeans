@@ -17,10 +17,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('parent_id')->index();
             $table->string('name')->nullable();
-            $table->string('slug');
-            $table->string('icon');
+            $table->string('slug')->nullable();
+            $table->string('icon')->nullable();
             $table->unsignedBigInteger('closet_id')->index();
-            $table->string('image');
+            $table->string('image')->nullable();
             $table->tinyInteger('product_count',false);
             $table->tinyInteger('position',false);
             $table->boolean('is_featured')->default(Constant::No);

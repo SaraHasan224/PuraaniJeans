@@ -3,15 +3,26 @@
 
 namespace App\Helpers;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\Request;
+
 use Lcobucci\JWT\Parser as JwtParser;
 
 class Helper
 {
+    public static function clean($string) {
+        if(empty($string))
+            return $string;
+
+        $string = trim($string); // Replaces all spaces with no s.
+        return preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
+    }
+
     public static function isImageValid($url,$image_placeholder){
         $image = $image_placeholder;
         // Remove all illegal characters from a url
@@ -370,10 +381,38 @@ class Helper
         return env($type) . "/$merchant_id/";
     }
 
+    public static function formatNumber($number, $decimals = 2)
+    {
+        return (float)number_format((float)$number, $decimals, '.', '');
+    }
+
+    static function validationErrors($request, $rules, $messages = [])
+    {
+        if (is_array($request))
+        {
+            $formData = $request;
+        }
+        else
+        {
+            $formData = $request->all();
+        }
+
+        $validator = Validator::make($formData, $rules, $messages);
+
+        if ($validator->fails())
+        {
+            return $validator->errors();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     static function uploadFile($file, $destinationPath, $fileName, $isFile = true)
     {
 
-        if (env('UPLOAD_TO_S3'))
+        if (config('app.upload_to_s3'))
         {
             if ($isFile)
             {
@@ -389,10 +428,5 @@ class Helper
         {
             $file->move(public_path($destinationPath), $fileName);
         }
-    }
-
-    public static function formatNumber($number, $decimals = 2)
-    {
-        return (float)number_format((float)$number, $decimals, '.', '');
     }
 }

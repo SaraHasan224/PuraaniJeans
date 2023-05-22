@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('closet_name')->nullable();
             $table->string('closet_reference')->nullable();
             $table->string('logo')->nullable();
-            $table->tinyInteger('referrer_type');
+            $table->tinyInteger('referrer_type')->nullable();
             $table->boolean('status')->default(Constant::No);
-            $table->unsignedBigInteger('updated_by')->index();
+            $table->unsignedBigInteger('updated_by')->index()->nullable();
             $table->timestamps();
         });
     }
