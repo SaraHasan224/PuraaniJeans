@@ -29,7 +29,7 @@
 
 @section('scripts')
     <script>
-        $( document ).ready(function() {
+        $(document).ready(function () {
             App.Helpers.getPhoneInput('profile_phone', 'profile_country_code', true)
         });
     </script>

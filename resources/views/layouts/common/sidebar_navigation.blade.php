@@ -35,7 +35,7 @@
         <div class="app-sidebar__inner">
             <ul class="vertical-nav-menu">
                 <li class="app-sidebar__heading">Account Management</li>
-                <li class="{{ (Request::is('home') ||  Request::is('/')) ? 'mm-active' : '' }}">
+                <li class="{{ (Request::is('dashboard') ||  Request::is('/')) ? 'mm-active' : '' }}">
                     <a href="{{ URL::to('/') }}">
                         <i class="metismenu-icon pe-7s-display2">
                         </i>Dashboard

@@ -66,7 +66,7 @@ class AuthenticatedSessionController extends Controller
             //User::sendOtp($user, $otp, 'signin');
             //Email: Admin Sign in
             //EmailHandler::merchantSignin_upEmail($user, $otp, 'signin');
-            return redirect()->route('home');
+            return redirect()->route('dashboard');
         }
         else
         {

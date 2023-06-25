@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('search_history', function (Blueprint $table) {
+        Schema::create('search_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('customer_id')->index();
             $table->unsignedBigInteger('search_text_id')->index()->nullable();

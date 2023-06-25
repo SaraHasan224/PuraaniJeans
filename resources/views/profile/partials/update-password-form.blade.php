@@ -28,7 +28,9 @@
         <div>
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
             <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
+            @if ($errors->updatePassword->get('password_confirmation'))
+                <div class="mt-1 text-red-500 text-sm">{{ $errors->updatePassword->get('password_confirmation') }}</div>
+            @endif
         </div>
 
         <div class="flex items-center gap-4">

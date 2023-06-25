@@ -16,9 +16,26 @@ class Constant
         'Customer'    => 3,
     ];
 
+    const CRUD_STATES = [
+        'created' => 0,
+        'updated' => 1
+    ];
+
+//    const USER_STATUS = [
+//        0 => "In Active",
+//        1 => "Active",
+//    ];
     const USER_STATUS = [
-        0 => "In Active",
-        1 => "Active",
+        "InActive" => 0,
+        "Active" => 1,
+    ];
+    const USER_STATUS_STYLE = [
+        0 => "danger",
+        1 => "success"
+    ];
+    const CUSTOMER_STATUS = [
+        "InActive" => 0,
+        "Active" => 1,
     ];
     const OTP_MODULES = [
         'users'     => 'User',

@@ -30,14 +30,13 @@ class PimAttribute extends Model
         return $result;
     }
 
-    public static function saveAttribute($data)
+    public static function saveAttribute($attribute)
     {
-        return self::firstOrCreate(
-          [
-            'store_id'  => $data['store_id'],
-            'name' 		=> $data['name']
-          ]
-        )->id;
+        $attribute =  self::updateOrCreate([
+            'name' => $attribute,
+            'status' => Constant::Yes
+        ]);
+        return $attribute;
     }
 
     public static function getAttributeByNameAndStoreId($storeId, $name)

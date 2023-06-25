@@ -171,7 +171,6 @@ class CategoryController extends Controller
         try
         {
             $bSecureCategoryIds = $this->getCachedSubCategoriesIds( $categorySlug );
-
             if( $bSecureCategoryIds )
             {
                 $merchantCategoryIds = $this->getCachedMerchantCategories( $categorySlug, $bSecureCategoryIds );
@@ -192,18 +191,18 @@ class CategoryController extends Controller
 
     public function getCachedSubCategoriesIds( $categorySlug )
     {
-        $cacheKey = 'get_all_subcategory_ids_'.$categorySlug;
-        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($categorySlug) {
+//        $cacheKey = 'get_all_subcategory_ids_'.$categorySlug;
+//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($categorySlug) {
             return PimBsCategory::getAllSubCategoryIds( $categorySlug );
-        });
+//        });
     }
 
     public function getCachedPimCategoryProductIds( $categorySlug, $merchantCategoryIds )
     {
-        $cacheKey = 'get_products_'.$categorySlug;
-        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($merchantCategoryIds) {
+//        $cacheKey = 'get_products_'.$categorySlug;
+//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($merchantCategoryIds) {
             return PimProduct::getPimCategoryProductIds($merchantCategoryIds);
-        });
+//        });
     }
 
     public function getCachedProducts( $request, $categorySlug, $merchantCategoryIds, $productIds )
@@ -211,23 +210,23 @@ class CategoryController extends Controller
         $page = $request->input('page') ?? 1;
         $perPage = 10;
         $cacheKey = 'get_products_'.$categorySlug.'_'.$page.'_'.$perPage;
-        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($merchantCategoryIds, $perPage, $categorySlug, $productIds) {
+//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($merchantCategoryIds, $perPage, $categorySlug, $productIds) {
             $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'];
             $listOptions = [
                 "categoryIds" => $merchantCategoryIds,
                 "bsCategorySlug" => $categorySlug,
                 'filter_by_product_ids' => $productIds
             ];
-            return PimProduct::getProductsForCustomerPortal($listType, $perPage, $listOptions);
-        });
+            return PimProduct::getProductsForApp($listType, $perPage, $listOptions);
+//        });
     }
 
     public function getCachedMerchantCategories( $categorySlug, $bSecureCategoryIds )
     {
-        $cacheKey = 'bsecure_categories_mapped_'.$categorySlug;
-        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($bSecureCategoryIds) {
+//        $cacheKey = 'bsecure_categories_mapped_'.$categorySlug;
+//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($bSecureCategoryIds) {
             return PimBsCategoryMapping::getAllMerchantCategoryIds( $bSecureCategoryIds );
-        });
+//        });
     }
 
 
@@ -349,7 +348,7 @@ class CategoryController extends Controller
                     'filters' => $filterData,
                     'filter_by_product_ids' => $this->getCachedPimCategoryProductIds( $categorySlug, $merchantCategoryIds )
                 ];
-                $response = PimProduct::getProductsForCustomerPortal($listType, 15, $listOptions);
+                $response = PimProduct::getProductsForApp($listType, 15, $listOptions);
 
                 return ApiResponseHandler::success( $response, __('messages.general.success') );
             }

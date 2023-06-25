@@ -17,8 +17,7 @@ class PimProductImage extends Model
             return Helper::getProductImagePlaceholder();
         }
 
-        $image = env('ENV_FOLDER') . $value;
-        return Helper::getImgixImage($image, false, 300);
+        return $value;
     }
 
     public static function getPlaceholder(){

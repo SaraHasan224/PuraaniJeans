@@ -7,6 +7,114 @@
 
 @section('content')
     <div class="tabs-animation">
+        <div class="card no-shadow bg-transparent no-border rm-borders mb-3">
+            <div class="card">
+                <div class="no-gutters row">
+                    <div class="col-md-12 col-lg-4">
+                        <ul class="list-group list-group-flush">
+                            <li class="bg-transparent list-group-item">
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-outer">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left">
+                                                <div class="widget-heading">Total Users</div>
+                                                <div class="widget-subheading">Admin User Count</div>
+                                            </div>
+                                            <div class="widget-content-right">
+                                                <div class="widget-numbers text-success">{{$stats['user_count']}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="bg-transparent list-group-item">
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-outer">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left">
+                                                <div class="widget-heading">Customers</div>
+                                                <div class="widget-subheading">Total Customer Count</div>
+                                            </div>
+                                            <div class="widget-content-right">
+                                                <div class="widget-numbers text-primary">{{ $stats['customer_count'] }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-12 col-lg-4">
+                        <ul class="list-group list-group-flush">
+                            <li class="bg-transparent list-group-item">
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-outer">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left">
+                                                <div class="widget-heading">Closet</div>
+                                                <div class="widget-subheading">Total Closet Count</div>
+                                            </div>
+                                            <div class="widget-content-right">
+                                                <div class="widget-numbers text-danger">{{$stats['closet_count']}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="bg-transparent list-group-item">
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-outer">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left">
+                                                <div class="widget-heading">Products Sold</div>
+                                                <div class="widget-subheading">Total revenue streams</div>
+                                            </div>
+                                            <div class="widget-content-right">
+                                                <div class="widget-numbers text-warning">{{$stats['products_sold']}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-12 col-lg-4">
+                        <ul class="list-group list-group-flush">
+                            <li class="bg-transparent list-group-item">
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-outer">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left">
+                                                <div class="widget-heading">Total Complains</div>
+                                                <div class="widget-subheading">Last year expenses</div>
+                                            </div>
+                                            <div class="widget-content-right">
+                                                <div class="widget-numbers text-success">{{$stats['t_complains']}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="bg-transparent list-group-item">
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-outer">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left">
+                                                <div class="widget-heading">Clients</div>
+                                                <div class="widget-subheading">Total Clients Reviews</div>
+                                            </div>
+                                            <div class="widget-content-right">
+                                                <div class="widget-numbers text-primary">{{$stats['t_reviews']}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="mb-3 card">
             <div class="card-header-tab card-header">
                 <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
@@ -69,114 +177,6 @@
                                                     </span>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card no-shadow bg-transparent no-border rm-borders mb-3">
-            <div class="card">
-                <div class="no-gutters row">
-                    <div class="col-md-12 col-lg-4">
-                        <ul class="list-group list-group-flush">
-                            <li class="bg-transparent list-group-item">
-                                <div class="widget-content p-0">
-                                    <div class="widget-content-outer">
-                                        <div class="widget-content-wrapper">
-                                            <div class="widget-content-left">
-                                                <div class="widget-heading">Total Orders</div>
-                                                <div class="widget-subheading">Last year expenses</div>
-                                            </div>
-                                            <div class="widget-content-right">
-                                                <div class="widget-numbers text-success">1896</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="bg-transparent list-group-item">
-                                <div class="widget-content p-0">
-                                    <div class="widget-content-outer">
-                                        <div class="widget-content-wrapper">
-                                            <div class="widget-content-left">
-                                                <div class="widget-heading">Clients</div>
-                                                <div class="widget-subheading">Total Clients Profit</div>
-                                            </div>
-                                            <div class="widget-content-right">
-                                                <div class="widget-numbers text-primary">$12.6k</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-12 col-lg-4">
-                        <ul class="list-group list-group-flush">
-                            <li class="bg-transparent list-group-item">
-                                <div class="widget-content p-0">
-                                    <div class="widget-content-outer">
-                                        <div class="widget-content-wrapper">
-                                            <div class="widget-content-left">
-                                                <div class="widget-heading">Followers</div>
-                                                <div class="widget-subheading">People Interested</div>
-                                            </div>
-                                            <div class="widget-content-right">
-                                                <div class="widget-numbers text-danger">45,9%</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="bg-transparent list-group-item">
-                                <div class="widget-content p-0">
-                                    <div class="widget-content-outer">
-                                        <div class="widget-content-wrapper">
-                                            <div class="widget-content-left">
-                                                <div class="widget-heading">Products Sold</div>
-                                                <div class="widget-subheading">Total revenue streams</div>
-                                            </div>
-                                            <div class="widget-content-right">
-                                                <div class="widget-numbers text-warning">$3M</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-12 col-lg-4">
-                        <ul class="list-group list-group-flush">
-                            <li class="bg-transparent list-group-item">
-                                <div class="widget-content p-0">
-                                    <div class="widget-content-outer">
-                                        <div class="widget-content-wrapper">
-                                            <div class="widget-content-left">
-                                                <div class="widget-heading">Total Orders</div>
-                                                <div class="widget-subheading">Last year expenses</div>
-                                            </div>
-                                            <div class="widget-content-right">
-                                                <div class="widget-numbers text-success">1896</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="bg-transparent list-group-item">
-                                <div class="widget-content p-0">
-                                    <div class="widget-content-outer">
-                                        <div class="widget-content-wrapper">
-                                            <div class="widget-content-left">
-                                                <div class="widget-heading">Clients</div>
-                                                <div class="widget-subheading">Total Clients Profit</div>
-                                            </div>
-                                            <div class="widget-content-right">
-                                                <div class="widget-numbers text-primary">$12.6k</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
                     </div>
                 </div>
             </div>

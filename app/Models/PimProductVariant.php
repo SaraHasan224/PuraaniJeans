@@ -9,7 +9,7 @@ use App\Helpers\Constant;
 class PimProductVariant extends Model
 {
     protected $guarded = [];
-    protected $table = 'pim_product_variant';
+    protected $table = 'pim_product_variants';
 
     /**
      * The accessors to append to the model's array form.

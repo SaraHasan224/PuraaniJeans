@@ -19,7 +19,7 @@ class PimProductVariantOption extends Model
     public function variant()
     {
         return $this->belongsTo(PimProductVariant::class, 'variant_id', 'id')
-            ->where('is_active', Constant::Yes);
+            ->where('status', Constant::Yes);
     }
 
     public function attributes()

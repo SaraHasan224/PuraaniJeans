@@ -149,18 +149,15 @@ App.Helpers = {
         }
         let checkbox = null;
         let dataTableId = 'dataList';
+        if(table_id) {
+            dataTableId = table_id;
+        }
         let className = 'dt-body-center';
         if (reOrderRow){
             reOrderRow = {
                 selector: 'td.reorder',
                 dataSrc: reOrderDataSource
             }
-        }
-        if (table_id == 'merchant_documents' || table_id == 'editVoucherTable'|| table_id == 'abandonedOrderDataList') {
-            dataTableId = 'documentList';
-        }
-        if (table_id == 'agency') {
-            className = 'dt-body-right';
         }
 
         if (add_checkbox) {
@@ -645,11 +642,12 @@ App.Helpers = {
         }
     },
 
-    getPhoneInput: function (phoneId, countryCodeId, setCountryCode) {
+    getPhoneInput: function (phoneId, countryCodeId, setCountryCode, countryCode, phoneNumber = "") {
+        console.log(phoneId, countryCodeId, setCountryCode, countryCode, phoneNumber)
         var input = document.querySelector("#" + phoneId);
         if (input) {
             let onSuccess = function (response) {
-                var iti = window.intlTelInput(input, {
+                var iti = intlTelInput(input, {
                     initialCountry: "pk",
                     formatOnDisplay: true,
                     separateDialCode: true,
@@ -666,7 +664,7 @@ App.Helpers = {
                         if (iti.getSelectedCountryData().name) {
                             let code = iti.getSelectedCountryData().dialCode
                             $('#' + countryCodeId).val(code);
-                            $('#' + phoneId).val('');
+                            $('#' + phoneId).val(phoneNumber);
                             // App.Helpers.getPhoneMask(code, phoneId)
                         }
                     });
@@ -677,7 +675,7 @@ App.Helpers = {
                         if (iti.getSelectedCountryData().name && !setCountryCode) {
                             let code = iti.getSelectedCountryData().dialCode
                             $('#' + countryCodeId).val(code);
-                            $('#' + phoneId).val('');
+                            $('#' + phoneId).val(phoneNumber);
                             // App.Helpers.getPhoneMask(code, phoneId)
                         }
                     });
@@ -748,7 +746,7 @@ App.Helpers = {
         //   "INVALID_LENGTH": 5,
         // };
         var input = document.querySelector('#' + phoneId);
-        var iti = window.intlTelInputGlobals.getInstance(input);
+        var iti = intlTelInputGlobals.getInstance(input);
         iti.isValidNumber();
         var error = iti.getValidationError();
         if (error != 0) {

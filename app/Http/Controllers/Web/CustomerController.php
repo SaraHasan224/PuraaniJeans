@@ -12,7 +12,7 @@ class CustomerController extends Controller
     /**
      * Show the application customers.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {

@@ -12,7 +12,7 @@ class RoleController extends Controller
     /**
      * Show the application roles.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {

@@ -16,9 +16,8 @@ return new class extends Migration
         Schema::create('pim_brands', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->unsignedBigInteger('parent_id')->index();
             $table->unsignedBigInteger('closet_id')->index();
-            $table->text('image')->nullable();
+            $table->text('icon')->nullable();
             $table->boolean('status')->default(Constant::No);
             $table->timestamps();
         });

@@ -28,57 +28,32 @@ App.Users = {
         App.Helpers.oTable.draw();
     },
 
-    initializeDataTable: function (merchant_id) {
+    initializeDataTable: function () {
         let table_name = "users_table";
         var current_url;
         current_url = $("#currentUrl").val();
-        let url = App.Helpers.generateApiURL(App.Constants.endPoints.getUsers);
-        if (merchant_id !== undefined) {
-            url += '/' + merchant_id;
-        }
-        let columns = [];
-        if (this.canResendPassword == 1) {
-            columns = [
-                {data: 'show', name: 'show', orderable: false, searchable: false},
-                {data: 'check', name: 'check', orderable: false, searchable: false},
-                {data: 'user_id', name: 'user_id', orderable: true, searchable: true},
-                {data: 'name', name: 'name', orderable: true, searchable: true},
-                {data: 'email', name: 'email', orderable: true, searchable: true},
-                {data: 'phone', name: 'phone', orderable: true, searchable: true},
-                {data: 'member_since', name: 'member_since', orderable: true, searchable: true},
-                {data: 'roles', name: 'roles', orderable: true, searchable: true},
-                {data: 'status', name: 'status', orderable: true, searchable: false},
-                {data: 'action', name: 'action', orderable: true, searchable: false},
-            ];
+        let url = App.Helpers.generateApiURL(App.Constants.endPoints.usersList);
+        let columns = [
+            {data: 'check', name: 'check', orderable: false, searchable: false},
+            {data: 'name', name: 'name', orderable: true, searchable: true},
+            {data: 'email', name: 'email', orderable: true, searchable: true},
+            {data: 'phone', name: 'phone', orderable: true, searchable: true},
+            {data: 'user_type', name: 'user_type', orderable: true, searchable: true},
+            {data: 'last_login', name: 'last_login', orderable: true, searchable: true},
+            {data: 'status', name: 'status', orderable: true, searchable: false},
+            {data: 'created_at', name: 'created_at', orderable: true, searchable: false},
+            {data: 'updated_at', name: 'updated_at', orderable: true, searchable: false},
+        ];
 
-            if(current_url == 'business.edit' || App.Users.isMerchant == 1){
-                columns.push({data: 'stores', name: 'stores', orderable: false, searchable: false})
-            }
-
-        } else {
-            columns = [
-                {data: 'show', name: 'show', orderable: false, searchable: false},
-                {data: 'check', name: 'check', orderable: false, searchable: false},
-                {data: 'user_id', name: 'user_id', orderable: true, searchable: true},
-                {data: 'name', name: 'name', orderable: true, searchable: true},
-                {data: 'email', name: 'email', orderable: true, searchable: true},
-                {data: 'phone', name: 'phone', orderable: true, searchable: true},
-                {data: 'member_since', name: 'member_since', orderable: true, searchable: true},
-                {data: 'roles', name: 'roles', orderable: true, searchable: true},
-                {data: 'status', name: 'status', orderable: true, searchable: false},
-            ];
-        }
         let postData = function (d) {
             d.user_id = $('#user_id').val();
             d.name = $('#name').val();
             d.email = $('#email').val();
             d.phone = $('#filter_phone').val();
-            d.member_since = $('#daterange').val();
-            d.role = $('#role').val();
         };
         let orderColumn = [[2, "desc"]];
         let searchEnabled = true;
-        App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn , [], true, true, 10, 1);
+        App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn , [], false, true, 10, 1);
     },
 
     initializeBulkDelete: function () {
@@ -102,8 +77,11 @@ App.Users = {
                     App.Constants.endPoints.createUser
                 );
 
-                let onSuccess= function () {
-                    window.location.href = '/users';
+                let onSuccess= function (data) {
+                    if(data.type == "success") {
+                        window.location.href = '/users';
+                        App.Helpers.showSuccessMessage( data.message );
+                    }
                 }
                 let requestData = $("#user_create_form").serialize();
                 App.Ajax.post(url, requestData, onSuccess, false, {});
@@ -111,22 +89,16 @@ App.Users = {
         });
     },
 
-    editUserFormBinding: function () {
+    editUserFormBinding: function (userId) {
         $("#edit-user").bind("click", function (e) {
-
-            var previous_url;
-            previous_url = $("#previous_url").val();
-            var incStr = previous_url.includes("tab=users");
-
             if ($("#user_edit_form").valid()) {
                 let url = App.Helpers.generateApiURL(
-                    App.Constants.endPoints.editUser
+                    App.Constants.endPoints.editUser+"/"+userId
                 );
                 let onSuccess= function () {
-                    if(incStr){
-                        window.location.href = previous_url;
-                    }else{
+                    if(data.type == "success") {
                         window.location.href = '/users';
+                        App.Helpers.showSuccessMessage( data.message );
                     }
                 }
                 let requestData = $("#user_edit_form").serialize();

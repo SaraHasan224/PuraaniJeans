@@ -10,7 +10,7 @@
                         <div class="slider-light">
                             <div class="slick-slider">
                                 <div>
-                                    <div class="position-relative h-100 d-flex justify-content-center align-items-center bg-plum-plate"
+                                    <div class="position-relative h-100 d-flex justify-content-center align-items-center bg-org-plate"
                                          tabindex="-1">
                                         <div class="slide-img-bg"
                                              style="background-image: url('assets/images/originals/city.jpg');"></div>

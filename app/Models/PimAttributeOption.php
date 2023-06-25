@@ -15,9 +15,14 @@ class PimAttributeOption extends Model
         return self::whereId($attrId)->first();
     }
 
-    public static function saveOption($data)
+    public static function saveOption($attribute, $options)
     {
-        return self::updateOrCreate($data);
+        $attribute =  self::updateOrCreate([
+            'option_value' => $options,
+            'attribute_id' => $attribute->id,
+            'status' => Constant::Yes
+        ]);
+        return $attribute;
     }
 
     public static function getOptionByValue($attrId, $value)

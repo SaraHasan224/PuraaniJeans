@@ -12,7 +12,7 @@ class OrderController extends Controller
     /**
      * Show the application closet orders.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {

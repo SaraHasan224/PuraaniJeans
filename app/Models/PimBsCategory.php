@@ -9,9 +9,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PimBsCategory extends Model
 {
-    use SoftDeletes;
-    public $table = 'pim_bs_category';
+    public $table = 'pim_bs_categories';
 
+    protected $fillable = [
+         'parent_id', 'name', 'slug', 'position' , 'status'
+    ];
     public function getNameAttribute($value)
     {
         return $this->attributes[ Helper::getLocalizedColumn('name') ];
@@ -27,20 +29,20 @@ class PimBsCategory extends Model
     {
         return $this->hasMany(PimBsCategory::class, 'parent_id', 'id')
             ->select('id', 'parent_id')
-            ->where('is_active', Constant::Yes)
+            ->where('status', Constant::Yes)
             ->with('children');
     }
 
     public function parent(){
         return $this->belongsTo(PimBsCategory::class, 'parent_id', 'id')->select('id','name', 'slug', 'parent_id')
-          ->where('is_active', Constant::Yes);
+          ->where('status', Constant::Yes);
     }
 
     public static function getCategoryBySlug( $slug )
     {
         return self::select('id', 'name', 'slug', 'parent_id')
             ->where('slug', $slug)
-            ->where('is_active', Constant::Yes)
+            ->where('status', Constant::Yes)
             ->with('parent')
             ->first();
     }
@@ -48,7 +50,7 @@ class PimBsCategory extends Model
     public static function getFeaturedCategories()
     {
         return self::select('name', 'slug', 'icon', 'product_count')
-            ->where('is_active', Constant::Yes)
+            ->where('status', Constant::Yes)
             ->where('is_featured', Constant::Yes)
             ->where('product_count', '>' , 0)
             ->orderBy('position')
@@ -60,7 +62,7 @@ class PimBsCategory extends Model
     {
         return self::select('name', 'slug', 'icon', 'product_count')
             ->where('parent_id', $parentId)
-            ->where('is_active', Constant::Yes)
+            ->where('status', Constant::Yes)
             ->where('product_count', '>' , 0)
             ->orderBy('position')
             ->get();
@@ -70,7 +72,7 @@ class PimBsCategory extends Model
     {
         $allCategories = self::select('id')
             ->where('slug', $slug)
-            ->where('is_active', Constant::Yes)
+            ->where('status', Constant::Yes)
             ->with('children')
             ->first();
 

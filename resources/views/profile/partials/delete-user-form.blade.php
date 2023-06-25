@@ -38,7 +38,9 @@
                     placeholder="{{ __('Password') }}"
                 />
 
-                <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />
+                @if ($errors->userDeletion->get('password'))
+                    <div class="mt-1 text-red-500 text-sm">{{ $errors->userDeletion->get('password') }}</div>
+                @endif
             </div>
 
             <div class="mt-6 flex justify-end">

@@ -13,15 +13,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('closet', function (Blueprint $table) {
+        Schema::create('closets', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->index();
+            $table->unsignedBigInteger('customer_id')->index();
             $table->string('closet_name')->nullable();
             $table->string('closet_reference')->nullable();
-            $table->string('logo')->nullable();
-            $table->tinyInteger('referrer_type')->nullable();
+            $table->text('logo')->nullable();
+            $table->text('banner')->nullable();
+            $table->text('about_closet')->nullable();
             $table->boolean('status')->default(Constant::No);
-            $table->unsignedBigInteger('updated_by')->index()->nullable();
             $table->timestamps();
         });
     }

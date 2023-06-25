@@ -15,7 +15,9 @@
                 autocomplete="name"
                 required
         >
-        <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        @if ($errors->get('name'))
+            <div class="mt-1 text-red-500 text-sm">{{ $errors->get('name') }}</div>
+        @endif
     </div>
     <div class="position-relative form-group">
         <label for="examplePassword" class="">{{ __('Email') }}</label>
@@ -29,7 +31,9 @@
                 autocomplete="username"
                 required
         >
-        <x-input-error class="mt-2" :messages="$errors->get('email')" />
+        @if ($errors->get('email'))
+            <div class="mt-1 text-red-500 text-sm">{{ $errors->get('email') }}</div>
+        @endif
         @if (\Illuminate\Support\Facades\Auth::user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! \Illuminate\Support\Facades\Auth::user()->hasVerifiedEmail())
             <div>
                 <p class="text-sm mt-2 text-gray-800">
@@ -71,10 +75,10 @@
         @endif
         @if (session('status') === 'profile-updated')
             <button
-                x-data="{ show: true }"
-                x-show="show"
-                x-transition
-                x-init="setTimeout(() => show = false, 2000)"
+                {{--x-data="{ show: true }"--}}
+                {{--x-show="show"--}}
+                {{--x-transition--}}
+                {{--x-init="setTimeout(() => show = false, 2000)"--}}
                 class="mt-1 btn btn-success text-sm text-gray-600"
                 type="submit"
             >

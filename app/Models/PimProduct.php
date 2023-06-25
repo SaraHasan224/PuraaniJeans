@@ -11,8 +11,6 @@ use Illuminate\Validation\Rule;
 
 class PimProduct extends Model
 {
-    use SoftDeletes;
-
     protected $guarded = [];
     public static $validationRules = [
         'addToCart' => [
@@ -126,7 +124,7 @@ class PimProduct extends Model
     public function activeVariants()
     {
         return $this->hasMany(PimProductVariant::class, 'product_id', 'id')
-            ->where('is_active', Constant::Yes)
+            ->where('status', Constant::Yes)
             ->with([
                 'image:id,url,position',
             ]);
@@ -137,22 +135,15 @@ class PimProduct extends Model
         return $this->hasMany(PimProductCategory::class, 'product_id', 'id');
     }
 
-    public function productStore()
+    public function closet()
     {
-        return $this->belongsTo(MerchantStore::class, 'store_id', 'id');
+        return $this->belongsTo(Closet::class, 'closet_id', 'id');
     }
-
-    public function store()
-    {
-        return $this->belongsTo(MerchantStore::class, 'store_id', 'id')->withTrashed();
-    }
-
-
 
     public function images()
     {
         return $this->hasMany(PimProductImage::class, 'product_id', 'id')
-            ->where('is_active',Constant::Yes)->orderBy('position')->select('id','product_id','url');
+            ->where('status',Constant::Yes)->orderBy('position')->select('id','product_id','url');
     }
 
     public function defaultImage()
@@ -174,7 +165,7 @@ class PimProduct extends Model
 
     public static function getById($id)
     {
-        return self::where('id', $id)->where('is_active', Constant::Yes)->first();
+        return self::where('id', $id)->where('status', Constant::Yes)->first();
     }
 
     public static function getProductImagePlaceholder()
@@ -200,7 +191,7 @@ class PimProduct extends Model
             ->select($fields)
             ->with([
                 'defaultImage:id,product_id,url,position',
-                'productStore' => function($query) {
+                'closet' => function($query) {
                     $query->select([
                         'id',
                         'merchant_id',
@@ -239,20 +230,20 @@ class PimProduct extends Model
                     ])->whereHas('variant');
                 },
                 'activeVariants' => function($query) {
-                    $query->where('is_active', Constant::Yes);
+                    $query->where('status', Constant::Yes);
                 }
             ])
             ->whereHas('merchant', function($query) {
-                $query->select('id','is_active','user_id')->where('is_active',Constant::Yes)
+                $query->select('id','status','user_id')->where('status',Constant::Yes)
                     ->whereHas('user', function ($records)
                     {
-                        $records->where("is_active",  Constant::Yes);
+                        $records->where("status",  Constant::Yes);
                     });
             })
             ->whereHas('activeVariants', function($query) {
-                $query->where('is_active', Constant::Yes);
+                $query->where('status', Constant::Yes);
             })
-            ->where('pim_products.is_active', Constant::Yes)->first();
+            ->where('pim_products.status', Constant::Yes)->first();
         $productStore = "";
         if(!empty($product)) {
             $productStore = $product->store;
@@ -374,8 +365,7 @@ class PimProduct extends Model
                     'discount_type' => $discountType,
                     'discounted_price' => $discountedPrice,
                     'image' => !empty($image) ? $productVariant->image->url : Helper::getProductImagePlaceholder(),
-                    'track_quantity' => $productVariant->track_quantity,
-                    'max_quantity' => $productVariant->track_quantity == Constant::No ? $product->max_quantity : (($productVariant->quantity > $product->max_quantity) ? $product->max_quantity : $productVariant->quantity),
+                    'max_quantity' => $product->max_quantity,
                     'price' => $price,
                     'sku' => $productVariant->sku,
                     'variant_id' => $productVariant->id,
@@ -399,7 +389,7 @@ class PimProduct extends Model
             unset($product['defaultImage']);
             unset($product['attribute']);
             unset($product['attributeOption']);
-            unset($product['productStore']);
+            unset($product['closet']);
             unset($product['activeVariants']);
             unset($product['merchant']);
             unset($product['default_shipment_methods']);
@@ -409,32 +399,28 @@ class PimProduct extends Model
         ];
     }
 
-    public static function getProductsForCustomerPortal($listingType = Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS'], $perPage , $listOptions = [], $disablePagination = false)
+    public static function getProductsForApp($listingType = Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS'], $perPage, $listOptions = [], $disablePagination = false)
     {
         $slug = "";
-        $store = array_key_exists('store', $listOptions) ? $listOptions['store'] : [];
+        $closet = array_key_exists('closet', $listOptions) ? $listOptions['closet'] : [];
         $categoryId = array_key_exists('categoryId', $listOptions) ? $listOptions['categoryId'] : [];
-        $campaignId = array_key_exists('campaignId', $listOptions) ? $listOptions['campaignId'] : [];
         $categoryIds = array_key_exists('categoryIds', $listOptions) ? $listOptions['categoryIds'] : [];
-        $campaignSlug = array_key_exists('campaignSlug', $listOptions) ? $listOptions['campaignSlug'] : [];
         $bsCategorySlug = array_key_exists('bsCategorySlug', $listOptions) ? $listOptions['bsCategorySlug'] : '';
         $filters = array_key_exists('filters', $listOptions) ? $listOptions['filters'] : '';
         $limitRecord = array_key_exists('limit_record', $listOptions) ? $listOptions['limit_record'] : '';
         $skipRecord = array_key_exists('skip_record', $listOptions) ? $listOptions['skip_record'] : false;
         $skipCount = array_key_exists('skip_count', $listOptions) ? $listOptions['skip_count'] : '';
         $filterByProductIds = array_key_exists('filter_by_product_ids', $listOptions) ? $listOptions['filter_by_product_ids'] : "";
-        $campaign = array_key_exists('campaign', $listOptions) ? $listOptions['campaign'] : "";
         $customerId = array_key_exists('customer_id', $listOptions) ? $listOptions['customer_id'] : "";
         $excludedProductId = array_key_exists('exclude_product', $listOptions) ? $listOptions['exclude_product'] : "";
         $storeShipmentDisabled = array_key_exists('store_disabled', $listOptions) ? $listOptions['store_disabled'] : Constant::Yes;
-        $storeShipmentError = array_key_exists('shipment_error', $listOptions) ? $listOptions['shipment_error'] : '';
 
         $fields = [
             'pim_products.id as id',
             'name',
             'price',
-            'merchant_id',
-            'store_id',
+            'closet_id',
+            'brand_id',
             'max_quantity',
             'short_description',
             'has_variants',
@@ -443,18 +429,17 @@ class PimProduct extends Model
             'rank',
         ];
 
-        if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['RECENTLY_VIEWED_PRODUCTS']){
+        if ($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['RECENTLY_VIEWED_PRODUCTS']) {
             $fields[] = 'cp_recently_viewed.created_at as recently_viewed_created_at';
         }
-
 
         $category = null;
         $productListing = array_flip(Constant::CUSTOMER_APP_PRODUCT_LISTING);
         $type = $productListing[$listingType];
 
-        if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'] && !empty($bsCategorySlug)){
+        if ($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'] && !empty($bsCategorySlug)) {
             $slug = $bsCategorySlug;
-            $category = PimBsCategory::getCategoryBySlug( $bsCategorySlug );
+            $category = PimBsCategory::getCategoryBySlug($bsCategorySlug);
         }
 
         $products = self::select($fields);
@@ -468,97 +453,66 @@ class PimProduct extends Model
 //            }
 //        }
 
-        if(!empty($filterByProductIds)){
-            $products = $products->whereIn('pim_products.id',$filterByProductIds);
+        if (!empty($filterByProductIds)) {
+            $products = $products->whereIn('pim_products.id', $filterByProductIds);
         }
 
         $products = $products->with([
-                'defaultImage:id,product_id,url,position',
-                'productStore' => function($query) {
-                    $query->select([
-                        'id',
-                        'merchant_id',
-                        'store_slug',
-                        'name',
-                        'is_bshop_enabled',
-                        'plugin_status',
-                        'plugin_installed',
-                    ])->with([
-                        'branding'  => function($query) {
-                            $query->select([
-                                'id',
-                                'store_id',
-                                'favicon',
-                                'website',
-                            ]);
-                        },
-                    ]);
-                },
-                'merchant' => function($query) {
-                    $query->select([
-                        'id',
-                    ]);
-                },
-                'attribute' => function($query) {
-                    $query->select([
-                        'id',
-                        'product_id',
-                        'attribute_id',
-                        'attribute_value',
-                    ])
+            'defaultImage:id,product_id,url,position',
+            'closet' => function ($query) {
+                $query->select([
+                    'id',
+                    'closet_name',
+                    'closet_reference',
+                    'logo',
+                    'banner',
+                ])->where('status', Constant::Yes);
+            },
+            'attribute' => function ($query) {
+                $query->select([
+                    'id',
+                    'product_id',
+                    'attribute_id',
+                    'attribute_value',
+                ])
                     ->with(['options:id,product_id,attribute_id,pim_product_attribute_id,option_id,option_value'])
                     ->whereHas('options');
-                },
-                'attributeOption' => function($query) {
-                    $query->select([
-                        'id',
-                        'product_id',
-                        'variant_id',
-                        'attribute_id',
-                        'option_id'
-                    ])->whereHas('variant');
-                },
-                "activeVariants" => function($query) {
-                    $query->select([
-                        'id as variant_id',
-                        'product_variant as variant_name',
-                        'product_id',
-                        'sku',
-                        'quantity as max_quantity',
-                        'price',
-                        'discount',
-                        'discount_type',
-                        'is_active',
-                        'image_id',
-                        'track_quantity',
-                        'short_description as variant_short_description',
-                        'best_discount_value',
-                        'best_discount_type',
-                    ])->where('is_active', Constant::Yes);
+            },
+            'attributeOption' => function ($query) {
+                $query->select([
+                    'id',
+                    'product_id',
+                    'variant_id',
+                    'attribute_id',
+                    'option_id'
+                ])->whereHas('variant');
+            },
+            "activeVariants" => function ($query) {
+                $query->select([
+                    'id as variant_id',
+                    'product_variant as variant_name',
+                    'product_id',
+                    'sku',
+                    'quantity as max_quantity',
+                    'price',
+                    'discount',
+                    'discount_type',
+                    'status',
+                    'image_id',
+                    'short_description as variant_short_description',
+                ])->where('status', Constant::Yes);
 
-                },
-            ])
-            ->whereHas('merchant', function($query) {
-                $query->select('id','is_active','user_id')->where('is_active',Constant::Yes)
-                    ->whereHas('user', function ($records)
-                    {
-                        $records->where("is_active",  Constant::Yes);
-                    });
+            },
+        ])
+            ->whereHas('activeVariants', function ($query) {
+                $query->where('status', Constant::Yes);
             })
-            ->whereHas('activeVariants', function($query) {
-                $query->where('is_active', Constant::Yes);
-                $query->where(function($q){
-                    $q->where('quantity', '>', 0)
-                        ->orWhere('track_quantity',Constant::Yes);
-                })->orWhere('track_quantity',Constant::No);
-            })
-            ->where('pim_products.is_active', Constant::Yes);
+            ->where('pim_products.status', Constant::Yes);
 
 
         $filteredProducts = $products;
 
         $filtersApplied = false;
-//
 //        if(!empty($filters)){
 //            if(array_key_exists('store_slug', $filters) && !empty($filters['store_slug'])){
 //                $filteredProducts->when($filters, function ($query) use ($filters) {
@@ -673,73 +627,89 @@ class PimProduct extends Model
         $productMin = $products->min('price');
 
         // IF $skipRecord is true then use ;
-        if($skipRecord) {
-            if(!$filtersApplied) {
+        if ($skipRecord) {
+            if (!$filtersApplied) {
                 $productList = $products->offset($skipCount)->limit($limitRecord)->get();
-            }else {
+            } else {
                 $productList = $filteredProducts->offset($skipCount)->limit($limitRecord)->get();
             }
             $productsTransformed = $productList;
-        }else {
-            if(!$filtersApplied) {
+        } else {
+            if (!$filtersApplied) {
                 $productList = $products->paginate($perPage);
-            }else {
+            } else {
                 $productList = $filteredProducts->paginate($perPage);
             }
             $productsTransformed = $productList->getCollection();
         }
 
         $productsTransformed = $productsTransformed
-            ->map(function($item) use($slug, $listingType, $category, $campaignSlug, $campaignId, $filters, $campaign, $storeShipmentDisabled, $storeShipmentError) {
+            ->map(function ($item) use ($slug, $listingType, $category, $filters) {
                 $defaultVariant = $item->activeVariants->first();
                 $discountType = $defaultVariant->ultimate_best_discount_type;
                 $price = $defaultVariant->ultimate_best_price;
                 $discount = $defaultVariant->ultimate_discount;
                 $discountedPrice = $defaultVariant->ultimate_best_discounted_price;
                 $productListingType = 0;
-                $showSlug = '';
-                if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS']){
+                if ($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS']) {
                     $position = $item->rank;
-                } else if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS']){
+                } else if ($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS']) {
                     $position = $item->featured_position;
                 } else {
                     $position = $item->position;
                 }
 
                 $image = optional(optional($item)->defaultImage)->url;
-                return [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                    'listing_type' => $productListingType,
-                    'list_type' => $listingType,
-                    'listing_slug' => $showSlug ? $campaignSlug : '',
-                    'discount' => empty($discount) ? 0 : $discount,
-                    'price' => $price,
-                    'discounted_price' => $discountedPrice,
-                    'discount_badge' => [
-                        'show' =>  Constant::Yes,
-                        'discount' => $discount,
-                        'type' => $discountType,
-                    ],
-                    'max_quantity' => $defaultVariant->track_quantity == Constant::Yes ? $defaultVariant->max_quantity : $item->max_quantity,
-                    'has_variants' => $item->has_variants,
-                    'image' => !empty($image) ? $image : Helper::getProductImagePlaceholder(),
-                    'position' => $position,
-                    'variant_count' => $item->activeVariants->count(),
-                    'attribute_count' => $item->attribute->count(),
-                    'default_variant_id' => $defaultVariant->variant_id,
-                    'category_name' => !empty($category) && !empty($category->parent) ? $category->parent->name : optional($category)->name,
-                    'category_id' => !empty($category) && !empty($category->parent) ? $category->parent->id : optional($category)->id,
-                    'sub_category_name' => !empty($category) && !empty($category->parent) ? $category->name : null,
-                    'sub_category_id' => !empty($category) && !empty($category->parent) ? $category->id : null,
-                    'merchant_name' => "My company",
-                    'store_name' => $item->productStore->name,
-                    'store_slug' => $item->productStore->store_slug,
-                    'store_favicon' => $item->productStore->getStoreAppFavicon(),
-                    'store_website' => $item->productStore->getStoreAppFavicon(),
-                    'store_disabled' => $storeShipmentDisabled,
-                    'store_disabled_note' => $storeShipmentError,
-                ];
+                if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS']) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'listing_type' => $productListingType,
+                        'list_type' => $listingType,
+                        'discount' => empty($discount) ? 0 : $discount,
+                        'price' => $price,
+                        'discounted_price' => $discountedPrice,
+                        'discount_badge' => [
+                            'show' => ($discountedPrice >= $price) ? Constant::No : Constant::Yes,
+                            'discount' => $discount,
+                            'type' => $discountType,
+                        ],
+                        'image' => !empty($image) ? $image : Helper::getProductImagePlaceholder(),
+                        'position' => $position,
+                        'qty' => $item->max_quantity,
+                        'handle' => $item->handle,
+                        'short_description' => $item->short_description
+                    ];
+                }else {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'listing_type' => $productListingType,
+                        'list_type' => $listingType,
+                        'discount' => empty($discount) ? 0 : $discount,
+                        'price' => $price,
+                        'discounted_price' => $discountedPrice,
+                        'discount_badge' => [
+                            'show' => ($discountedPrice >= $price) ? Constant::No : Constant::Yes,
+                            'discount' => $discount,
+                            'type' => $discountType,
+                        ],
+                        'max_quantity' => $item->max_quantity,
+                        'has_variants' => $item->has_variants,
+                        'image' => !empty($image) ? $image : Helper::getProductImagePlaceholder(),
+                        'position' => $position,
+                        'variant_count' => $item->activeVariants->count(),
+                        'attribute_count' => $item->attribute->count(),
+                        'default_variant_id' => $defaultVariant->variant_id,
+                        'category_name' => !empty($category) && !empty($category->parent) ? $category->parent->name : optional($category)->name,
+                        'category_id' => !empty($category) && !empty($category->parent) ? $category->parent->id : optional($category)->id,
+                        'sub_category_name' => !empty($category) && !empty($category->parent) ? $category->name : null,
+                        'sub_category_id' => !empty($category) && !empty($category->parent) ? $category->id : null,
+                        'closet_name' => $item->closet->closet_name,
+                        'closet_slug' => $item->closet->closet_reference,
+                        'closet_favicon' => $item->closet->logo,
+                    ];
+                }
             })
             ->toArray();
 
@@ -748,12 +718,12 @@ class PimProduct extends Model
 //        $stores = MerchantStore::getStoresListing(Constant::CUSTOMER_APP_STORE_LISTING_TYPE['Filters'], null, ['storeIds' => $filteredStores]);
 
 //        if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['STORES_PRODUCTS']){
-            $stores = "";
+        $stores = "";
 //        }
 
-        if($disablePagination) {
+        if ($disablePagination) {
             return $productsTransformed;
-        }else {
+        } else {
             $finalResult = new \Illuminate\Pagination\LengthAwarePaginator(
                 $productsTransformed,
                 $productList->total(),
@@ -771,9 +741,9 @@ class PimProduct extends Model
                 'slug' => $slug,
                 'filters' => []
             ];
-            if(!$filtersApplied) {
+            if (!$filtersApplied) {
                 $sortByFilters = Constant::SORT_BY_FILTERS;
-                if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS']){
+                if ($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS']) {
                     unset($sortByFilters['featured']);
                 }
                 $productResults['slug'] = $slug;
@@ -792,34 +762,25 @@ class PimProduct extends Model
     }
 
 
-    public static function getPimCategoryProductIds($merchantCategoryIds) {
-        return self::whereHas('category', function ($records) use ($merchantCategoryIds)
+    public static function getPimCategoryProductIds($categoryId) {
+        return self::whereHas('category', function ($records) use ($categoryId)
         {
-            $records->whereIn('category_id', $merchantCategoryIds)->orderBy('id','ASC');
+            $records->whereIn('category_id', $categoryId)->orderBy('id','ASC');
         })->pluck('id');
     }
 
-    /*
-     *
-     *  MERCHANT STORE
-     *
-    */
-
-    public static function getMerchantPimAvailableCategories($merchantId, $store)
+    public static function getMerchantPimAvailableCategories($closet)
     {
-        $catalogProductType = optional($store->merchant->merchantProductSettings)->catalog_products_type;
-        $pimProductIds = PimProduct::where('merchant_id', $merchantId)
-            ->where('product_delivery_type', $catalogProductType)
-            ->where('pim_products.is_active',Constant::Yes)
-            ->where('store_id', $store->id)
+        $pimProductIds = PimProduct::where('pim_products.status',Constant::Yes)
+            ->where('closet_id', $closet->id)
             ->whereHas("activeVariants")
             ->pluck('id')
             ->toArray();
         return PimCategory::select('pim_categories.id', 'name', 'name_ur', 'handle as slug', 'image as banner', 'is_default')
             ->join('pim_product_categories', 'pim_categories.id', 'pim_product_categories.category_id')
             ->whereIn('pim_product_categories.product_id', $pimProductIds)
-            ->where('store_id', $store->id)
-            ->where('is_active', Constant::Yes)
+            ->where('closet_id', $closet->id)
+            ->where('status', Constant::Yes)
             ->groupBy('pim_product_categories.category_id')
             ->orderBy('position', 'ASC')
             ->orderBy('id', 'DESC')
@@ -827,172 +788,18 @@ class PimProduct extends Model
     }
 
 
-    public static function getByImportedId($importedId)
+    public static function deleteProducts($closetId, $product)
     {
-        return self::where('imported_product_id', $importedId)->first();
-    }
-
-    public static function getProductsForZoodpay( $storeId )
-    {
-        $fields = [
-          'pim_products.id as id',
-          'name',
-          'sku',
-          'price',
-          'is_active as status',
-          'max_quantity',
-          'short_description as description',
-          'has_variants',
-          'merchant_id',
-          'imported_product_id'
-        ];
-
-        $category = null;
-
-        $products = self::select($fields)
-          ->where('store_id', $storeId)
-          ->where('pim_products.is_imported', Constant::Yes)
-          ->with([
-            'images',
-            'category' => function($query) {
-                $query->select([
-                  'id',
-                  'product_id',
-                  'category_id',
-                ])
-                  ->whereHas('category')->with('category:id,name');
-            },
-            'attribute' => function($query) {
-                $query->select([
-                  'id',
-                  'product_id',
-                  'attribute_id',
-                  'attribute_value',
-                ])
-                  ->whereHas('options');
-            },
-            "variants" => function($query) {
-                $query->select([
-                  'id as variant_id',
-                  'imported_variant_id',
-                  'product_variant as variant_name',
-                  'product_id',
-                  'sku',
-                  'quantity',
-                  'price',
-                  'is_active',
-                  'image_id',
-                  'track_quantity',
-                  'short_description as variant_short_description',
-                ])->where('is_active', Constant::Yes);
-
-            }
-          ])
-          ->whereHas('variants')
-          ->paginate(10);
-
-
-        $productsTransformed = $products->getCollection();
-
-        $productsTransformed = $productsTransformed
-          ->map(function($item) {
-              $defaultImage = Helper::getProductImagePlaceholder();
-              $product = [
-                'productId' => $item->id,
-                'importedProductId' => $item->imported_product_id,
-                'sku' => $item->sku,
-                'name' => $item->name,
-                'defaultPrice' => $item->price,
-                'crossedPrice' => $item->price,
-                'quantity'  => 0,
-                'description' => $item->description,
-                'status' => $item->is_active ? 'Enabled' : 'Disabled',
-                'currency' => optional($item->merchant)->getAnalyticCurrencyCode(),
-                'skuType' => Constant::ZOODPAY_SKU_TYPES['SINGLE_VARIANT'],
-                'propertyName'  => null,
-                'property'      => [],
-                'categories'    => [],
-              ];
-              if (!empty($item->images->toArray())){
-                  $product['pictures'] = array_column($item->images->toArray(), 'url');
-              }else{
-                  $product['pictures'][] = $defaultImage;
-              }
-              if ($item->has_variants){
-                  unset($product['quantity']);
-                  $attributes = array_column($item->attribute->toArray(), 'attribute_value');
-                  $product['propertyName'] = implode('|', $attributes);
-                  if (!empty($item->variants) && count($item->variants->toArray()) > 1){
-                      $product['skuType'] = Constant::ZOODPAY_SKU_TYPES['MULTI_VARIANT'];
-                  }
-                  foreach ($item->variants as $variant){
-                      $product['property'][] = [
-                        "id" => $variant->variant_id,
-                        'importedVariantId' => $variant->imported_variant_id,
-                        "sku" => $variant->sku,
-                        "propertyValue" => $variant->variant_name,
-                        "status" => $variant->is_active ? 'Enabled' : 'Disabled',
-                        "propertyImage" => optional($variant->image)->url ?? $defaultImage,
-                        "price" => $variant->price,
-                        "quantity" => $variant->quantity,
-                        "track_quantity" => $variant->track_quantity,
-                        "onSale" => "0"
-                      ];
-                  }
-              }else{
-                  $product['quantity'] = $item->variants[0]->quantity;
-              }
-              if (!empty($item->category)){
-                  $product['categories'] = array_column($item->category->toArray(), 'category');
-              }
-              return $product;
-          })
-          ->toArray();
-
-        $finalResult = new \Illuminate\Pagination\LengthAwarePaginator(
-          $productsTransformed,
-          $products->total(),
-          $products->perPage(),
-          $products->currentPage(), [
-            'path' => \Request::url(),
-            'query' => [
-              'page' => $products->currentPage(),
-            ]
-          ]
-        );
-        $productResults = [
-          'products' => $finalResult,
-        ];
-
-        return $productResults;
-    }
-
-    public static function deleteProducts($storeId, $products)
-    {
-        return self::where('store_id', $storeId)
-          ->where('is_imported', Constant::Yes)
-          ->whereNotIn('imported_product_id', $products)
+        return self::where('closet_id', $closetId)->whereId($product->id)
           ->delete();
     }
 
-    public static function isUsedSKU($storeId, $product)
+    public static function isUsedSKU($closetId, $product)
     {
-        return self::where('store_id', $storeId)
+        return self::where('closet_id', $closetId)
           ->where('sku', $product['sku'])
-          ->whereNull('imported_product_id')
           ->count();
 
-    }
-
-    public static function deleteProductByImportedId($storeId, $importedProductId)
-    {
-        $product =  self::where('store_id', $storeId)
-          ->where('imported_product_id', $importedProductId)
-          ->first();
-        if ($product){
-            $product->delete();
-        }
-        return $product;
     }
 
     public static function saveProduct($productData)
@@ -1008,13 +815,12 @@ class PimProduct extends Model
           'uuid'                      => $productData['uuid'],
           'sku'                       => $productData['sku'],
           'price'                     => $productData['price'],
-          'currency_id'               => $productData['currency_id'],
           'weight'                    => $productData['weight'] ?? 0,
           'brand_id'                  => $productData['brand_id'],
           'is_imported'               => Constant::Yes,
           'max_quantity'              => $productData['max_quantity'],
           'journey_id'                => $productData['journey_id'],
-          'is_active'                 => ($productData['stock_status'] != 'outofstock') ? Constant::Yes : Constant::No
+          'status'                 => ($productData['stock_status'] != 'outofstock') ? Constant::Yes : Constant::No
         ];
 
         return self::updateOrCreate(
@@ -1040,8 +846,7 @@ class PimProduct extends Model
 
     public function disableProduct()
     {
-        $this->is_active = Constant::No;
+        $this->status = Constant::No;
         $this->save();
     }
-
 }

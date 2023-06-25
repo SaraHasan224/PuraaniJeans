@@ -103,7 +103,7 @@ class Country extends Model
     public static function getCountryByCountryCode($countryCode , $pluckCountryId = false)
     {
         $column = [];
-        $data = self::where('country_code', $countryCode);
+        $data = self::where('code', $countryCode);
         if($pluckCountryId){
             $column = [
                 'id',

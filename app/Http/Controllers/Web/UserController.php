@@ -6,7 +6,11 @@ use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+
+use Yajra\DataTables\DataTables;
 
 use App\Helpers\ApiResponseHandler;
 use App\Helpers\AppException;
@@ -22,12 +26,12 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
         try{
-            $data['USER_STATUS'] = array_flip(Constant::USER_STATUS);
+            $data['USER_STATUS'] = Constant::USER_STATUS;
             return view('users.index',$data);
         }catch (\Exception $e){
             AppException::log($e);
@@ -44,62 +48,73 @@ class UserController extends Controller
     public function create()
     {
         $data['status'] = Constant::USER_STATUS;
-        return view('admin.modules.users.add.index', $data);
+        $data['user'] = [];
+        return view('users.create', $data);
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(UsersRequest $request)
+    public function store(Request $request)
     {
         // Check if the incoming request is valid...
-        (object)$validated = $request->validated();
-        $image = Auth::user()->image;
-        if ($request->hasFile('image')) {
-            $image_tmp = $request->image;
-            if ($image_tmp->isValid()) {
-                $extension = $image_tmp->getClientOriginalExtension();
-                $image = strtolower(trim($request->name)) . '_' . strtotime(Carbon::now()) . "." . $extension;
-                $image_path = public_path('assets/images/uploads/users/' . $image);
-                Image::make($image_tmp)->save($image_path);
-            }
-        }
-        // Retrieve the validated input data...
-        $data = $this->storeOrUpdate($validated, $image, Constant::CRUD_STATES['create']);
-        return redirect('admin/users')->with($data['type'], $data['message']);
+        $requestData = $request->all();
+        $requestData['phone'] = isset($requestData['phone']) ?
+            str_replace("-", "", $request->phone) : null;
 
+        $validationRule = User::getValidationRules('createUser', $requestData);
+        $validator = Validator::make($requestData, $validationRule);
+        if ($validator->fails())
+        {
+            return ApiResponseHandler::validationError($validator->errors());
+        }
+
+//        $image = Auth::user()->image;
+//        if ($request->hasFile('image')) {
+//            $image_tmp = $request->image;
+//            if ($image_tmp->isValid()) {
+//                $extension = $image_tmp->getClientOriginalExtension();
+//                $image = strtolower(trim($request->name)) . '_' . strtotime(Carbon::now()) . "." . $extension;
+//                $image_path = public_path('assets/images/uploads/users/' . $image);
+//                Image::make($image_tmp)->save($image_path);
+//            }
+//        }
+        // Retrieve the validated input data...
+        $data = $this->storeOrUpdate($requestData, Constant::CRUD_STATES['created']);
+        return ApiResponseHandler::success($data);
     }
 
-    private function storeOrUpdate($validated, $image, $state, $id = false)
+    private function storeOrUpdate($validated, $state, $image = "", $id = false)
     {
         DB::beginTransaction();
-        if ($state == Constant::CRUD_STATES['create']) {
+        if ($state == Constant::CRUD_STATES['created']) {
             $user = new User();
             $user->password = Hash::make($validated['password']);
         } else {
-            $user = User::getRecordById($id);
+            $user = User::findById($id);
             if(!empty($validated['password']) && $validated['password'] !== "password"){
                 $user->password = Hash::make($validated['password']);
             }
         }
         try {
             $user->name = $validated['name'];
-            $user->role = $validated['role'];
             $user->email = $validated['email'];
-            $user->image = $image;
-            $user->status = $validated['status'];
+            $user->country_code = $validated['country_code'];
+            $user->phone_number = $validated['phone'];
+            $user->user_type = Constant::USER_TYPES['Admin'];
+//            $user->image = $image;
+            $user->status = $validated['is_active'] == 1 ? Constant::USER_STATUS['Active'] : Constant::USER_STATUS['InActive'];
             if ((!$user->save())) //|| (!$mapped)
             {
                 throw new \Exception("Oopss we are facing some hurdle right now to process this action, please try again");
-            } else {
-                DB::commit();
             }
-
+            DB::commit();
             $return['type'] = 'success';
-            $return['message'] = 'User has been ' . $state . ' successfully.';
+            $action = array_flip(Constant::CRUD_STATES);
+            $return['message'] = 'User has been ' . $action[$state] . ' successfully.';
             return $return;
         } catch (\Exception $e) {
             AppException::log($e);
@@ -136,14 +151,14 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        $user = User::getRecordById($id);
+        $user = User::findById($id);
         if(empty($user))
         {
-            return redirect('admin/users')->with('warning_msg', "Record not found.");
+            return redirect('/users')->with('warning_msg', "Record not found.");
         }else{
             $data['user'] = $user;
             $data['status'] = Constant::USER_STATUS;
-            return view('admin.modules.users.edit.index', $data);
+            return view('users.edit', $data);
         }
     }
 
@@ -152,58 +167,37 @@ class UserController extends Controller
      *
      * @param  \Illuminate\Http\Request $request
      * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(UsersRequest $request, $id)
+    public function update(Request $request, $id)
     {
+
         // Check if the incoming request is valid...
-        (object)$validated = $request->validated();
-        $user = User::getRecordById($id);
-        $image = $user->image;
-        if ($request->hasFile('image')) {
-            $image_tmp = $request->image;
-            if ($image_tmp->isValid()) {
-                $extension = $image_tmp->getClientOriginalExtension();
-                $image = strtolower(trim($request->name)) . '_' . strtotime(Carbon::now()) . "." . $extension;
-                $image_path = public_path('assets/images/uploads/users/' . $image);
-                Image::make($image_tmp)->save($image_path);
-            }
+        $requestData = $request->all();
+        $requestData['phone'] = isset($requestData['phone']) ?
+            str_replace("-", "", $request->phone) : null;
+
+        $validationRule = User::getValidationRules('updateUser', $requestData);
+        $validator = Validator::make($requestData, $validationRule);
+        if ($validator->fails())
+        {
+            return ApiResponseHandler::validationError($validator->errors());
         }
-        // Retrieve the validated input data...
-        $data = $this->storeOrUpdate($validated, $image, Constant::CRUD_STATES['update'], $id);
-        return redirect('admin/users')->with($data['type'], $data['message']);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
-
-    // The incoming request is valid...
-    //if($id == false)
-    //{
-    //    //CREATE NEW USER
-    //$user = new User();
-    //$user->created_by = Auth::user()->id;
-    //$user->status = $validated['status'];
-    //$user->password = bcrypt($validated['password']);
-    //$return['message'] = 'User has been added successfully.';
-    //}else{
-    //    //SELECT USER'S RECORD
-    //    $user =  User::whereId($id)->first();
-//        if(!empty($validated['password'])){
-//            $user->password = Hash::make($validated['password']);
+//        $image = $user->image;
+//        if ($request->hasFile('image')) {
+//            $image_tmp = $request->image;
+//            if ($image_tmp->isValid()) {
+//                $extension = $image_tmp->getClientOriginalExtension();
+//                $image = strtolower(trim($request->name)) . '_' . strtotime(Carbon::now()) . "." . $extension;
+//                $image_path = public_path('assets/images/uploads/users/' . $image);
+//                Image::make($image_tmp)->save($image_path);
+//            }
 //        }
-    //    $user->status = $validated['status'];
-    //    $return['message'] = 'User has been updated successfully.';
-    //}
+        // Retrieve the validated input data...
+        $data = $this->storeOrUpdate($requestData, Constant::CRUD_STATES['updated'], "", $id);
+        return ApiResponseHandler::success($data);
+    }
+
     /**
      * Get list of the specified resource from storage.
      *
@@ -218,53 +212,56 @@ class UserController extends Controller
             $response = $this->makeDatatable($usersRecord);
             return $response;
         } catch (\Exception $e) {
-            dd($e);
+            AppException::log($e);
+            dd($e->getTraceAsString());
         }
     }
 
     private function makeDatatable($data)
     {
-        return \DataTables::of($data['records'])
+        return DataTables::of($data['records'])
             ->addColumn('check', function ($rowdata) {
                 $class = '';
-                $disbaled = '';
-                if ($rowdata->is_super_admin == Constant::Yes || !empty($rowdata->deleted_at))
+                $disabled = '';
+                if (!empty($rowdata->deleted_at))
                 {
-                    $disbaled = 'disabled="disabled"';
+                    $disabled = 'disabled="disabled"';
                 }
-                return '<input type="checkbox" ' . $disbaled . ' name="data_raw_id[]"  class="theClass ' . $class . '" value="' . $rowdata->id . '">';
-
+                return '<input type="checkbox" ' . $disabled . ' name="data_raw_id[]"  class="theClass ' . $class . '" value="' . $rowdata->id . '">';
             })
             ->addColumn('name', function ($rowdata) {
-                $disabledClass = $rowdata->is_super_admin == Constant::Yes ? "disable" : "";
-                $url = $rowdata->is_super_admin == Constant::Yes ? "#" : url("admin/users/" . $rowdata->id.'/edit');
-                $target = $rowdata->is_super_admin == Constant::Yes ? "" : "_blank";
-
-                $return = '<a target="'.$target.'" href="'.$url.'" class="'.$disabledClass.'" >' . $rowdata->name . '</a>';
-                if (!empty($rowdata->deleted_at)) {
-                    $return .= '<br/><label class="badge badge-danger"> Deleted</label>';
-                }
-                return $return;
+                $disabledClass = "";
+                $url = url("/users/" . $rowdata->id.'/edit');
+                $target = "_blank";
+                return '<a target="'.$target.'" href="'.$url.'" class="'.$disabledClass.'" >' . $rowdata->name . '</a>';
             })
-            ->addColumn('email', function ($rowdata) {
-                return $rowdata->email;
+            ->addColumn('phone', function ($rowdata) {
+                return "+(".$rowdata->country_code.")".$rowdata->phone_number;
             })
             ->addColumn('status', function ($rowdata) {
-                $isActive = $rowdata->status ?? 1;
-                $result = "";
-                $result .= '<label class="badge badge-' . Constant::USER_STATUS_STYLE[$isActive] . '"> ' . Constant::USER_STATUS[$isActive] . '</label>';
-                return $result;
+                $isActive = $rowdata->status;
+                $userStatus = array_flip(Constant::USER_STATUS);
+                return '<label class="badge badge-' . Constant::USER_STATUS_STYLE[$isActive] . '"> ' . $userStatus[$isActive] . '</label>';
+            })
+            ->addColumn('last_login', function ($rowdata) {
+                if(empty($rowdata->last_login))
+                    return null;
+                return Helper::dated_by(null,$rowdata->last_login);
             })
             ->addColumn('created_at', function ($rowdata) {
 //                optional($rowdata->created_record)->name
-                return Helper::dated_by(optional($rowdata->created_record)->name,$rowdata->created_at);
+                return Helper::dated_by(null,$rowdata->created_at);
             })
             ->addColumn('updated_at', function ($rowdata) {
                 return Helper::dated_by(null,$rowdata->updated_at);
             })
             ->rawColumns(['check', 'name', 'status','created_at','updated_at'])
-//            ->setOffset($data['offset'])
-//            ->setTotalRecords($data['count'])
+            ->setOffset($data['offset'])
+            ->with([
+                "recordsTotal" => $data['count'],
+                "recordsFiltered" => $data['count'],
+            ])
+            ->setTotalRecords($data['count'])
             ->make(true);
     }
 
@@ -273,7 +270,7 @@ class UserController extends Controller
      * Remove all the specified resource from storage.
      *
      * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function deleteRecords(Request $request)
     {

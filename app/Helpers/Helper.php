@@ -15,12 +15,55 @@ use Lcobucci\JWT\Parser as JwtParser;
 
 class Helper
 {
+    public static function assets($path, $secure = null) {
+        return app('url')->asset($path.'/asset', $secure);
+    }
+
     public static function clean($string) {
         if(empty($string))
             return $string;
 
         $string = trim($string); // Replaces all spaces with no s.
         return preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
+    }
+
+    static function formatPhoneNumber($phone)
+    {
+        $phone = str_replace('+', '', $phone);
+        if (strlen($phone) > 2)
+        {
+            $phone = substr($phone, 2);
+        }
+        return $phone;
+    }
+
+    static function dated_by($name, $date)
+    {
+        $text = '';
+        if(!empty($name))
+        {
+            $text .= '<b>' . $name . '</b><br/>';
+        }
+        if (!empty($date)) {
+            $text .= self::dateTime($date);
+        }
+        return $text;
+    }
+
+    static function dateTime($timestamp)
+    {
+        if (empty($timestamp)) return '';
+        $localTimeZone = self::getUserLocalTime();
+        $timestampFormat = 'Y-m-d H:i:s';
+        return Carbon::createFromFormat($timestampFormat, $timestamp, 'UTC')
+            ->setTimezone($localTimeZone)
+            ->format('d M Y h:i  A');
+    }
+
+    public static function generateSlugReference($name) {
+        $randString = substr( time().mt_rand(111, 999) , 8);
+        $slug = self::clean(str_replace(' ', '-', $name));
+        return (string) $randString."_".strtolower($slug);
     }
 
     public static function isImageValid($url,$image_placeholder){
@@ -313,7 +356,7 @@ class Helper
         }
         else
         {
-            $basePath = (($withAssetPath) ? env('ASSETS_BASE_PATH','https://bsecure-dev.s3-eu-west-1.amazonaws.com/dev/assets') : env('IMGIX_BASE_PATH','https://bsecure-dev-images.imgix.net'));
+            $basePath = (($withAssetPath) ? env('ASSETS_BASE_PATH',) : env('IMGIX_BASE_PATH','https://bsecure-dev-images.imgix.net'));
             $imageUrl = $basePath.'/'.$image.'?auto=compress';
 
             if($width != "")

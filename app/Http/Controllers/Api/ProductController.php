@@ -160,7 +160,7 @@ class ProductController extends Controller
         try {
             $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS'];
             $listOptions = [];
-            $response = PimProduct::getProductsForCustomerPortal($listType, 10, $listOptions);
+            $response = PimProduct::getProductsForApp($listType, 10, $listOptions);
 
             return ApiResponseHandler::success($response, __('messages.general.success'));
         } catch (\Exception $e) {
@@ -215,7 +215,7 @@ class ProductController extends Controller
             'customer_id' => $customerId,
             'exclude_product' => $productId
         ];
-        return PimProduct::getProductsForCustomerPortal($listType, 5, $listOptions, true);
+        return PimProduct::getProductsForApp($listType, 5, $listOptions, true);
     }
 
 
@@ -313,7 +313,7 @@ class ProductController extends Controller
 
             $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS'];
 
-            $response = PimProduct::getProductsForCustomerPortal($listType, 50, $listOptions);
+            $response = PimProduct::getProductsForApp($listType, 50, $listOptions);
 
             return ApiResponseHandler::success($response, __('messages.general.success'));
         } catch (\Exception $e) {

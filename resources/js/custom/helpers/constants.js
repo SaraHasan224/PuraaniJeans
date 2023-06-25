@@ -25,6 +25,8 @@ App.Constants = {
     'deleteUserAccount': '/data/users/getdata',
     'getCountriesData': '/get-active-countries',
     'usersList': '/users-list',
+    'createUser': '/user-save',
+    'editUser': "/users/edit"
   },
     user_type:{
       1 : 'Admin',

@@ -18,7 +18,7 @@
     <div class="page-title-actions">
         <div class="d-inline-block pr-3">
             <button class="btn btn-primary fright listing-btns-wrap clear-pagination-state" type="button"
-                    onclick="location.href='{{ URL::to('roles/create') }}'">
+                    onclick="location.href='{{ URL::to('/users-create') }}'">
                 <i class="icon-add"></i>
                 <span>Create User</span>
             </button>
@@ -51,13 +51,15 @@
     {{--<!-- FILTERS VIEW ENDS HERE -->--}}
     <div class="main-card mb-3 card">
         <div class="card-body">
-            <table style="width: 100%;" id="dataList" class="table table-hover table-striped table-bordered">
+            <table style="width: 100%;" id="users_table" class="table table-hover table-striped table-bordered">
                 <thead>
                 <tr>
                     <th>S#</th>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>User Description</th>
+                    <th>Phone</th>
+                    <th>User Type</th>
+                    <th>Last Login</th>
                     <th>Status</th>
                     <th>Created At</th>
                     <th>Updated At</th>

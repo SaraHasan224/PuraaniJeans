@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('closet_id')->index();
             $table->text('description')->nullable();
             $table->string('pim_cat_reference')->nullable();
-            $table->string('image')->nullable();
+            $table->text('image')->nullable();
             $table->boolean('is_full_banner')->default(Constant::No);
             $table->boolean('status')->default(Constant::No);
             $table->boolean('is_default')->default(Constant::No);

@@ -11,17 +11,17 @@ class PimProductAttributeOption extends Model
     protected $guarded = [];
     protected $table = 'pim_product_attribute_options';
 
-    public static function saveProductAttributeOption($data)
+    public static function saveProductAttributeOption($pimProduct, $attribute, $productAttribute, $attributeOptions, $options)
     {
         return self::updateOrCreate([
-          'product_id'     => $data['product_id'],
-          'attribute_id'   => $data['attribute_id'],
-          'option_id'      => $data['option_id']
+          'product_id'     => $pimProduct->id,
+          'attribute_id'   => $attribute->id,
+          'option_id'      => $attributeOptions->id
         ],
           [
-            'pim_product_attribute_id'  => $data['pim_product_attribute_id'],
-            'option_value'              => $data['option_value'] ?? ''
-          ])->id;
+            'pim_product_attribute_id'  => $productAttribute->id,
+            'option_value'              => $options
+          ]);
     }
 
     public static function removeProductAttributeOptions($productId, $attributeId, $optionIds)

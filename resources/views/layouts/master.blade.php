@@ -5,10 +5,10 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     @include('layouts.common.meta_tags')
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ URL::asset('images/logo.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ URL::asset('images/logo.png') }}">
-    <link rel="stylesheet" href="{{ mix('css/master.css') }}">
-    <script src="{{ mix('/js/master.js') }}"></script>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ URL::asset('assets/logo/favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ URL::asset('assets/logo/favicon.png') }}">
+    <link rel="stylesheet" href="{{ mix('css/init.css') }}">
+    <script src="{{ mix('js/admin.js') }}"></script>
     <style>
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
@@ -37,6 +37,7 @@
             <div class="app-main__outer">
                 <div class="app-main__inner">
                     @include('layouts.common.breadcrumb')
+                    @include('layouts.common.alert')
                     @yield('content')
                 </div>
                 @include('layouts.common.footer')
@@ -44,8 +45,8 @@
         </div>
     @endif
 </div>
-@include('layouts.common.confg_mapping')
 @include('common.model.index')
+@include('layouts.common.config_mapping')
 @yield('scripts')
 </body>
 </html>

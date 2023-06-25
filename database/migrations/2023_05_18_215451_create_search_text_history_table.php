@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('search_text_history', function (Blueprint $table) {
+        Schema::create('search_text_histories', function (Blueprint $table) {
             $table->id();
             $table->string('search_text')->nullable();
             $table->tinyInteger('referrer_type')->index()->nullable();

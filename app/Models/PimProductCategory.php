@@ -14,6 +14,14 @@ class PimProductCategory extends Model
         return $this->belongsTo(PimCategory::class, 'category_id', 'id');
     }
 
+    public static function addPimCategory($pimProduct, $parentCat, $childCat){
+        $category = self::updateOrCreate([
+            'product_id' => $pimProduct->id,
+            'category_id' => !empty($childCat) ? $childCat->id :  $parentCat->id,
+        ]);
+        return $category;
+    }
+
     public static function mapProductCategory($productId, $categoryId)
     {
         return self::updateOrCreate([

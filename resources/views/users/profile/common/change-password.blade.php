@@ -12,7 +12,9 @@
             autofocus
             required
         >
-        <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+        @if ($errors->get('current_password'))
+            <div class="mt-1 text-red-500 text-sm">{{ $errors->get('current_password') }}</div>
+        @endif
     </div>
     <div class="position-relative form-group">
         <label for="examplePassword" class="">{{ __('New Password') }}</label>
@@ -24,7 +26,9 @@
             autocomplete="new-password"
             required
         >
-        <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
+        @if ($errors->get('password'))
+            <div class="mt-1 text-red-500 text-sm">{{ $errors->get('password') }}</div>
+        @endif
     </div>
     <div class="position-relative form-group">
         <label for="examplePassword" class="">{{ __('Confirm Password') }}</label>
@@ -36,16 +40,18 @@
             autocomplete="new-password"
             required
         >
-        <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
+        @if ($errors->get('password_confirmation'))
+            <div class="mt-1 text-red-500 text-sm">{{ $errors->get('password_confirmation') }}</div>
+        @endif
     </div>
     <div class="flex items-center gap-4">
         <button class="mt-1 btn btn-primary" type="submit">{{ __('Save') }}</button>
         @if (session('status') === 'password-updated')
         <p
-                x-data="{ show: true }"
-                x-show="show"
-                x-transition
-                x-init="setTimeout(() => show = false, 2000)"
+                {{--x-data="{ show: true }"--}}
+                {{--x-show="show"--}}
+                {{--x-transition--}}
+                {{--x-init="setTimeout(() => show = false, 2000)"--}}
                 class="text-sm text-gray-600"
         >{{ __('Saved.') }}</p>
         @endif

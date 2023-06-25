@@ -1,48 +1,19 @@
-@extends('layouts.admin')
-@if($isAdmin)
-    @section('parentModuleTitle','User Management')
-    @section('parentModuleIcon','icon-breadcrumb')
-    @section('parentModule')
-        <li><a href="{{URL::to('users')}}"><i class="@yield('parentModuleIcon')"></i> <span>@yield('parentModuleTitle')</span></a></li>
-    @endsection
+@extends('layouts.master')
+@section('page_title',env('APP_NAME').' - User Management')
+@section('parent_module_breadcrumb_title','User Management')
 
-    @section('childModuleTitle','Create Users')
-    @section('childModuleIcon','icon-breadcrumb')
-    @section('childModule')
-        <li class="active"><span><i class="@yield('childModuleIcon')"></i> @yield('childModuleTitle')</span></li>
-    @endsection
+@section('parent_module_icon','lnr-users')
+@section('parent_module_title','Account Management')
 
-    @section('currentModuleTitle','Create Users')
-@else
-    @section('backButtonPlacement')
-        <li>
-            <a href="{{URL::to('users')}}" class="backButton">
-                <i class="icon-back-arrow"></i>
-            </a>
-        </li>
-    @endsection
-    @section('parentModuleTitle','Global Settings')
-    @section('parentModuleIcon','icon-breadcrumb')
-    @section('parentModule')
-        <li><a href="{{route('settings.view',$userId)}}"><i class="@yield('parentModuleIcon')"></i> <span>@yield('parentModuleTitle')</span></a></li>
-    @endsection
+@section('has_child_breadcrumb_section', true)
+{{--@section('has_child_breadcrumb_actions', true)--}}
 
-    @section('childModuleTitle','Users')
-    @section('childModuleIcon','icon-breadcrumb')
-    @section('childModule')
-        <li><a href="{{URL::to('users')}}"><i class="@yield('childModuleIcon')"></i> <span>@yield('childModuleTitle')</span></a></li>
-    @endsection
+@section('child_module_icon','icon-breadcrumb')
+@section('child_module_breadcrumb_title','Users')
+@section('sub_child_module_icon','icon-breadcrumb')
+@section('sub_child_module_breadcrumb_title','Create')
 
-    @section('secondChildModuleTitle','Create User')
-    @section('secondChildModuleIcon','icon-breadcrumb')
-    @section('secondChildModule')
-        <li class="active"><span><i class="@yield('secondChildModuleIcon')"></i> @yield('secondChildModuleTitle')</span></li>
-    @endsection
-
-    @section('currentModuleTitle','Create User')
-@endif
-
-@section('header_title_right')
+@section('has_child_breadcrumb_actions')
 @endsection
 
 @section('content')
@@ -51,7 +22,7 @@
             <!-- ALERTS STARTS HERE -->
             <section>
                 <div class="row">
-                    @include('common.alerts')
+                    {{--@include('common.alerts')--}}
                 </div>
             </section>
             <!-- ALERTS ENDS HERE -->
@@ -60,47 +31,72 @@
                 <section id="section1">
                     <div class="row">
                         <div class="col-xs-12 col-sm-12 col-md-12">
-                            {!! Form::open(array('autocomplete'=>'off', 'id'=> 'user_create_form', 'class'=> 'newFormContainer')) !!}
-
+                            <form id="user_create_form" class="newFormContainer" method="post" autocomplete="off">
+                                @csrf
                                 <div class="row">
                                     <div class="col-md-6 formFieldsWrap">
 
                                         <div class="form-group">
                                             <label>Name *</label>
-                                            {!! Form::text('name', null, array('maxlength' => '30', 'placeholder' => 'Name','class' => 'form-control','required' => 'required')) !!}
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                maxlength="30"
+                                                placeholder="Name"
+                                                class="form-control"
+                                                value="{{ !empty(old('name')) ? old('name') : !empty($user->name) ? $user->name : '' }}"
+                                                required
+                                            >
                                         </div>
 
                                         <div class="form-group">
                                             <label>Email *</label>
-                                            {!! Form::email('email', null, array('maxlength' => '100', 'placeholder' => 'Email','class' => 'form-control','required' => 'required')) !!}
-                                        </div>
-
-                                        <div class="form-group profileMobileNo">
-                                            <label>Mobile no *</label>
-                                            <input type="hidden" name="country_code" id="create_country_code">
-                                            <input class="form-control" type="tel" name="phone" oninput="App.Helpers.validatePhoneNumber(this)" required  id="create_phone">
-                                            <p id="mcc_code_error" class="help-block error"></p>
+                                            <input
+                                                    type="email"
+                                                    name="email"
+                                                    maxlength="100"
+                                                    placeholder="Email"
+                                                    class="form-control"
+                                                    value="{{ !empty(old('email')) ? old('email') : !empty($user->email) ? $user->email : '' }}"
+                                                    required
+                                            >
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Role *</label>
-                                            <div class="filterSelect">
-                                                <div class="select2Wrap">
-                                                    <select name="roles" onchange="App.Users.isGlobalRole()" class="form-control select2" required="required">
-                                                        @foreach($roles as $key => $role)
-                                                            <option
-                                                                    value="{{$key}}" is_global="{{$role}}"
-                                                            >{{  str_replace( config('permission.merchant_prefix').($merchantId), '', $key) }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
+                                            <label>Password *</label>
+                                            <input
+                                                    type="password"
+                                                    name="password"
+                                                    maxlength="100"
+                                                    placeholder="*****"
+                                                    class="form-control"
+                                                    value="{{ !empty(old('password')) ? old('password') : '' }}"
+                                                    required
+                                            >
                                         </div>
 
+                                        <div class="form-group profileMobileNo">
+                                            <label class="col-12">Mobile no *</label>
+                                            <input
+                                                    type="hidden"
+                                                    name="country_code"
+                                                    id="create_country_code"
+                                            >
+                                            <input
+                                                    type="tel"
+                                                    name="phone"
+                                                    oninput="App.Helpers.validatePhoneNumber(this)"
+                                                    class="form-control col-12"
+                                                    value="{{ !empty(old('phone')) ? old('phone') :  !empty($user->phone) ? $user->phone : '' }}"
+                                                    required
+                                                    id="create_phone"
+                                            >
+                                            <label id="mcc_code_error" class="help-block error"></label>
+                                        </div>
                                         <div class="form-group switchFromGrp">
                                             <span class="defaultLabel">Status</span>
                                             <div class="custom-control custom-switch product-purchase-checkbox">
-                                                <input value="1"
+                                                <input value="{{ !empty(old('is_active')) ? old('is_active') :  !empty($user->status) ? $user->status : '' }}"
                                                        type="checkbox"
                                                        checked="checked"
                                                        name="is_active"
@@ -113,35 +109,6 @@
                                             </div>
                                         </div>
 
-                                        @if($isMerchant)
-                                            <div class="form-group switchFromGrp">
-                                                <span class="defaultLabel">Select All Store</span>
-                                                <div class="custom-control custom-switch product-purchase-checkbox">
-                                                    <input value="0"
-                                                           type="checkbox"
-                                                           class="custom-control-input"
-                                                           id="permission_to_all_stores_checkbox"
-                                                           onclick="App.Users.permissionToAllStoreCheckbox(this)"
-                                                    />
-
-                                                    <label class="custom-control-label"
-                                                           for="permission_to_all_stores_checkbox"></label>
-                                                </div>
-                                            </div>
-                                            <input type="hidden" name="has_permission_to_all_stores" id="has_permission_to_all_stores" value="0">
-                                            <label>Select Stores</label>
-                                            <div class="select2-blue">
-                                                <select class="select2" search="true" multiple="multiple" name="merchant_stores[]" id="merchant_stores"
-                                                        onchange="App.Users.merchantStoreSelection(this)"
-                                                        data-placeholder="Select Store" style="width: 100%;">
-                                                    @foreach($merchantStores as $key => $val)
-                                                        <option value="{{$key}}">{{$val}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-
-                                        @endif
-
                                         <div class="form-group">
                                             <div class="insideButtons">
                                                 <button id="create-user" type="button" class="btn btn-primary"><i class="icon-check-thin newMargin"></i>Save</button>
@@ -150,8 +117,7 @@
 
                                     </div>
                                 </div>
-
-                            {!! Form::close() !!}
+                            </form>
                         </div>
                     </div>
                 </section>
@@ -160,4 +126,12 @@
         <!-- /.box-body -->
     </section>
 @endsection
-@include('users.script')
+@section('scripts')
+    <script>
+        $(document).ready(function () {
+            App.Users.initializeValidations();
+            App.Users.createUserFormBinding();
+            App.Helpers.getPhoneInput('create_phone', 'create_country_code', true)
+        })
+    </script>
+@endsection

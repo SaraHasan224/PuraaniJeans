@@ -13,16 +13,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pim_bs_category', function (Blueprint $table) {
+        Schema::create('pim_bs_categories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('parent_id')->index();
             $table->string('name')->nullable();
             $table->string('slug')->nullable();
-            $table->string('icon')->nullable();
-            $table->unsignedBigInteger('closet_id')->index();
-            $table->string('image')->nullable();
-            $table->tinyInteger('product_count',false);
-            $table->tinyInteger('position',false);
+            $table->text('icon')->nullable();
+            $table->text('image')->nullable();
+            $table->tinyInteger('product_count')->default(Constant::No);
+            $table->tinyInteger('position')->default(Constant::No);
             $table->boolean('is_featured')->default(Constant::No);
             $table->boolean('status')->default(Constant::No);
             $table->timestamps();
@@ -34,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pim_bs_category');
+        Schema::dropIfExists('pim_bs_categories');
     }
 };

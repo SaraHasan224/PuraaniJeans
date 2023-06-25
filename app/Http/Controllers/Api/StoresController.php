@@ -73,7 +73,7 @@ class StoresController extends Controller
         }else {
             $cacheType = "is_bshop_enabled_stores".'_'.$page.'_'.$perPage;
         }
-        $cacheKey = 'get_customer_app_'.$cacheType;
+        $cacheKey = 'get_app_'.$cacheType;
         return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use($type, $perPage) {
             return MerchantStore::getStoresListing($type, $perPage);
         });
@@ -210,7 +210,7 @@ class StoresController extends Controller
                     'shipment_error' => empty($shipment) ? 'Delivery not available in your region.' : ''
                 ];
                 $perPage = 12;
-                $response = PimProduct::getProductsForCustomerPortal($listType, $perPage, $listOptions);
+                $response = PimProduct::getProductsForApp($listType, $perPage, $listOptions);
                 return ApiResponseHandler::success($response, __('messages.general.success'));
             }
             return ApiResponseHandler::failure( "Store not found", '', ['not_found' => Constant::Yes] );
@@ -308,7 +308,7 @@ class StoresController extends Controller
                 'shipment_error' => empty($shipment) ? 'Delivery not available in your region.' : ''
             ];
 
-            return PimProduct::getProductsForCustomerPortal($listType, $perPage, $listOptions);
+            return PimProduct::getProductsForApp($listType, $perPage, $listOptions);
         });
     }
 
@@ -472,7 +472,7 @@ class StoresController extends Controller
                 'store' => $store,
                 'categoryId' => $category->id,
             ];
-            return PimProduct::getProductsForCustomerPortal($listType, $perPage, $listOptions);
+            return PimProduct::getProductsForApp($listType, $perPage, $listOptions);
         });
     }
 

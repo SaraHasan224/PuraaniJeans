@@ -12,7 +12,7 @@ class PIMController extends Controller
     /**
      * Show the application closet product inventory.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {

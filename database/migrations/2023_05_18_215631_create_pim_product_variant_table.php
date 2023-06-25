@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pim_product_variant', function (Blueprint $table) {
+        Schema::create('pim_product_variants', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_id')->index();
             $table->string('product_variant');
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->tinyInteger('discount_type')->nullable();
             $table->unsignedBigInteger('image_id')->nullable();
             $table->unsignedBigInteger('position')->nullable();
-            $table->string('short_description')->nullable();
+            $table->text('short_description')->nullable();
             $table->boolean('status')->default(Constant::No);
             $table->timestamps();
         });

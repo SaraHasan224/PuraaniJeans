@@ -21,6 +21,7 @@ use App\Http\Controllers\Web\Auth\VerifyEmailController;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,11 @@ use Illuminate\Support\Facades\Mail;
 //Route::get('/', function () {
 //    return view('welcome');
 //});
+Route::get('/clear-cache', function() {
+    $exitCode = Artisan::call('cache:clear');
+    $exitCode = Artisan::call('config:cache');
+    return 'DONE'; //Return anything
+});
 
 Route::get('/test-mail', function () {
     Mail::send(new \App\Mail\UserCreated());
@@ -76,19 +82,23 @@ Route::middleware('auth')->group(function () {
         ->name('password.confirm');
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
-    Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
+    Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard'); //completed
 
     Route::get('/profile',  [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
-    Route::get('/users', [UserController::class, 'index'])->name('users');
     //User Management
-    Route::resources([
-        'users' => UserController::class,
-    ]);
+//    Route::resources([
+//        'users' => UserController::class,
+//    ]);
+    Route::get('/users', [UserController::class, 'index'])->name('users'); //completed
+    Route::get('/users-create', [UserController::class, 'create'])->name('users.create'); //completed
+    Route::post('/user-save', [UserController::class, 'store'])->name('users.store'); //completed
     Route::get('/users-list', [UserController::class, 'getListingRecord'])->name('users-list');
+    Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('user-edit-form');
+    Route::post('/users/edit/{id}', [UserController::class, 'update'])->name('user-edit');
     Route::post('/users-delete', [UserController::class, 'deleteRecords'])->name('users-delete');
 
     Route::get('/roles', [RoleController::class, 'index'])->name('roles');

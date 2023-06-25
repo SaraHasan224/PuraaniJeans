@@ -5,10 +5,6 @@ use Sentry\State\Scope;
 
 class AppException
 {
-    /**
-     * @Author: MiesamJafry
-     * @Date: 08June2020
-     */
     public static function log( \Exception $exception )
     {
 //        if (app()->bound('sentry')) {

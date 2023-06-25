@@ -68,6 +68,10 @@ class User extends Authenticatable
     ];
 
 
+    public static $createUserCustomMessage = [
+        'merchant_stores.required' => 'Please add at least 1 store.'
+    ];
+
     public static function getValidationRules($type, $params = [])
     {
         $logged_in_user_id = Auth::check() ? auth()->user()->id : null;
@@ -75,12 +79,22 @@ class User extends Authenticatable
         $rules = [
             'createUser'        => [
                 'name'  => 'required',
-                'email' => 'required|email:rfc,dns', //|unique:users,email
+                'email' => 'required|email:rfc,dns|unique:users,email',
+                'password' => 'required|max:30',
                 'phone' => [
                     'required',
                     'regex:/^[0-9]+$/'
                 ],
-                'roles' => 'required',
+            ],
+            'updateUser'        => [
+                'name'     => 'required',
+                'email'    => 'required|email:rfc,dns',//|unique:users,email,' . $user_id,
+                'phone'    => [
+                    'required',
+                    'string',
+                    'regex:/^[0-9]+$/'
+                ],
+                'password' => 'same:confirm-password',
             ],
             'updateUserProfile' => [
                 'name'         => 'required',
@@ -97,17 +111,6 @@ class User extends Authenticatable
                 'password' => 'required|max:30',
                 'password_confirmation' => 'required|same:password',
             ],
-            'updateUser'        => [
-                'name'     => 'required',
-                'email'    => 'required|email:rfc,dns',//|unique:users,email,' . $user_id,
-                'phone'    => [
-                    'required',
-                    'string',
-                    'regex:/^[0-9]+$/'
-                ],
-                'password' => 'same:confirm-password',
-                'roles'    => 'required'
-            ],
             'signInUser'        => [
                 'email'    => ['required', 'max:255'],
                 'password' => ['required', 'string', 'min:4', 'max:100'],
@@ -119,6 +122,10 @@ class User extends Authenticatable
 
     public function updateDetails($data){
         return $this->update($data);
+    }
+
+    public static function findById($id){
+        return self::where('id', $id)->first();
     }
 
     public static function getUserByEmail($email, $checkIsActive = false)
@@ -144,7 +151,6 @@ class User extends Authenticatable
         return false;
     }
 
-
     public static function createSignInOtp($action, $user, $resend = false, $phone = false, $sendSms = false)
     {
         $otp = Otp::createOtp($action, $user, $resend, $phone, $sendSms);
@@ -157,7 +163,56 @@ class User extends Authenticatable
         return $otp;
     }
 
+    public static function getUsersByFilters($filter)
+    {
+        $data = self::select('id', 'name', 'email', 'country_code', 'phone_number', 'user_type', 'login_attempts', 'last_login', 'status', 'created_at','updated_at','deleted_at');
+        $data = $data->withTrashed()->orderBy('id', 'DESC');
 
+        if (count($filter))
+        {
+            if (!empty($filter['user_name']))
+            {
+                $data = $data->where('name', 'LIKE', '%' . trim($filter['user_name']) . '%');
+            }
+
+            if (!empty($filter['phone']))
+            {
+                $phone = trim($filter['phone']);
+                $phone = Helper::formatPhoneNumber($phone);
+                $data = $data->where('phone', 'LIKE', '%' . $phone . '%');
+            }
+
+            if (!empty($filter['email']))
+            {
+                $data = $data->where('email', 'LIKE', '%' . trim($filter['email']) . '%');
+            }
+
+            if (!empty($filter['last_login']))
+            {
+                $memberSince = trim($filter['last_login']);
+                $data = $data->whereDate('last_login', '>=', date('Y-m-d', strtotime($memberSince)));
+            }
+
+            if (isset($filter['status']))
+            {
+                $data = $data->where('status', $filter['status']);
+            }
+        }
+
+        $count = $data->count();
+
+//        if (isset($filter['start']) && isset($filter['length']))
+//        {
+//            $data->skip($filter['start'])->limit($filter['length']);
+//        }
+
+        return [
+            'count'   => $count,
+            'offset'  => isset($filter['start']) ? $filter['start'] : 0,
+            'records' => $data->get()
+        ];
+    }
+    //
     public static function sendOtp($action, $user, $resend = false, $phone = false, $sendSms = false)
     {
 //        if (env('OTP_ENABLED'))
@@ -171,10 +226,6 @@ class User extends Authenticatable
     public static function setUsersLoginAttempts($userId, $attempts)
     {
         self::where('id', $userId)->update(['login_attempts' => $attempts]);
-    }
-
-    public static function findById($id){
-        return self::where('id', $id)->first();
     }
 
     public static function profileValidate($requestData)
