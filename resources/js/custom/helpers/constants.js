@@ -26,10 +26,13 @@ App.Constants = {
     'getCountriesData': '/get-active-countries',
     'usersList': '/users-list',
     'createUser': '/user-save',
-    'editUser': "/users/edit"
+    'editUser': "/users/edit",
+    'getCustomers': '/customers-list',
+    'createCustomer': '/customer-save',
+    'editCustomer': '/customer/edit'
   },
     user_type:{
-      1 : 'Admin',
+      1 : 'Admin'
     },
     http_statues: {
         'success' : 200,
@@ -38,12 +41,5 @@ App.Constants = {
         'authenticationError' : 401,
         'authorizationError' : 403,
         'serverError': 500,
-    },
-    shipment_methods : {
-        'Free Shipping' : 1,
-        'Standard Shipping' : 2,
-        'Express Shipping' : 3,
-        'Self Pickup': 4,
-        'Bykea' : 5
     },
 }

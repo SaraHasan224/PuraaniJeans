@@ -62,7 +62,7 @@
                         </li>
                     </ul>
                 </li>
-                <li class="{{ (Request::is('roles') ||  Request::is('/roles')) ? 'mm-active' : '' }}">
+                <li class="{{ (Request::is('roles') ||  Request::is('/roles')) ? 'mm-active d-none' : ' d-none' }}">
                     <a href="{{ URL::to('/roles') }}">
                         <i class="metismenu-icon pe-7s-safe"></i>
                         Roles

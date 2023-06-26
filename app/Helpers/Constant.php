@@ -15,6 +15,11 @@ class Constant
         'Closet'      => 2,
         'Customer'    => 3,
     ];
+    const USER_TYPES_STYLE = [
+        1 => "primary",
+        2 => "warning",
+        3 => "success",
+    ];
 
     const CRUD_STATES = [
         'created' => 0,
@@ -36,6 +41,18 @@ class Constant
     const CUSTOMER_STATUS = [
         "InActive" => 0,
         "Active" => 1,
+    ];
+    const CUSTOMER_STATUS_STYLE = [
+        0 => "danger",
+        1 => "success"
+    ];
+    const CUSTOMER_SUBSCRIPTION_STATUS = [
+        "enabled" => 1,
+        "disabled" => 2
+    ];
+    const CUSTOMER_SUBSCRIPTION_STATUS_STYLE = [
+        2 => "danger",
+        1 => "success"
     ];
     const OTP_MODULES = [
         'users'     => 'User',

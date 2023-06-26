@@ -7,8 +7,8 @@
             <div class="form-group">
                 <input
                         type="text"
-                        name="user_name"
-                        id="user_name"
+                        name="name"
+                        id="name"
                         placeholder="User Name"
                         class="form-control mr-3"
                 />
@@ -24,14 +24,14 @@
                 />
             </div>
 
-            <div class="form-group mr-2">
-                <label for="status">&nbsp;&nbsp;</label>
-                <select class="form-control" name="status" id="status">
-                    <option value="">Status</option>
-                    @foreach($USER_STATUS as $key => $value)
-                        <option value="{{$value}}">{{$key}}</option>
-                    @endforeach
-                </select>
+            <div class="form-group">
+                <input
+                        type="tel"
+                        name="phone"
+                        id="phone"
+                        placeholder="User Phone Number"
+                        class="form-control mr-3"
+                />
             </div>
 
             <div class="form-group filterButtons">

@@ -70878,232 +70878,117 @@ App.Customer = {
   initializeValidations: function initializeValidations() {
     $("#search-form").validate();
   },
-  exportCustomers: function exportCustomers() {
-    var id = $("#id").val();
-    var name = $("#name").val();
-    var email = $("#email").val();
-    var phone = $("#phone").val();
-    var member_since = $("#daterange").val();
-    var merchant_name = $("#merchant_name").val();
-    var status = $("#status").val();
-    var city = $("#city").val();
-    var verification = $("#verification").val();
-    var query_string = '?id=' + id + '&name=' + name + '&email=' + email + '&phone=' + phone + '&merchant_name=' + merchant_name + '&status=' + status + '&city=' + city + '&verification=' + verification;
-    window.open('' + App.Constants.endPoints.exportCustomers + query_string, '_blank');
-  },
   removeFilters: function removeFilters() {
-    $("#id").val("");
     $("#name").val("");
+    $("#username").val("");
     $("#email").val("");
     $("#phone").val("");
-    $("#daterange").val("");
-    $("#merchant_name").val('').trigger('change');
-    $("#store").val('').trigger('change');
-    $("#customer_type").val('').trigger('change');
-    $("#origin_source").val("").trigger('change');
-    $("#status").val("");
-    $("#city").val("");
-    $("#verification").val("");
+    $("#country").val('').trigger('change');
+    $("#subscription_status").val('').trigger('change');
+    $("#status").val('').trigger('change');
+    $("#created_at").val("");
     App.Helpers.removeAllfilters();
   },
   removeSelectionFilters: function removeSelectionFilters() {
-    $("#daterange").val("");
-    $("#merchant_name").val('').trigger('change');
-    $("#store").val('').trigger('change');
-    $("#customer_type").val('').trigger('change');
-    $("#status").val("");
-    $("#verification").val("");
-    $("#origin_source").val("").trigger('change');
+    $("#name").val("");
+    $("#username").val('').trigger('change');
+    $("#phone").val('').trigger('change');
+    $("#country").val('').trigger('change');
+    $("#subscription_status").val("");
+    $("#status").val("").trigger('change');
+    $("#created_at").val("");
     App.Helpers.oTable.draw();
   },
   initializeDataTable: function initializeDataTable() {
     var table_name = "customers_table";
     var url = App.Helpers.generateApiURL(App.Constants.endPoints.getCustomers);
-    var columns = [];
-    var sortColumn;
-    if (this.isAdmin == 1) {
-      sortColumn = [[2, "desc"]];
-      columns = [{
-        data: 'show',
-        name: 'show',
-        orderable: false,
-        searchable: false,
-        className: 'show'
-      }, {
-        data: 'check',
-        name: 'check',
-        orderable: false,
-        searchable: false
-      }, {
-        data: "row_id",
-        name: "row_id",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "name",
-        name: "name",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "city",
-        name: "city",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "email",
-        name: "email",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "phone",
-        name: "phone",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "member_since",
-        name: "member_since",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "status",
-        name: "status",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "verification",
-        name: "verification",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "customer_type",
-        name: "customer_type",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "origin_source",
-        name: "origin_source",
-        orderable: true,
-        searchable: true
-      }];
-    } else {
-      sortColumn = [[1, "desc"]];
-      columns = [{
-        data: 'show',
-        name: 'show',
-        orderable: false,
-        searchable: false,
-        className: 'show'
-      }, {
-        data: "row_id",
-        name: "row_id",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "name",
-        name: "name",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "city",
-        name: "city",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "email",
-        name: "email",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "phone",
-        name: "phone",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "member_since",
-        name: "member_since",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "status",
-        name: "status",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "verification",
-        name: "verification",
-        orderable: true,
-        searchable: true
-      }, {
-        data: "origin_source",
-        name: "origin_source",
-        orderable: true,
-        searchable: true
-      }];
-    }
+    var sortColumn = [[2, "desc"]];
+    var columns = [{
+      data: 'show',
+      name: 'show',
+      orderable: false,
+      searchable: false,
+      className: 'show'
+    }, {
+      data: "id",
+      name: "id",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "name",
+      name: "name",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "username",
+      name: "username",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "email",
+      name: "email",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "phone",
+      name: "phone",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "country",
+      name: "country",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "subscription_status",
+      name: "subscription_status",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "status",
+      name: "status",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "created_at",
+      name: "created_at",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "updated_at",
+      name: "updated_at",
+      orderable: true,
+      searchable: true
+    }];
     var postData = function postData(d) {
       d.id = $("#id").val();
       d.name = $("#name").val();
+      d.username = $("#username").val();
       d.email = $("#email").val();
       d.phone = $("#phone").val();
-      d.member_since = $("#daterange").val();
-      d.merchant_name = $("#merchant_name").val();
-      d.role = $("#role").val();
-      d.store = $("#store").val();
+      d.country = $("#country").val();
+      d.subscription_status = $("#subscription_status").val();
       d.status = $("#status").val();
-      d.city = $("#city").val();
-      d.verification = $("#verification").val();
-      d.customer_type = $("#customer_type").val();
-      d.origin_source = $("#origin_source").val();
+      d.created_at = $("#created_at").val();
     };
     var orderColumn = sortColumn;
     var searchEnabled = true;
     App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn, [], false);
   },
-  removeEnvironment: function removeEnvironment() {
-    var url = App.Helpers.generateApiURL(App.Constants.endPoints.setEnvironment);
-    var onSuccess = function onSuccess(response) {
-      var obj = document.getElementById('merchant_name');
-      App.Helpers.getAppsByMerchantId(obj, '{{$defaultEnvironment}}');
-    };
-    var requestData = {};
-    App.Ajax.get(url, requestData, onSuccess, false, {}, 0);
-  },
-  markAsTesting: function markAsTesting(method_action) {
-    App.Customer.countIds = [];
-    $.each($("input[name='data_raw_id[]']:checked"), function () {
-      App.Customer.countIds.push($(this).val());
-    });
-    var record_count = 'customers';
-    if (App.Customer.countIds.length == 1) {
-      record_count = 'customer';
-    }
-    if (App.Customer.countIds.length == 0) {
-      App.Helpers.selectRowsFirst("Please select at least one customer");
-    } else {
-      var action = function action(isConfirm) {
-        if (isConfirm) {
-          if ($(".cbbox_all_prod").is(':checked')) {
-            $(".cbbox_all_prod").click();
+  editCustomerFormBinding: function editCustomerFormBinding(userId) {
+    $("#customer-user").bind("click", function (e) {
+      if ($("#customer_edit_form").valid()) {
+        var url = App.Helpers.generateApiURL(App.Constants.endPoints.editCustomer + "/" + userId);
+        var onSuccess = function onSuccess() {
+          if (data.type == "success") {
+            window.location.href = '/customers';
+            App.Helpers.showSuccessMessage(data.message);
           }
-          var url = App.Helpers.generateApiURL(App.Constants.endPoints.updateCustomers);
-          var requestData = {
-            "customer_ids": App.Customer.countIds,
-            "type": method_action
-          };
-          var success = function success(response) {
-            App.Helpers.refreshDataTable();
-          };
-          App.Ajax.post(url, requestData, success, false, {});
-        }
-      };
-      var action_to_be_taken = '';
-      if (method_action == 1) {
-        action_to_be_taken = 'mark as live';
-      } else if (method_action == 2) {
-        action_to_be_taken = 'mark as testing';
+        };
+        var requestData = $("#customer_edit_form").serialize();
+        App.Ajax.post(url, requestData, onSuccess, false, {});
       }
-      App.Helpers.confirm('You want to ' + action_to_be_taken + ' selected ' + record_count + '.', action);
-    }
+    });
   },
   updateCustomerStatus: function updateCustomerStatus(thisKey, customerId) {
     var customerStatusValue = $(thisKey).find(':selected').text();
@@ -73693,8 +73578,6 @@ App.UserProfile = {
 /***/ (function(module, exports) {
 
 App.Users = {
-  canResendPassword: 0,
-  isMerchant: 0,
   initializeValidations: function initializeValidations() {
     $("#user_edit_form").validate();
     $("#user_create_form").validate();
@@ -73705,16 +73588,13 @@ App.Users = {
     }
   },
   removeFilters: function removeFilters() {
-    $('#user_id').val('');
-    $('#role').val('');
+    $('#user_name').val('');
     $('#email').val('');
-    $('#filter_phone').val('');
-    $('#daterange').val('');
-    App.Helpers.removeAllfilters();
+    $('#status').val('');
+    $('#phone').val('');
+    App.Helpers.removeAllfilters("users_table");
   },
   removeSelectionFilters: function removeSelectionFilters() {
-    $('#role').val('');
-    $('#daterange').val('');
     App.Helpers.oTable.draw();
   },
   initializeDataTable: function initializeDataTable() {
@@ -73819,70 +73699,6 @@ App.Users = {
         var requestData = $("#user_edit_form").serialize();
         App.Ajax.post(url, requestData, onSuccess, false, {});
       }
-    });
-  },
-  isGlobalRole: function isGlobalRole() {
-    var roleName = $('[name=roles] option:selected').val();
-    var isGlobal = $('[name=roles] option:selected').attr('is_global');
-    var merchantStores = $("#merchant_stores");
-    var checkBoxToggle = $("#permission_to_all_stores_checkbox");
-    var field = $("#has_permission_to_all_stores");
-    var userExist = $("[name=id]").val(); //in edit case
-
-    if (isGlobal == 1 && roleName == App.Constants.user_type[2]) {
-      checkBoxToggle.prop('checked', true);
-      $("#has_permission_to_all_stores").val(1);
-      $("#merchant_stores > option").prop("selected", true);
-      merchantStores.trigger("change");
-      setTimeout(function () {
-        $("span.select2-selection__clear").css("display", "none");
-      }, 100);
-
-      // $("#merchant_stores :selected").map(function(i, el) {
-      //    $('<input type="hidden" class="is_global_select" name="merchant_stores[]" value="'+$(el).val()+'">').insertAfter(field);
-      // }).get();
-    } else {
-      checkBoxToggle.prop('checked', false);
-      checkBoxToggle.prop('disabled', false);
-      $("#has_permission_to_all_stores").val(0);
-      $("#merchant_stores > option").prop("selected", false);
-      merchantStores.trigger("change");
-      merchantStores.removeAttr('disabled');
-      $('.is_global_select').remove();
-    }
-  },
-  permissionToAllStoreCheckbox: function permissionToAllStoreCheckbox(element) {
-    if ($(element).is(':checked')) {
-      $("#has_permission_to_all_stores").val(1);
-      $("#merchant_stores > option").prop("selected", true);
-      $("#merchant_stores").trigger("change");
-    } else {
-      $("#has_permission_to_all_stores").val(0);
-      $("#merchant_stores > option").prop("selected", false);
-      $("#merchant_stores").trigger("change");
-    }
-  },
-  merchantStoreSelection: function merchantStoreSelection(element) {
-    var total_length = $(element).children('option').length;
-    var get_selected_length = $('#merchant_stores :selected').length;
-    if (get_selected_length < total_length) {
-      $("#permission_to_all_stores_checkbox").prop('checked', false);
-      $("#has_permission_to_all_stores").val(0);
-    } else {
-      $("#permission_to_all_stores_checkbox").prop('checked', true);
-      $("#has_permission_to_all_stores").val(1);
-    }
-  },
-  viewStoreModal: function viewStoreModal() {
-    $(".view-stores").modal('hide');
-  },
-  viewStoresInModal: function viewStoresInModal(element) {
-    var storeNames = $(element).attr('store');
-    var data = storeNames.split(',');
-    var initialDiv = $("#viewStoreSection");
-    initialDiv.empty();
-    $.each(data, function (index, item) {
-      initialDiv.append('<label class="badge badge-success mt-2">' + item + '</label>');
     });
   }
 };
@@ -74061,7 +73877,10 @@ App.Constants = {
     'getCountriesData': '/get-active-countries',
     'usersList': '/users-list',
     'createUser': '/user-save',
-    'editUser': "/users/edit"
+    'editUser': "/users/edit",
+    'getCustomers': '/customers-list',
+    'createCustomer': '/customer-save',
+    'editCustomer': '/customer/edit'
   },
   user_type: {
     1: 'Admin'
@@ -74073,13 +73892,6 @@ App.Constants = {
     'authenticationError': 401,
     'authorizationError': 403,
     'serverError': 500
-  },
-  shipment_methods: {
-    'Free Shipping': 1,
-    'Standard Shipping': 2,
-    'Express Shipping': 3,
-    'Self Pickup': 4,
-    'Bykea': 5
   }
 };
 

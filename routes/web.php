@@ -106,7 +106,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/closet/orders', [OrderController::class, 'index'])->name('closet-orders');
     Route::get('/closet/pim', [PIMController::class, 'index'])->name('closet-pim');
 
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers');
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers'); //completed
+    Route::get('/customers-list', [CustomerController::class, 'getListingRecord'])->name('customers-list');
+    Route::get('/customers/{id}/edit', [CustomerController::class, 'edit'])->name('customer-edit-form');
+    Route::post('/customer/edit/{id}', [CustomerController::class, 'update'])->name('customer-edit');
+    Route::post('/customers-delete', [CustomerController::class, 'deleteRecords'])->name('customers-delete');
 
 
 

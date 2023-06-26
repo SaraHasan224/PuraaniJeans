@@ -170,9 +170,9 @@ class User extends Authenticatable
 
         if (count($filter))
         {
-            if (!empty($filter['user_name']))
+            if (!empty($filter['name']))
             {
-                $data = $data->where('name', 'LIKE', '%' . trim($filter['user_name']) . '%');
+                $data = $data->where('name', 'LIKE', '%' . trim($filter['name']) . '%');
             }
 
             if (!empty($filter['phone']))

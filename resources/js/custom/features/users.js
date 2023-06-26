@@ -1,7 +1,4 @@
 App.Users = {
-    canResendPassword: 0,
-    isMerchant: 0,
-
     initializeValidations: function () {
         $("#user_edit_form").validate();
         $("#user_create_form").validate();
@@ -14,17 +11,14 @@ App.Users = {
     },
 
     removeFilters: function () {
-        $('#user_id').val('');
-        $('#role').val('');
+        $('#user_name').val('');
         $('#email').val('');
-        $('#filter_phone').val('');
-        $('#daterange').val('');
-        App.Helpers.removeAllfilters();
+        $('#status').val('');
+        $('#phone').val('');
+        App.Helpers.removeAllfilters("users_table");
     },
 
     removeSelectionFilters: function () {
-        $('#role').val('');
-        $('#daterange').val('');
         App.Helpers.oTable.draw();
     },
 
@@ -106,79 +100,4 @@ App.Users = {
             }
         });
     },
-
-    isGlobalRole:function(){
-        var roleName       = $( '[name=roles] option:selected').val();
-        var isGlobal       = $('[name=roles] option:selected').attr('is_global');
-        var merchantStores = $("#merchant_stores");
-        var checkBoxToggle = $("#permission_to_all_stores_checkbox");
-        var field          = $("#has_permission_to_all_stores");
-        var userExist      = $("[name=id]").val(); //in edit case
-
-        if(isGlobal == 1 && roleName == App.Constants.user_type[2]){
-            checkBoxToggle.prop('checked',true);
-            $("#has_permission_to_all_stores").val(1);
-            $("#merchant_stores > option").prop("selected",true);
-            merchantStores.trigger("change");
-
-            setTimeout(function(){
-                $("span.select2-selection__clear").css("display", "none");
-            },100);
-
-            // $("#merchant_stores :selected").map(function(i, el) {
-            //    $('<input type="hidden" class="is_global_select" name="merchant_stores[]" value="'+$(el).val()+'">').insertAfter(field);
-            // }).get();
-
-        }else{
-            checkBoxToggle.prop('checked',false);
-            checkBoxToggle.prop('disabled',false);
-            $("#has_permission_to_all_stores").val(0);
-            $("#merchant_stores > option").prop("selected",false);
-            merchantStores.trigger("change");
-            merchantStores.removeAttr('disabled');
-            $('.is_global_select').remove();
-        }
-    },
-
-    permissionToAllStoreCheckbox:function(element){
-        if ($(element).is(':checked')) {
-            $("#has_permission_to_all_stores").val(1);
-            $("#merchant_stores > option").prop("selected",true);
-            $("#merchant_stores").trigger("change");
-
-        }else{
-            $("#has_permission_to_all_stores").val(0);
-            $("#merchant_stores > option").prop("selected",false);
-            $("#merchant_stores").trigger("change");
-        }
-    },
-
-    merchantStoreSelection:function(element){
-        var total_length = $(element).children('option').length;
-        var get_selected_length = $('#merchant_stores :selected').length;
-        if(get_selected_length < total_length){
-            $("#permission_to_all_stores_checkbox").prop('checked',false);
-            $("#has_permission_to_all_stores").val(0);
-        }else{
-            $("#permission_to_all_stores_checkbox").prop('checked',true);
-            $("#has_permission_to_all_stores").val(1);
-        }
-    },
-
-    viewStoreModal: function(){
-        $(".view-stores").modal('hide');
-    },
-
-    viewStoresInModal: function (element) {
-        var storeNames = $(element).attr('store');
-        var data       = storeNames.split(',');
-        var initialDiv = $("#viewStoreSection");
-
-        initialDiv.empty();
-
-        $.each(data, function (index, item) {
-            initialDiv.append('<label class="badge badge-success mt-2">'+item+'</label>');
-        });
-    }
-
 }

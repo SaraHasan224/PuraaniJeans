@@ -22,7 +22,6 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      *
@@ -38,7 +37,6 @@ class UserController extends Controller
             return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
         }
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -138,7 +136,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $data['user'] = User::getRecordById($id);
+        $data['user'] = User::findById($id);
         $data['status'] = Constant::USER_STATUS;
         return view('admin.modules.users.edit.index', $data);
     }
@@ -238,6 +236,11 @@ class UserController extends Controller
             ->addColumn('phone', function ($rowdata) {
                 return "+(".$rowdata->country_code.")".$rowdata->phone_number;
             })
+            ->addColumn('user_type', function ($rowdata) {
+                $isActive = $rowdata->user_type;
+                $userStatus = array_flip(Constant::USER_TYPES);
+                return '<label class="badge badge-' . Constant::USER_TYPES_STYLE[$isActive] . '"> ' . $userStatus[$isActive] . '</label>';
+            })
             ->addColumn('status', function ($rowdata) {
                 $isActive = $rowdata->status;
                 $userStatus = array_flip(Constant::USER_STATUS);
@@ -255,7 +258,7 @@ class UserController extends Controller
             ->addColumn('updated_at', function ($rowdata) {
                 return Helper::dated_by(null,$rowdata->updated_at);
             })
-            ->rawColumns(['check', 'name', 'status','created_at','updated_at'])
+            ->rawColumns(['check', 'name', 'user_type', 'status','created_at','updated_at'])
             ->setOffset($data['offset'])
             ->with([
                 "recordsTotal" => $data['count'],
@@ -264,7 +267,6 @@ class UserController extends Controller
             ->setTotalRecords($data['count'])
             ->make(true);
     }
-
 
     /**
      * Remove all the specified resource from storage.
