@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\HomeController;
-use App\Http\Controllers\Api\PlaygroundTestController;
+use App\Http\Controllers\Api\MetadataController;
+use App\Http\Controllers\Api\OtpController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,13 +19,15 @@ use App\Http\Controllers\Api\PlaygroundTestController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
+//Route::post('cloudinary/image-upload-test', [PlaygroundTestController::class, 'uploadImageToCloudinary']);
+//Route::post('disk/image-upload-test', [PlaygroundTestController::class, 'uploadImage']);
 
-Route::post('cloudinary/image-upload-test', [PlaygroundTestController::class, 'uploadImageToCloudinary']);
-Route::post('disk/image-upload-test', [PlaygroundTestController::class, 'uploadImage']);
 
+Route::get('countries-meta-data', [MetadataController::class, 'getMetaData']);
+Route::get('country-list', [MetadataController::class, 'getCountriesList']);
 
 Route::get('meta-data', [HomeController::class, 'getMetaContent']);
 Route::get('homepage', [HomeController::class, 'getHomePageContent']);
@@ -36,6 +39,8 @@ Route::post('register', 'Api\AuthController@register');
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/signup-or-signin', [OtpC::class, 'index'])->name('users'); //completed
 
 //#Featured Products
 //Route::get('/featured-products', 'ProductController@getFeaturedProducts');

@@ -1,0 +1,981 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Puraani Jeans APIs",
+        "description": "Puraani Jeans API documentation",
+        "contact": {
+            "email": "developer@puranijeans.com"
+        },
+        "license": {
+            "name": "Apache 2.0"
+        },
+        "version": ""
+    },
+    "servers": [
+        {
+            "url": "http://puranijeans.test/",
+            "description": "dev"
+        }
+    ],
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Register"
+                ],
+                "summary": "User Register",
+                "description": "User Register here",
+                "operationId": "Register",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "country",
+                                    "email_address",
+                                    "first_name",
+                                    "last_name",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "country": {
+                                        "type": "numeric"
+                                    },
+                                    "email_address": {
+                                        "type": "email"
+                                    },
+                                    "first_name": {
+                                        "type": "text"
+                                    },
+                                    "last_name": {
+                                        "type": "text"
+                                    },
+                                    "password": {
+                                        "type": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "password"
+                                    },
+                                    "subscription": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Register Successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Register Successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Login"
+                ],
+                "summary": "User Login",
+                "description": "Login User Here",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "email"
+                                    },
+                                    "password": {
+                                        "type": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Register Successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Register Successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                }
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get Categories List",
+                "operationId": "getCategoriesList",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/{slug}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get Sub Categories List",
+                "operationId": "getSubCategoriesList",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/{slug}/products": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get Category Products",
+                "operationId": "getCategoryProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/filter/categories/{slug}/products": {
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get Filtered Category Products",
+                "operationId": "getFilteredCategoryProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Set Order Shipment Details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "filters": {
+                                        "description": "filters",
+                                        "properties": {
+                                            "price_range": {
+                                                "description": "Price Range",
+                                                "properties": {
+                                                    "min": {
+                                                        "description": "1",
+                                                        "type": "string"
+                                                    },
+                                                    "max": {
+                                                        "description": "1",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            "store_slug": {
+                                                "description": "Filter by store slug",
+                                                "type": "string"
+                                            },
+                                            "sort_by": {
+                                                "description": "Sort by",
+                                                "properties": {
+                                                    "newest_arrival": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "featured": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "price_high_to_low": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "price_low_to_high": {
+                                                        "description": "0",
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/meta-data": {
+            "get": {
+                "tags": [
+                    "HomePage"
+                ],
+                "summary": "Get meta data content",
+                "operationId": "getMetaContent",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/homepage": {
+            "get": {
+                "tags": [
+                    "HomePage"
+                ],
+                "summary": "Get Homepage content",
+                "operationId": "getHomePageContent",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/homepage/featured-section": {
+            "get": {
+                "tags": [
+                    "HomePage"
+                ],
+                "summary": "Get Homepage featured content",
+                "operationId": "getHomePageFeaturedContent",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/countries-meta-data": {
+            "get": {
+                "tags": [
+                    "Metadata"
+                ],
+                "summary": "Get countries data meta content",
+                "operationId": "getMetaData",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/country-list": {
+            "get": {
+                "tags": [
+                    "Metadata"
+                ],
+                "summary": "Get country list meta content",
+                "operationId": "getCountriesList",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/v1/portal/otp/send": {
+            "post": {
+                "tags": [
+                    "Verification"
+                ],
+                "summary": "Send Otp",
+                "operationId": "sendOtp",
+                "requestBody": {
+                    "description": "Send OTP for provided phone number",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "country_code": {
+                                        "description": "Country code ie. 92 for Pakistan",
+                                        "type": "number",
+                                        "example": 92
+                                    },
+                                    "phone_number": {
+                                        "description": "Phone Number",
+                                        "type": "string",
+                                        "example": 3002927320
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/otp/verify": {
+            "post": {
+                "tags": [
+                    "Verification"
+                ],
+                "summary": "Verify Otp",
+                "operationId": "verifyOtp",
+                "requestBody": {
+                    "description": "Verify OTP",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "otp": {
+                                        "description": "6 Ditig OTP Sent to your mobile number",
+                                        "type": "string",
+                                        "example": "000000"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": []
+                    }
+                ]
+            }
+        },
+        "/v1/portal/otp/resend": {
+            "post": {
+                "tags": [
+                    "Verification"
+                ],
+                "summary": "Resend Otp",
+                "operationId": "resendOtp",
+                "requestBody": {
+                    "description": "Resend OTP",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "network_id": {
+                                        "description": "Network Id of customer's phone number",
+                                        "type": "number",
+                                        "example": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": []
+                    }
+                ]
+            }
+        },
+        "/api/cloudinary/image-upload-test": {
+            "post": {
+                "tags": [
+                    "Playground"
+                ],
+                "summary": "Get Homepage content",
+                "operationId": "uploadImageToCloudinary",
+                "requestBody": {
+                    "description": "Set Order Shipment Details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "image": {
+                                        "description": "filters",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/product/{productId}": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Product detail",
+                "operationId": "getProductDetail",
+                "parameters": [
+                    {
+                        "name": "productId",
+                        "in": "path",
+                        "description": "product id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Get product detail",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "referrer_type": {
+                                        "description": "referrer type",
+                                        "type": "string",
+                                        "example": "Featured Product"
+                                    },
+                                    "customer_address_id": {
+                                        "description": "customer address id",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/featured-products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get Homepage featured products",
+                "operationId": "getFeaturedProducts",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/recently-viewed/products": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get customer's recently viewed products",
+                "operationId": "getRecentlyViewedProducts",
+                "parameters": [
+                    {
+                        "name": "productId",
+                        "in": "path",
+                        "description": "product id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/filter/featured-products": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get Homepage featured products",
+                "operationId": "getFilteredFeaturedProducts",
+                "requestBody": {
+                    "description": "Set Order Shipment Details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "filters": {
+                                        "description": "filters",
+                                        "properties": {
+                                            "price_range": {
+                                                "description": "Price Range",
+                                                "properties": {
+                                                    "min": {
+                                                        "description": "1",
+                                                        "type": "string"
+                                                    },
+                                                    "max": {
+                                                        "description": "1",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            "store_slug": {
+                                                "description": "Filter by store slug",
+                                                "type": "string"
+                                            },
+                                            "sort_by": {
+                                                "description": "Sort by",
+                                                "properties": {
+                                                    "featured": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "newest_arrival": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "price_high_to_low": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "price_low_to_high": {
+                                                        "description": "0",
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/stores/list/{type}": {
+            "get": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Manage Store",
+                "operationId": "getAllStores",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "description": "type",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/stores/{slug}": {
+            "get": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Manage Store",
+                "operationId": "getStore",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "store slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/filter/stores/{slug}/product": {
+            "post": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Store Products",
+                "operationId": "getFilteredStoreProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "store slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Resend OTP",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "filters": {
+                                        "description": "Network Id of customer's phone number",
+                                        "type": "object",
+                                        "example": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/stores/{slug}/product": {
+            "get": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Store Products",
+                "operationId": "getStoreProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "store slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/stores/{slug}/category/{catSlug}": {
+            "get": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Manage Store Category Products",
+                "operationId": "getStoreCategories",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "catSlug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/stores/{slug}/category/{catSlug}/product": {
+            "get": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Manage Store Category Products",
+                "operationId": "getStoreCategoryProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "catSlug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "user_access_token": {
+                "type": "apiKey",
+                "description": "user access token",
+                "name": "Authorization",
+                "in": "header"
+            },
+            "client_id": {
+                "type": "apiKey",
+                "description": "client id",
+                "name": "x-client-id",
+                "in": "header"
+            },
+            "client_secret": {
+                "type": "apiKey",
+                "description": "client secret",
+                "name": "x-client-token",
+                "in": "header"
+            }
+        }
+    }
+}

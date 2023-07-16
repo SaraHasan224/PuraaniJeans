@@ -15,6 +15,11 @@ class Country extends Model
     protected $table = 'countries';
     protected $primaryKey = 'id';
 
+    public function getNameAttribute($val)
+    {
+        return ucwords($val);
+    }
+
     protected function rules($except_id = "")
     {
         $arr = array(
@@ -23,40 +28,17 @@ class Country extends Model
         return $arr;
     }
 
-    protected function getAllCountriesWithRegion()
+    public function provinces()
     {
-        return $this->with(array('region'))->get();
-    }
-
-    protected function getCountryNameById($id)
-    {
-        return $this->where('id', $id)->pluck('name')->first();
-    }
-
-    protected function pluckCountriesByRegionId($region_id)
-    {
-        return $this->where('fk_region', $region_id)->pluck('id');
-    }
-
-    protected function getSingleCountryById($id)
-    {
-        return $this->with(array('region'))->find($id);
-    }
-
-    protected function getSingleCountryByName($country_name)
-    {
-        return $this->where('name', $country_name)->first();
-    }
-
-    public function region()
-    {
-        return $this->belongsTo('App\Models\Region', 'fk_region', 'region_id');
+        return $this->hasMany(Province::class ,'country_id', 'country_id' )
+            ->orderBy('name', 'ASC');
     }
 
     public function cities()
     {
         return $this->hasMany('App\Models\City', 'fk_country', 'country_id');
     }
+
 
     protected function updateCountry($request, $id)
     {
@@ -73,31 +55,13 @@ class Country extends Model
         // $country->save();
     }
 
-    protected function getAllCountries($only_shippable = false)
+    protected function getCountryNameById($id)
     {
-        $countries = $this->where('enabled', Constant::Yes);
-        if ($only_shippable)
-        {
-            $countries = $countries->where('is_ship', '1');
-        }
-        $countries = $countries->orderBy('priority', 'desc')->orderBy('sort_order', 'asc')->select('name', 'id', 'country_code')->get()->toArray();
-
-        return $countries;
+        return $this->where('id', $id)->pluck('name')->first();
     }
-
     public static function getEnabledCountries()
     {
         return Country::where('status', Constant::Yes)->orderBy('name')->pluck('code')->toArray();
-    }
-
-    public static function getPhoneNumberMaskByCode($code)
-    {
-        return Country::select('phone_number_mask')->where('country_code', $code)->where('status', Constant::Yes)->first();
-    }
-
-    protected function getCountryByName($location_name)
-    {
-        return $this->where('name', $location_name)->first();
     }
 
     public static function getCountryByCountryCode($countryCode , $pluckCountryId = false)
@@ -114,14 +78,4 @@ class Country extends Model
             return $data->where('status', Constant::Yes)->first();
         }
     }
-
-    public static function getCountries()
-    {
-        return self::where('code', '!=', null)->orderBy('name')->pluck('name', 'id')->toArray();
-    }
-
-    public static function getMessageBirdOriginatorByCountryCode($countryCode){
-        return self::select('msg_bird_originator')->where('country_code', $countryCode)->first()->msg_bird_originator;
-    }
-
 }

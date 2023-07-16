@@ -70973,7 +70973,7 @@ App.Customer = {
     };
     var orderColumn = sortColumn;
     var searchEnabled = true;
-    App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn, [], false);
+    App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn, [], true);
   },
   editCustomerFormBinding: function editCustomerFormBinding(userId) {
     $("#customer-user").bind("click", function (e) {
@@ -73879,8 +73879,8 @@ App.Constants = {
     'createUser': '/user-save',
     'editUser': "/users/edit",
     'getCustomers': '/customers-list',
-    'createCustomer': '/customer-save',
-    'editCustomer': '/customer/edit'
+    'editCustomer': '/customer/edit',
+    'getClosets': '/closet-list'
   },
   user_type: {
     1: 'Admin'

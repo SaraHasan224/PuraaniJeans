@@ -3,12 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\auth\MustVerifyEmail;
+use App\Helpers\Constant;
 use App\Helpers\Helper;
+use App\Helpers\Http;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Passport\HasApiTokens; // include this
+use Illuminate\Support\Facades\Auth;
+use Laravel\Passport\HasApiTokens;
+use phpseclib3\System\SSH\Agent;
+use function Ramsey\Uuid\v4; // include this
 
 class Customer extends Authenticatable
 {
@@ -45,6 +51,17 @@ class Customer extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public static $validationRules = [
+        'register' => [
+            'country' => 'required|string',
+            'email_address' => 'required|email',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+            'subscription' => 'required|boolean',
+        ],
+    ];
+
     public static function getValidationRules($type, $params = [])
     {
         $rules = [
@@ -76,7 +93,67 @@ class Customer extends Authenticatable
         return self::where('id', $id)->first();
     }
 
+    public static function findByPhoneNumber($code, $phone)
+    {
+        return self::where('country_code',$code)
+            ->where('phone_number',$phone)
+            ->first();
+    }
 
+    public static function findNonAnonymousCustomerByOtp( $otp )
+    {
+        return self::where('is_anonymous', Constant::No)
+            ->where('id', '!=', Auth::user()->id )
+            ->where('country_code', $otp->country_code)
+            ->where('phone_number', $otp->phone_number)
+            ->whereNull('deleted_at')
+            ->first();
+    }
+
+
+    public static function removeCustomer( $customer_id )
+    {
+        self::where('id', $customer_id )->delete();
+    }
+
+    public function updateAnonymousOrNonVerifiedCustomer( $verifiedOtp )
+    {
+        $updateCols = [
+            'is_anonymous' => Constant::No,
+            'is_verified' => Constant::Yes,
+            'country_code' => $verifiedOtp->country_code,
+            'phone_network_id' => $verifiedOtp->network_id,
+            'phone_number' => $verifiedOtp->phone_number,
+        ];
+
+        if($verifiedOtp->otp_provider == Constant::OTP_PROVIDERS['SMS']){
+            $this->updateIsDummyPhone();
+            $updateCols['phone_verified_at'] = Now();
+        }else{
+            $updateCols['email_verified_at'] = Now();
+        }
+
+        $this->update($updateCols);
+    }
+
+    public static function createCustomer( $requestData )
+    {
+        $emptyString = "";
+
+        $data = [
+            'first_name'            => $requestData['first_name'],
+            'last_name'             => $requestData['last_name'],
+            'email'                 => $requestData['email'],
+            'country_code'          => $requestData['country_code'] ?? $emptyString,
+            'phone_number'          => $requestData['phone_number'] ?? $emptyString,
+            'country_id'            => $requestData['country_id'],
+            'status'                => Constant::CUSTOMER_STATUS['Active'],
+            'subscription_status'   => $requestData['subscription_status'] ?? $emptyString,
+            'identifier'            => v4(),
+        ];
+
+        return self::create($data);
+    }
 
     public static function getByFilters($filter)
     {
@@ -135,6 +212,50 @@ class Customer extends Authenticatable
             'count'   => $count,
             'offset'  => isset($filter['start']) ? $filter['start'] : 0,
             'records' => $data->get()
+        ];
+    }
+
+    public function createAccessToken( $request, $revokeOldToken = false, $refreshOldSession = false )
+    {
+        $identifier = $request->identifier ?? v4();
+
+        if( $revokeOldToken )
+        {
+            AccessToken::revokeOldTokensByName( $identifier );
+        }
+
+        $ip = Helper::getUserIP( $request );
+        $identifier = Http::getRequestIdentifiers($identifier, 'customer-portal');
+        $iPDetails = Http::getIpDetails($request, "access-token", $identifier, "Upon creating taptap customer access-token save customer ip details for future use");
+        $agent = new Agent();
+
+        $token = $this->createToken( $identifier,['customer-portal']);
+        $token->token->ip = $ip;
+        $token->token->country = isset($iPDetails['country_name']) ? $iPDetails['country_name'] : null;
+        $token->token->user_agent = $agent->getUserAgent();
+        $token->token->save();
+        $sessionData = [
+            'ip' => $ip,
+            'ip_details' => $iPDetails,
+            'token' => $token,
+            'revokeOldToken' => $revokeOldToken,
+            'customer' => $this,
+            'user_agent' => $agent->getUserAgent(),
+        ];
+
+        CustomerAppSession::createSession($sessionData, $refreshOldSession);
+
+        if(!$revokeOldToken){
+            RequestResponseLog::addData( $request, [
+                'session_id'      => $token->token->name,
+                'customer_id'      => $this->id,
+            ]);
+        }
+
+        return [
+            'token' => $token->accessToken,
+            'id' => $token->token->name,
+            'session' => $token->token,
         ];
     }
 }

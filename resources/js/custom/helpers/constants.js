@@ -28,8 +28,8 @@ App.Constants = {
     'createUser': '/user-save',
     'editUser': "/users/edit",
     'getCustomers': '/customers-list',
-    'createCustomer': '/customer-save',
-    'editCustomer': '/customer/edit'
+    'editCustomer': '/customer/edit',
+    'getClosets': '/closet-list',
   },
     user_type:{
       1 : 'Admin'

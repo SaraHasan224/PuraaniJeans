@@ -21,6 +21,12 @@ class Constant
         3 => "success",
     ];
 
+    const APP_JOURNEY = [
+        'LOGIN' => 0,
+        'ONBOARDING' => 1,
+        'GUEST_USER' => 2,
+    ];
+
     const CRUD_STATES = [
         'created' => 0,
         'updated' => 1
@@ -41,6 +47,7 @@ class Constant
     const CUSTOMER_STATUS = [
         "InActive" => 0,
         "Active" => 1,
+        "Blocked" => 2
     ];
     const CUSTOMER_STATUS_STYLE = [
         0 => "danger",
@@ -57,6 +64,17 @@ class Constant
     const OTP_MODULES = [
         'users'     => 'User',
         'customers' => 'Customer'
+    ];
+
+    const OTP_EVENTS = [
+        'send' => 'send',
+        'resend' => 'resend'
+    ];
+
+    const OTP_PROVIDERS = [
+        'SMS' => 1,
+        'EMAIL' => 2,
+        'BOTH_EMAIL_AND_SMS' => 3,
     ];
 
     const OTP_MESSAGE_TEXT = [

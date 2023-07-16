@@ -47,6 +47,7 @@ class HomeController
                     'banner_background' => URL::asset('assets/banners/backgrounds/home-bg-1.png')
                 ],
                 'banners' => $this->getCachedBanner(),
+                'auth_banners' => $this->getCachedBanner("auth"),
             ];
             return ApiResponseHandler::success($response, __('messages.general.success'));
         } catch (\Exception $e) {
@@ -131,11 +132,14 @@ class HomeController
         }
     }
 
-    public function getCachedBanner()
+    public function getCachedBanner($type = "general")
     {
         $cacheKey = 'get_app_banners';
 //        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () {
-            return self::getBanners();
+            if($type == "auth")
+                return self::getAuthBanners();
+            else
+                return self::getBanners();
 //        });
     }
 
@@ -177,6 +181,24 @@ class HomeController
                 'text' => 'Hand Bags',
                 'product_count' => 15,
             ],
+        ];
+    }
+
+    private static function getAuthBanners()
+    {
+        return [
+            [
+                'index' => 1,
+                'image' => URL::asset('assets/banners/auth_banners/1.png'),
+            ],
+            [
+                'index' => 2,
+                'image' => URL::asset('assets/banners/auth_banners/2.png'),
+            ],
+            [
+                'index' => 3,
+                'image' => URL::asset('assets/banners/auth_banners/3.png'),
+            ]
         ];
     }
 

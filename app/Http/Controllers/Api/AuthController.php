@@ -2,8 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ApiResponseHandler;
 use App\Http\Controllers\Controller;
+use App\Models\Country;
+use App\Models\Customer;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -21,11 +28,14 @@ class AuthController extends Controller
      *            mediaType="multipart/form-data",
      *            @OA\Schema(
      *               type="object",
-     *               required={"name","email", "password", "password_confirmation"},
-     *               @OA\Property(property="name", type="text"),
-     *               @OA\Property(property="email", type="text"),
+     *               required={"country","email_address","first_name","last_name", "password", "password_confirmation"},
+     *               @OA\Property(property="country", type="numeric"),
+     *               @OA\Property(property="email_address", type="email"),
+     *               @OA\Property(property="first_name", type="text"),
+     *               @OA\Property(property="last_name", type="text"),
      *               @OA\Property(property="password", type="password"),
-     *               @OA\Property(property="password_confirmation", type="password")
+     *               @OA\Property(property="password_confirmation", type="password"),
+     *               @OA\Property(property="subscription", type="boolean"),
      *            ),
      *        ),
      *    ),
@@ -50,18 +60,24 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed',
-            'mobile_number' => 'required',
-        ]);
-        $data = $request->all();
-        $data['password'] = Hash::make($data['password']);
-        $user = User::create($data);
-        $success['token'] =  $user->createToken('authToken')->accessToken;
-        $success['name'] =  $user->name;
-        return response()->json(['success' => $success]);
+
+
+        $requestData = $request->all();
+        $response = [];
+        $validator = Validator::make($requestData, Customer::$validationRules['register']);
+
+        if ($validator->fails()) {
+            return ApiResponseHandler::validationError($validator->errors());
+        }
+
+        $requestData['password'] = Hash::make($requestData['password']);
+        $requestData['country_id'] = Country::getCountryByCountryCode($requestData['password'], true);
+        $requestData['remember_token'] = Str::random(10);
+        $customer = Customer::createCustomer($requestData);
+
+
+        $response['token'] =  $customer->createToken('authToken')->accessToken;
+        return ApiResponseHandler::success($response,"You have successfully registered to ".env('APP_NAME').".");
     }
     /**
      * @OA\Post(
@@ -84,12 +100,12 @@ class AuthController extends Controller
      *    ),
      *      @OA\Response(
      *          response=201,
-     *          description="Login Successfully",
+     *          description="Register Successfully",
      *          @OA\JsonContent()
      *       ),
      *      @OA\Response(
      *          response=200,
-     *          description="Login Successfully",
+     *          description="Register Successfully",
      *          @OA\JsonContent()
      *       ),
      *      @OA\Response(

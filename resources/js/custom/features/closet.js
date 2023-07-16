@@ -1,58 +1,38 @@
-App.Customer = {
-    isAdmin: 0,
+App.Closet = {
     countIds: [],
 
     initializeValidations: function () {
         $("#search-form").validate();
     },
     removeFilters: function () {
-        $("#name").val("");
-        $("#username").val("");
-        $("#email").val("");
-        $("#phone").val("");
-        $("#country").val('').trigger('change')
-        $("#subscription_status").val('').trigger('change')
-        $("#status").val('').trigger('change')
-        $("#created_at").val("");
+        $("#customer").val("");
+        $("#closet_name").val("");
         App.Helpers.removeAllfilters();
     },
     removeSelectionFilters: function () {
-        $("#name").val("");
-        $("#username").val('').trigger('change');
-        $("#phone").val('').trigger('change');
-        $("#country").val('').trigger('change');
-        $("#subscription_status").val("");
-        $("#status").val("").trigger('change');
-        $("#created_at").val("");
+        $("#customer").val("");
+        $("#closet_name").val('').trigger('change');
         App.Helpers.oTable.draw();
     },
     initializeDataTable: function () {
-        let table_name = "customers_table";
-        let url = App.Helpers.generateApiURL(App.Constants.endPoints.getCustomers);
+        let table_name = "closet_table";
+        let url = App.Helpers.generateApiURL(App.Constants.endPoints.getClosets);
         let sortColumn = [[2, "desc"]];
         let columns = [
             {data: 'show', name: 'show', orderable: false, searchable: false, className: 'show'},
-            {data: "id", name: "id", orderable: true, searchable: true},
-            {data: "name", name: "name", orderable: true, searchable: true},
-            {data: "username", name: "username", orderable: true, searchable: true},
-            {data: "email", name: "email", orderable: true, searchable: true},
-            {data: "phone", name: "phone", orderable: true, searchable: true},
-            {data: "country", name: "country", orderable: true, searchable: true},
-            {data: "subscription_status", name: "subscription_status", orderable: true, searchable: true},
+            // {data: "id", name: "id", orderable: true, searchable: true},
+            {data: "closet_name", name: "closet_name", orderable: true, searchable: true},
+            // {data: "customer_name", name: "customer_name", orderable: true, searchable: true},
+            {data: "closet_reference", name: "closet_reference", orderable: true, searchable: true},
+            {data: "logo", name: "logo", orderable: true, searchable: true},
+            {data: "banner", name: "banner", orderable: true, searchable: true},
             {data: "status", name: "status", orderable: true, searchable: true},
             {data: "created_at", name: "created_at", orderable: true, searchable: true},
-            {data: "updated_at", name: "updated_at", orderable: true, searchable: true},
+            {data: "updated_at", name: "updated_at", orderable: true, searchable: true}
         ];
         let postData = function (d) {
-            d.id = $("#id").val();
-            d.name = $("#name").val();
-            d.username = $("#username").val();
-            d.email = $("#email").val();
-            d.phone = $("#phone").val();
-            d.country = $("#country").val();
-            d.subscription_status = $("#subscription_status").val();
-            d.status = $("#status").val();
-            d.created_at = $("#created_at").val();
+            d.customer = $("#customer").val();
+            d.closet_name = $("#closet_name").val();
         };
 
         let orderColumn = sortColumn;
@@ -61,13 +41,13 @@ App.Customer = {
     },
     editCustomerFormBinding: function (userId) {
         $("#customer-user").bind("click", function (e) {
-            if ($("#customer_edit_form").valid()) {
+            if ($("#closet_edit_form").valid()) {
                 let url = App.Helpers.generateApiURL(
                     App.Constants.endPoints.editCustomer+"/"+userId
                 );
                 let onSuccess= function () {
                     if(data.type == "success") {
-                        window.location.href = '/customers';
+                        window.location.href = '/closets';
                         App.Helpers.showSuccessMessage( data.message );
                     }
                 };

@@ -17,7 +17,7 @@ class OrderController extends Controller
     public function index()
     {
         try{
-            return view('closet.orders.index');
+            return view('closet.closet.index');
         }catch (\Exception $e){
             AppException::log($e);
             return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
