@@ -12,12 +12,7 @@ class PimProductImage extends Model
 
     public function getUrlAttribute($value)
     {
-        if (empty($value))
-        {
-            return Helper::getProductImagePlaceholder();
-        }
-
-        return $value;
+        return asset("storage/".$value);
     }
 
     public static function getPlaceholder(){

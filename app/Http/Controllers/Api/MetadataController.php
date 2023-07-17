@@ -56,7 +56,7 @@ class MetadataController
 
     public function getMetaData()
     {
-        $responseData = self::getAllWithRelationalData(true);
+        $responseData = self::getAllWithRelationalData();
         return ApiResponseHandler::success( $responseData, __('messages.general.success'));
     }
 

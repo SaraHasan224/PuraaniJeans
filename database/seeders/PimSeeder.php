@@ -32,13 +32,13 @@ class PimSeeder extends Seeder
     {
 
         try {
-//            DB::table('pim_products')->truncate();
-//            DB::table('pim_product_attributes')->truncate();
-//            DB::table('pim_product_attribute_options')->truncate();
-//            DB::table('pim_product_categories')->truncate();
-//            DB::table('pim_product_images')->truncate();
-//            DB::table('pim_product_variants')->truncate();
-//            DB::table('pim_product_variant_options')->truncate();
+            DB::table('pim_products')->truncate();
+            DB::table('pim_product_attributes')->truncate();
+            DB::table('pim_product_attribute_options')->truncate();
+            DB::table('pim_product_categories')->truncate();
+            DB::table('pim_product_images')->truncate();
+            DB::table('pim_product_variants')->truncate();
+            DB::table('pim_product_variant_options')->truncate();
 
 
 
@@ -1368,12 +1368,13 @@ class PimSeeder extends Seeder
                 ]);
                 #Add PIM Product Images
                 $pimProductImages = [];
+
                 foreach ($product->images as $key2 => $images) {
 
                     $fileName = Helper::clean(trim(strtolower($product->name)));
 
 //                    $result = (array)CloudinaryUpload::uploadFile($images, "assets/closets/" . $closet->id . "/products/" . $fileName . "_" . $key2);
-                    $result = ImageUpload::downloadExternalFile($images, "images/closets/".$closet->id."/products" , $fileName . "_" . $key2);
+                    $result = ImageUpload::downloadExternalFile("images/closets/".$closet->id."/products" , $images, $fileName . "_" . $key2);
 
                     $image = PimProductImage::create([
                         'product_id' => $pimProduct->id,

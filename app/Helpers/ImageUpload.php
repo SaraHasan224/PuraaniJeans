@@ -9,6 +9,7 @@
 namespace App\Helpers;
 
 
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class ImageUpload
@@ -49,11 +50,10 @@ class ImageUpload
         $parsedURL = parse_url($url);
         $pathinfo = pathinfo($parsedURL['path']);
         $extension = $pathinfo['extension'];
-
         $contents = file_get_contents($url);
         $fileName = $path."/".$imgName.".".$extension;
+        Storage::put( "public/".$fileName, $contents);
 
-        Storage::put($fileName, $contents);
         return $fileName;
     }
 }

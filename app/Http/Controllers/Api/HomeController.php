@@ -12,11 +12,20 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHandler;
 use App\Helpers\AppException;
 use App\Helpers\Constant;
+use App\Helpers\Helper;
+use App\Helpers\ImageUpload;
 use App\Models\PimBrand;
 use App\Models\PimBsCategory;
+use App\Models\PimCategory;
 use App\Models\PimProduct;
+use App\Models\PimProductCategory;
+use App\Models\PimProductImage;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use function Ramsey\Uuid\v4;
 
 class HomeController
 {
@@ -78,7 +87,7 @@ class HomeController
             return ApiResponseHandler::success($response, __('messages.general.success'));
         } catch (\Exception $e) {
             AppException::log($e);
-            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
+            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getTraceAsString());
         }
     }
 
