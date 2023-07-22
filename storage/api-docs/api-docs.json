@@ -382,6 +382,20 @@
                 }
             }
         },
+        "/api/mega-menu": {
+            "get": {
+                "tags": [
+                    "HomePage"
+                ],
+                "summary": "Get mega menu content",
+                "operationId": "getMegaMenu",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
         "/api/countries-meta-data": {
             "get": {
                 "tags": [

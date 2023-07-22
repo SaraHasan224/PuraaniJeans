@@ -14,6 +14,7 @@ use App\Helpers\AppException;
 use App\Helpers\Constant;
 use App\Helpers\Helper;
 use App\Helpers\ImageUpload;
+use App\Models\Closet;
 use App\Models\PimBrand;
 use App\Models\PimBsCategory;
 use App\Models\PimCategory;
@@ -55,7 +56,23 @@ class HomeController
                     'logo_white' => URL::asset('assets/logo/logo-bg-white.png'),
                     'banner_background' => URL::asset('assets/banners/backgrounds/home-bg-1.png')
                 ],
+                'home' => [
+                    'title' => "BUY. SELL.DO IT ALL OVER.",
+                    'sub_title' => "Welcome to the community-powered circular fashion marketplace.",
+                ],
+                'brands' => [
+                    'title' => "RELAX & GET THE PRODUCT BY TOP BRANDS",
+                    'sub_title' => "In today's modern world, Household Shopping can be an extreme sport when you are making a list to grab things from physical stores therefore.",
+                ],
+                'subscription' => [
+                    'title' => "SUBSCRIBE US",
+                    'sub_title' => "We will not share your email with anyone else.",
+                ],
+                'sellers_watch' => [
+                    'list' => $this->getRecommendedSellerClosets(),
+                ],
                 'banners' => $this->getCachedBanner(),
+                'cities' => $this->getCachedCities(),
                 'auth_banners' => $this->getCachedBanner("auth"),
             ];
             return ApiResponseHandler::success($response, __('messages.general.success'));
@@ -141,6 +158,33 @@ class HomeController
         }
     }
 
+
+    /**
+     * @OA\Get(
+     *
+     *     path="/api/mega-menu",
+     *     tags={"HomePage"},
+     *     summary="Get mega menu content",
+     *     operationId="getMegaMenu",
+     *
+     *     @OA\Response(response=200,description="Success"),
+     *
+     * )
+     */
+
+    public function getMegaMenu()
+    {
+        try {
+            $response = [
+                'menu' => PimBsCategory::getAllMenuItems(),
+            ];
+            return ApiResponseHandler::success($response, __('messages.general.success'));
+        } catch (\Exception $e) {
+            AppException::log($e);
+            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
+        }
+    }
+
     public function getCachedBanner($type = "general")
     {
         $cacheKey = 'get_app_banners';
@@ -148,13 +192,21 @@ class HomeController
             if($type == "auth")
                 return self::getAuthBanners();
             else
-                return self::getBanners();
+                return PimBsCategory::getAllFeaturedCategories();
 //        });
     }
-
+    /*
     private static function getBanners()
     {
         return [
+
+            [
+                'index' => 3,
+                'image' => URL::asset('assets/banners/primary_banners/3.png'),
+                'text' => 'Mens Wear',
+                'product_count' => 70,
+                'is_centered' => Constant::Yes,
+            ],
             [
                 'index' => 1,
                 'image' => URL::asset('assets/banners/primary_banners/1.png'),
@@ -168,13 +220,6 @@ class HomeController
                 'text' => 'Watches',
                 'product_count' => 20,
                 'is_centered' => Constant::No,
-            ],
-            [
-                'index' => 3,
-                'image' => URL::asset('assets/banners/primary_banners/3.png'),
-                'text' => 'Mens Wear',
-                'product_count' => 70,
-                'is_centered' => Constant::Yes,
             ],
             [
                 'index' => 4,
@@ -192,7 +237,7 @@ class HomeController
             ],
         ];
     }
-
+    */
     private static function getAuthBanners()
     {
         return [
@@ -240,17 +285,69 @@ class HomeController
     {
         $cacheKey = 'get_app_brands';
 //        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () {
-        return self::getRecommendedBrands();
+        return [
+            [
+                'index' => 1,
+                'image' => URL::asset('assets/brands/1.png'),
+            ],
+            [
+                'index' => 2,
+                'image' => URL::asset('assets/brands/2.png'),
+            ],
+            [
+                'index' => 3,
+                'image' => URL::asset('assets/brands/3.png'),
+            ],
+            [
+                'index' => 4,
+                'image' => URL::asset('assets/brands/4.png'),
+            ],
+            [
+                'index' => 5,
+                'image' => URL::asset('assets/brands/5.png'),
+            ],
+            [
+                'index' => 6,
+                'image' => URL::asset('assets/brands/6.png'),
+            ],
+            [
+                'index' => 7,
+                'image' => URL::asset('assets/brands/7.png'),
+            ]
+        ];
 //        });
     }
 
-    private static function getRecommendedBrands()
+    private static function getRecommendedStoreBrands()
     {
         return PimBrand::where('closet_id', Constant::No)
             ->select('name', 'icon')
             ->where('status', Constant::Yes)
             ->take(8)
             ->get();
+    }
+
+    private static function getRecommendedSellerClosets()
+    {
+        return Closet::select('closet_name', "closet_reference", "logo")
+            ->where('status', Constant::Yes)
+            ->take(6)
+            ->get()->toArray();
+    }
+
+    public function getCachedCities()
+    {
+        return [
+            [
+                "Lahore",
+            ],
+            [
+                "Islamabad"
+            ],
+            [
+                'Karachi',
+            ]
+        ];
     }
 
     public function getCachedFeaturedCategoryProducts($type)

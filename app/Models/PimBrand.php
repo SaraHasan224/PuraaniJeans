@@ -11,8 +11,7 @@ class PimBrand extends Model
 
     public function getIconAttribute($value)
     {
-        return asset($value);
-//        return asset("storage/".$value);
+        return asset("storage/".$value);
     }
 
     public static function saveBrand($name)

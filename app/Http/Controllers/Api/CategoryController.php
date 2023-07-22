@@ -158,11 +158,7 @@ class CategoryController extends Controller
      *         description="category slug",
      *         required=true,
      *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     security={
-     *          {"user_access_token": {}, "locale": {}}
-     *     }
+     *     )
      * )
      */
 

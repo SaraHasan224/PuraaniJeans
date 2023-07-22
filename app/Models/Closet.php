@@ -9,6 +9,11 @@ class Closet extends Model
 {
     protected $table ="closets";
 
+    public function getLogoAttribute($value)
+    {
+        return asset("storage/".$value);
+    }
+
     protected $fillable = [
         'customer_id',
         'closet_name' ,

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\MetadataController;
 use App\Http\Controllers\Api\OtpController;
+use App\Http\Controllers\Api\PlaygroundTestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +23,7 @@ use App\Http\Controllers\Api\OtpController;
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //    return $request->user();
 //});
-//Route::post('cloudinary/image-upload-test', [PlaygroundTestController::class, 'uploadImageToCloudinary']);
+Route::post('cloudinary/image-upload-test', [PlaygroundTestController::class, 'uploadImageToCloudinary']);
 //Route::post('disk/image-upload-test', [PlaygroundTestController::class, 'uploadImage']);
 
 
@@ -30,6 +31,7 @@ Route::get('countries-meta-data', [MetadataController::class, 'getMetaData']);
 Route::get('country-list', [MetadataController::class, 'getCountriesList']);
 
 Route::get('meta-data', [HomeController::class, 'getMetaContent']);
+Route::get('mega-menu', [HomeController::class, 'getMegaMenu']);
 Route::get('homepage', [HomeController::class, 'getHomePageContent']);
 Route::get('homepage/featured-section', [HomeController::class, 'getHomePageFeaturedContent']);
 
@@ -51,7 +53,6 @@ Route::get('/signup-or-signin', [OtpC::class, 'index'])->name('users'); //comple
 //Route::get('/categories/{slug}', 'CategoryController@getSubCategories');
 Route::get('/categories/{slug}/products', [CategoryController::class, 'getProducts']);
 //Route::post('/filter/categories/{slug}/products', 'CategoryController@getFilteredCategoryProducts');
-
 
 #Closet List
 //Route::get('/stores/list/{type}', 'StoresController@getAllStores');

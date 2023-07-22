@@ -22,7 +22,10 @@ return new class extends Migration
             $table->text('image')->nullable();
             $table->tinyInteger('product_count')->default(Constant::No);
             $table->tinyInteger('position')->default(Constant::No);
+            $table->boolean('is_recommended')->default(Constant::No);
+            $table->boolean('is_recommended_weight')->default(0);
             $table->boolean('is_featured')->default(Constant::No);
+            $table->boolean('is_featured_weight')->default(0);
             $table->boolean('status')->default(Constant::No);
             $table->timestamps();
         });
