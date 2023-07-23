@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\MetadataController;
 use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\PlaygroundTestController;
+use App\Http\Controllers\Api\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,7 +27,6 @@ use App\Http\Controllers\Api\PlaygroundTestController;
 Route::post('cloudinary/image-upload-test', [PlaygroundTestController::class, 'uploadImageToCloudinary']);
 //Route::post('disk/image-upload-test', [PlaygroundTestController::class, 'uploadImage']);
 
-
 Route::get('countries-meta-data', [MetadataController::class, 'getMetaData']);
 Route::get('country-list', [MetadataController::class, 'getCountriesList']);
 
@@ -36,13 +36,11 @@ Route::get('homepage', [HomeController::class, 'getHomePageContent']);
 Route::get('homepage/featured-section', [HomeController::class, 'getHomePageFeaturedContent']);
 
 
-Route::post('login', 'Api\AuthController@login');
-Route::post('register', 'Api\AuthController@register');
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('login', [AuthController::class, "login"]);
+Route::post('register', [AuthController::class, "register"]);
 
-Route::get('/signup-or-signin', [OtpC::class, 'index'])->name('users'); //completed
+
+//Route::get('/signup-or-signin', [OtpC::class, 'index'])->name('users'); //completed
 
 //#Featured Products
 //Route::get('/featured-products', 'ProductController@getFeaturedProducts');
@@ -63,3 +61,11 @@ Route::get('/categories/{slug}/products', [CategoryController::class, 'getProduc
 #Closet Category
 //Route::get('/stores/{slug}/category/{catSlug}', 'StoresController@getStoreCategory');
 //Route::get('/stores/{slug}/category/{catSlug}/product', 'StoresController@getStoreCategoryProducts');
+
+Route::middleware(['tokenValidation', 'auth:api'])->group(function () {
+    Route::post('verify-phone', [OtpController::class, "sendOtp"]);
+    Route::middleware('')->get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+});

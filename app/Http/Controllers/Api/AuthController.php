@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use function Ramsey\Uuid\v4;
 
 class AuthController extends Controller
 {
@@ -60,8 +61,6 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-
-
         $requestData = $request->all();
         $response = [];
         $validator = Validator::make($requestData, Customer::$validationRules['register']);
@@ -71,12 +70,21 @@ class AuthController extends Controller
         }
 
         $requestData['password'] = Hash::make($requestData['password']);
-        $requestData['country_id'] = Country::getCountryByCountryCode($requestData['password'], true);
+        $requestData['country_id'] = Country::getCountryByCountryCode($requestData['country'], true);
         $requestData['remember_token'] = Str::random(10);
-        $customer = Customer::createCustomer($requestData);
+        $identifier = v4();
+        $customer = Customer::createCustomer($requestData, $identifier);
 
 
-        $response['token'] =  $customer->createToken('authToken')->accessToken;
+        $response['token'] =  $customer->createToken($identifier, ['customer'])->accessToken;
+        $response['customer'] = [
+            'first_name' => $customer->first_name,
+            'last_name' => $customer->last_name,
+            'email' => $customer->email,
+            'country_code' => $customer->country_code,
+            'phone_number' => $customer->phone_number,
+            'identifier' => $customer->identifier,
+        ];
         return ApiResponseHandler::success($response,"You have successfully registered to ".env('APP_NAME').".");
     }
     /**
@@ -126,7 +134,7 @@ class AuthController extends Controller
         if (!auth()->attempt($validator)) {
             return response()->json(['error' => 'Unauthorised'], 401);
         } else {
-            $success['token'] = auth()->user()->createToken('authToken')->accessToken;
+            $success['token'] = auth()->user()->createToken('customer')->accessToken;
             $success['user'] = auth()->user();
             return response()->json(['success' => $success])->setStatusCode(200);
         }

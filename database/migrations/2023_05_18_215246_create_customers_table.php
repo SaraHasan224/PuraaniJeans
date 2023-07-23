@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('last_name')->nullable();
             $table->string('username')->nullable();
             $table->string('email')->unique()->index();
-            $table->string('country_code', 7)->index();
-            $table->string('phone_number',25)->index();
-            $table->unsignedBigInteger('country_id')->index();
+            $table->string('country_code', 7)->index()->nullable();
+            $table->string('phone_number',25)->index()->nullable();
+            $table->unsignedBigInteger('country_id')->index()->nullable();
             $table->boolean('status')->default(Constant::No);
             $table->boolean('subscription_status')->default(Constant::No);
             $table->string('identifier')->nullable();

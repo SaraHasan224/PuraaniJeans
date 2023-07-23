@@ -30,7 +30,7 @@ class AuthServiceProvider extends ServiceProvider
          * and revoke access tokens, clients, and personal access tokens
          */
 
-        Passport::loadKeysFrom(__DIR__.'/../secrets/oauth');
+        Passport::loadKeysFrom(storage_path("secrets/oauth"));
 
 
 //        Passport::routes(function ($router) {
@@ -54,7 +54,7 @@ class AuthServiceProvider extends ServiceProvider
 
 
         Passport::tokensCan([
-            'authenticate'=> 'authenticate',
+            'customer'=> 'customer',
         ]);
     }
 }

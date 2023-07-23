@@ -196,33 +196,6 @@ class Otp extends Model
             })->update(['is_used' => 1]);
     }
 
-    public static function allowOtpSendOnApp ($request) {
-        $ip = Helper::getUserIP($request);
-        $date = env('APP_ENV') == "production" ? [now()->subHours(env('MAX_OTP_ATTEMPT_IP_TIMEFRAME')), now()] :
-            [now()->subMinutes(env('MAX_OTP_ATTEMPT_IP_TIMEFRAME')), now()];
-        $query =  Otp::where('model', Constant::OTP_MODULES['customers'])
-            ->where('ip',$ip)
-            ->whereBetween('created_at',$date);
-        $countMaxOtpTimeAttempts = $query->count();
-
-        if($countMaxOtpTimeAttempts > 0) {
-            $lastSentOtp = $query->latest('created_at')->first();
-            $blockOtpExpTime =  OtpBlocklist::checkIpExpiryTime($lastSentOtp->ip);
-            $maxAllowedOtpCount = env('MAX_OTP_IP_ATTEMPT_COUNT');
-            if($countMaxOtpTimeAttempts >= $maxAllowedOtpCount) {
-                if(empty($blockOtpExpTime)){
-                    $reason = "Customer has been blocked due to suspicious activity. Otp sent count is: {$countMaxOtpTimeAttempts} that is greater than max otp send allowed count w.r.t. ip condition that is. {$maxAllowedOtpCount}";
-                    OtpBlocklist::blockIP($lastSentOtp, $reason);
-                    return false;
-                }
-                if(!empty($blockOtpExpTime)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     public static function verifyCustomerPortalOtp($session_id, $phoneOtp )
     {
         $userOtp = Otp::getOtpByRequestId( $session_id );

@@ -105,6 +105,32 @@ class Constant
         'price_low_to_high' => 'Price: Low to High'
     ];
 
+    const SIZE_BY_FILTERS = [
+        'x_small' => 'Extra Small',
+        'small' => 'Small',
+        'medium' => 'Medium',
+        'large' => 'Large',
+        'x_large' => 'Extra Large'
+    ];
+
+    const COLORS_BY_FILTERS = [
+        "red" => '#C70039',
+        "black" => '#000000',
+        "beige" => '#F5F5DC',
+        "almond" => '#EADDCA',
+        'white' => '#FFFFF0',
+        'pink' => '#DE3163',
+        'purple' => '#702963',
+        'blue' => '#191970',
+        'yellow' => '#FFBF00',
+        'orange' => '#CC5500',
+        'brown' => '#C2B280',
+        'charcoal' => '#36454F',
+        'pistachio' => '#93C572',
+        'gold' => '#C4B454',
+        'peach' => '#FFE5B4',
+    ];
+
     const GeneralError = "messages.general.failed";
     const Yes = 1;
     const No = 0;

@@ -2,6 +2,10 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\ForceJson;
+use App\Http\Middleware\RequestResponseLogger;
+use App\Http\Middleware\ThirdPartyApi;
+use App\Http\Middleware\ValidateUserAccessToken;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -42,6 +46,9 @@ class Kernel extends HttpKernel
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+//            'forceJson',
+            'throttle:60,1',
+//            'log',
         ],
     ];
 
@@ -53,6 +60,9 @@ class Kernel extends HttpKernel
      * @var array<string, class-string|string>
      */
     protected $middlewareAliases = [
+//        'log' => RequestResponseLogger::class,
+        'forceJson' =>  ForceJson::class,
+        'tokenValidation' => ValidateUserAccessToken::class,
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
@@ -63,5 +73,7 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+//        'thirdparty' => ThirdPartyApi::class,
+//        'otpVerificationCheck' => OtpVerificationCheck::class,
     ];
 }

@@ -414,7 +414,6 @@ class PimProduct extends Model
         $customerId = array_key_exists('customer_id', $listOptions) ? $listOptions['customer_id'] : "";
         $excludedProductId = array_key_exists('exclude_product', $listOptions) ? $listOptions['exclude_product'] : "";
         $storeShipmentDisabled = array_key_exists('store_disabled', $listOptions) ? $listOptions['store_disabled'] : Constant::Yes;
-
         $fields = [
             'pim_products.id as id',
             'name',
@@ -441,7 +440,6 @@ class PimProduct extends Model
             $slug = $bsCategorySlug;
             $category = PimBsCategory::getCategoryBySlug($bsCategorySlug);
         }
-
         $products = self::select($fields);
 
 //        if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['RECENTLY_VIEWED_PRODUCTS']){
@@ -511,116 +509,105 @@ class PimProduct extends Model
 
 
         $filteredProducts = $products;
-
+        $filtersSortBy = "";
         $filtersApplied = false;
-//        if(!empty($filters)){
-//            if(array_key_exists('store_slug', $filters) && !empty($filters['store_slug'])){
-//                $filteredProducts->when($filters, function ($query) use ($filters) {
-//                    $_slug = MerchantStore::filterStoreIdsByStoreSlugs($filters['store_slug']);
-//                    return $query->whereIn('store_id', $_slug);
-//                });
-//                $filtersApplied = true;
-//            }
-//            if(array_key_exists('min', $filters['price_range']) &&  $filters['price_range']['min'] >= 0 && !empty($filters['price_range']['max'])){
-//                $filter_min_price = $filters['price_range']['min'];
-//                $filter_max_price = $filters['price_range']['max'];
-//                $filteredProducts->whereBetween('pim_products.price', [$filter_min_price, $filter_max_price]);
-//                $filtersApplied = true;
-//            }
-//
-//            if(array_key_exists('price_high_to_low', $filters['sort_by']) &&  $filters['sort_by']['price_high_to_low'] == 1){
-//                $filteredProducts->orderBy('pim_products.price', "DESC");
-//                $filtersApplied = true;
-//            }
-//            else if(array_key_exists('price_low_to_high', $filters['sort_by']) &&  $filters['sort_by']['price_low_to_high'] == 1){
-//                $filteredProducts->orderBy('pim_products.price', "ASC");
-//                $filtersApplied = true;
-//            }
-//            else if(array_key_exists('newest_arrival', $filters['sort_by']) &&  $filters['sort_by']['newest_arrival'] == 1){
-//                $filteredProducts->orderBy('pim_products.id', "DESC");
-//                $filtersApplied = true;
-//            }
-//            else if(array_key_exists('featured', $filters['sort_by']) &&  $filters['sort_by']['featured'] == 1){
-//                $filteredProducts->where('is_featured', Constant::Yes);
-//                $filteredProducts->orderBy('featured_position','ASC');
-//                $filtersApplied = true;
-//            }
-//        }
+        if(!empty($filters)){
+            if(array_key_exists('price_range', $filters)){
+                if(array_key_exists('min', $filters['price_range']) &&  $filters['price_range']['min'] >= 0 && !empty($filters['price_range']['max'])){
+                    $filter_min_price = $filters['price_range']['min'];
+                    $filter_max_price = $filters['price_range']['max'];
+                    $filteredProducts->whereBetween('pim_products.price', [$filter_min_price, $filter_max_price]);
+                    $filtersApplied = true;
+                }
+            }
 
-//
-//        if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS']){
-//            $products->where('is_featured', Constant::Yes);
-//            $products->orderBy('featured_position','ASC');
-//
-//            if($filtersApplied) {
-//                $filteredProducts->where('is_featured', Constant::Yes);
-//                $filteredProducts->orderBy('featured_position','ASC');
-//            }
-//        }
-//        else if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['STORES_PRODUCTS'] && !empty($store)){
-//            $slug = $store->store_slug;
-//            $products->where('pim_products.merchant_id', $store->merchant_id)
-//                     ->where('pim_products.store_id', $store->id);
-//            if(!empty($categoryId)){
-//                $products->whereHas('category', function ($query) use ($categoryId) {
-//                    $query->where('category_id',$categoryId);
-//                });
-//            }
-//            $products->orderBy('rank','ASC');
-//
-//            if($filtersApplied) {
-//                $filteredProducts->where('pim_products.merchant_id', $store->merchant_id)
-//                    ->where('pim_products.store_id', $store->id);
-//                if(!empty($categoryId)){
-//                    $filteredProducts->whereHas('category', function ($query) use ($categoryId) {
-//                        $query->where('category_id',$categoryId);
-//                    });
-//                }
-//                $filteredProducts->orderBy('rank','ASC');
-//            }
-//        }
-//        else if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'] && !empty($categoryIds)){
-//            $products->with([
-//                'category' => function($query) use($categoryId, $store) {
-//                    $query->select([
-//                        'product_id',
-//                        'category_id',
-//                    ]);
-//                },
-//            ])->whereHas('category', function ($records) use ($categoryIds)
-//            {
-//                $records->whereIn('category_id', $categoryIds)->orderBy('id','ASC');
-//            });
-//            $products->orderBy('rank','ASC');
-//
-//            if($filtersApplied) {
-//                $filteredProducts->with([
-//                    'category' => function($query) use($categoryId, $store) {
-//                        $query->select([
-//                            'product_id',
-//                            'category_id',
-//                        ]);
-//                    },
-//                ])->whereHas('category', function ($records) use ($categoryIds)
-//                {
-//                    $records->whereIn('category_id', $categoryIds)->orderBy('id','ASC');
-//                });
-//                $filteredProducts->orderBy('rank','ASC');
-//            }
-//        }
-//        else if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['CAMPAIGN_PRODUCTS']){
-//            $slug = $campaignSlug;
-//
-//            $products->orderBy('campaign_product_position','ASC');
-//
-//            if($filtersApplied) {
-//                $filteredProducts->orderBy('campaign_product_position','ASC');
-//            }
-//
-//        }
-//        else if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['RECENTLY_VIEWED_PRODUCTS']){
-//            $products->orderBy('recently_viewed_created_at','DESC');
-//        }
+            if(array_key_exists('price_high_to_low', $filters['sort_by']) &&  $filters['sort_by']['price_high_to_low'] == 1){
+                $filtersSortBy = "price_high_to_low";
+                $filteredProducts->orderBy('pim_products.price', "DESC");
+                $filtersApplied = true;
+            }
+            else if(array_key_exists('price_low_to_high', $filters['sort_by']) &&  $filters['sort_by']['price_low_to_high'] == 1){
+                $filtersSortBy = "price_low_to_high";
+                $filteredProducts->orderBy('pim_products.price', "ASC");
+                $filtersApplied = true;
+            }
+            else if(array_key_exists('newest_arrival', $filters['sort_by']) &&  $filters['sort_by']['newest_arrival'] == 1){
+                $filtersSortBy = "newest_arrival";
+                $filteredProducts->orderBy('pim_products.id', "DESC");
+                $filtersApplied = true;
+            }
+            else if(array_key_exists('featured', $filters['sort_by']) &&  $filters['sort_by']['featured'] == 1){
+                $filtersSortBy = "featured";
+                $filteredProducts->where('is_featured', Constant::Yes);
+                $filteredProducts->orderBy('featured_position','ASC');
+                $filtersApplied = true;
+            }
+        }
+
+
+        if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS']){
+            $products->where('is_featured', Constant::Yes);
+            $products->orderBy('featured_position','ASC');
+
+            if($filtersApplied) {
+                $filteredProducts->where('is_featured', Constant::Yes);
+                $filteredProducts->orderBy('featured_position','ASC');
+            }
+        }
+        else if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['STORES_PRODUCTS'] && !empty($store)){
+            $slug = $store->store_slug;
+            $products->where('pim_products.merchant_id', $store->merchant_id)
+                     ->where('pim_products.store_id', $store->id);
+            if(!empty($categoryId)){
+                $products->whereHas('category', function ($query) use ($categoryId) {
+                    $query->where('category_id',$categoryId);
+                });
+            }
+            $products->orderBy('rank','ASC');
+
+            if($filtersApplied) {
+                $filteredProducts->where('pim_products.merchant_id', $store->merchant_id)
+                    ->where('pim_products.store_id', $store->id);
+                if(!empty($categoryId)){
+                    $filteredProducts->whereHas('category', function ($query) use ($categoryId) {
+                        $query->where('category_id',$categoryId);
+                    });
+                }
+                $filteredProducts->orderBy('rank','ASC');
+            }
+        }
+        else if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'] && !empty($categoryIds)){
+            $products->with([
+                'category' => function($query) use($categoryId) {
+                    $query->select([
+                        'product_id',
+                        'category_id',
+                    ]);
+                },
+            ])->whereHas('category', function ($records) use ($categoryIds)
+            {
+                $records->whereIn('category_id', $categoryIds)->orderBy('id','ASC');
+            });
+            $products->orderBy('rank','ASC');
+
+            if($filtersApplied) {
+                $filteredProducts->with([
+                    'category' => function($query) use($categoryId) {
+                        $query->select([
+                            'product_id',
+                            'category_id',
+                        ]);
+                    },
+                ])->whereHas('category', function ($records) use ($categoryIds)
+                {
+                    $records->whereIn('category_id', $categoryIds)->orderBy('id','ASC');
+                });
+                $filteredProducts->orderBy('rank','ASC');
+            }
+        }
+        else if($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['RECENTLY_VIEWED_PRODUCTS']){
+            $products->orderBy('recently_viewed_created_at','DESC');
+        }
 
 
         $productMax = $products->max('price');
@@ -741,13 +728,23 @@ class PimProduct extends Model
                 'slug' => $slug,
                 'filters' => []
             ];
-            if (!$filtersApplied) {
+//            if (!$filtersApplied) {
                 $sortByFilters = Constant::SORT_BY_FILTERS;
                 if ($listingType == Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS']) {
                     unset($sortByFilters['featured']);
                 }
                 $productResults['slug'] = $slug;
                 $productResults['filters'] = [
+                    'categories' => PimBsCategory::select('id',"name", "slug")
+                        ->where('status', Constant::Yes)
+                        ->where('parent_id', Constant::No)
+                        ->get(),
+                    'brands' => PimBrand::where('closet_id', Constant::No)
+                        ->select('name', 'id')
+                        ->where('status', Constant::Yes)
+                        ->get(),
+                    'colors' => Constant::COLORS_BY_FILTERS,
+                    'size' => Constant::SIZE_BY_FILTERS,
                     'sort_by' => $sortByFilters,
                     'price_range' => [
                         'max' => $productMax,
@@ -755,8 +752,10 @@ class PimProduct extends Model
                     ],
                     'stores' => $stores,
                 ];
-            }
+//            }
             $productResults['slug'] = $slug;
+            $productResults['per_page_count'] = $perPage;
+            $productResults['sort_by'] = $filtersSortBy;
             return $productResults;
         }
     }

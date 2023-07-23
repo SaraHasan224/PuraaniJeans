@@ -75,7 +75,7 @@ class MetadataController
 
     public function getCountriesList()
     {
-        $responseData = self::getAllCountriesList();
+        $responseData = (array) self::getAllCountriesList();
         return ApiResponseHandler::success( $responseData, __('messages.general.success'));
     }
 
@@ -115,7 +115,8 @@ class MetadataController
         $metadata =  Country::where('status',Constant::Yes)
             ->select( $fields )
             ->orderBy('name', 'ASC')
-            ->get();
+            ->get()
+            ->toArray();
 
         return $metadata;
     }

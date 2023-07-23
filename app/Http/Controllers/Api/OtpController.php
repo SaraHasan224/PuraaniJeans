@@ -22,8 +22,8 @@ class OtpController extends BaseCustomerController
 {
     /**
      * @OA\Post(
-     *     path="/v1/portal/otp/send",
-     *     tags={"Verification"},
+     *     path="/api/verify-phone",
+     *     tags={"Auth Verification"},
      *     summary="Send Otp",
      *     operationId="sendOtp",
      *
@@ -60,61 +60,45 @@ class OtpController extends BaseCustomerController
         try {
             $response = [];
             $requestData = $request->all();
+            $error_body = [];
             $validator = Validator::make($requestData, Otp::$validationRules['send']);
 
             if ($validator->fails()) {
                 return ApiResponseHandler::validationError($validator->errors());
             }
-            $allowOtpSend = Otp::allowOtpSendOnApp($request);
+            $country_code = $requestData['country_code'];
+            $phone_number = $requestData['phone_number'];
 
-            $previousCustomer = Customer::findByPhoneNumber($requestData['country_code'],$requestData['phone_number']);
-            if(!empty($previousCustomer) && $previousCustomer->status == Constant::CUSTOMER_STATUS['Blocked']){
-                $error_body = [];
-                $error_body['customer_blocked'] = Constant::Yes;
-                if(Auth::user()) {
-                    Auth::user()->killSession($request->session_id);
+            $customer = Customer::findByPhoneNumber($country_code, $phone_number);
+            if (!empty($customer) && $customer->status == Constant::CUSTOMER_STATUS['Blocked']) {
+                if (Auth::user()) {
+                    //  Auth::user()->killSession($request->session_id);
                 }
                 return ApiResponseHandler::failure(__('messages.customer.otp.customer_is_blocked'), '', $error_body);
             }
 
-            if ($allowOtpSend) {
-                DB::beginTransaction();
-                $country_code = $requestData['country_code'];
-                $phone_number = $requestData['phone_number'];
+            DB::beginTransaction();
 
-                if($country_code != 92) {
-                    $error_body = [];
-                    return ApiResponseHandler::failure(__('messages.customer.customer_unauthorized'), '', $error_body);
-                }
+            $otpData = [
+                'session_id' => $customer->identifier,
+                'action' => Constant::OTP_EVENTS['send'],
+                'customer_id' => $customer->id,
+                'phone_number' => $phone_number,
+                'country_code' => $country_code,
+            ];
 
-                $otpData = [
-                    'session_id' => $request->session_id,
-                    'action' => Constant::OTP_EVENTS['send'],
-                    'customer_id' => $request->customer_id,
-                    'network_id' => 0,
-                    'phone_number' => $phone_number,
-                    'country_code' => $country_code,
-                ];
+            Otp::revokeOldOtpForCustomer($request->customer_id, Constant::OTP_MODULES['customers'], $request->session_id);
+            Otp::createOtp($otpData, $request);
 
-                Otp::revokeOldOtpForCustomer($request->customer_id, Constant::OTP_MODULES['customers'], $request->session_id);
-                Otp::createOtp($otpData, $request, "customer-portal", );
+            $timerVal = env('OTP_EXPIRE_TIME');
+            $sessionId = $requestData['session_id'];
 
-                $timerVal = env('OTP_EXPIRE_TIME');
-                $sessionId = $requestData['session_id'];
+            CustomerAppSession::updateJourney($sessionId, Constant::APP_JOURNEY['ONBOARDING']);
 
-                CustomerAppSession::updateJourney($sessionId, Constant::APP_JOURNEY['ONBOARDING']);
+            DB::commit();
 
-                DB::commit();
-
-                $response['sign_up'] = empty($previousCustomer) ? Constant::Yes : Constant::No;
-                $response['otp_timer'] = Helper::convertSecondsIntoMilliseconds($timerVal);
-                $response['session_config'] = $this->getCustomerAppSessionConfig($sessionId);
-                return ApiResponseHandler::success($response, __('messages.general.success'));
-            } else {
-                $error_body = [];
-                Auth::user()->killSession($request->session_id);
-                return ApiResponseHandler::failure(__('messages.customer.otp.customer_is_blocked'), '', $error_body);
-            }
+            $response['otp_timer'] = Helper::convertSecondsIntoMilliseconds($timerVal);
+            return ApiResponseHandler::success($response, __('messages.general.success'));
         } catch (\Exception $e) {
             DB::rollBack();
             AppException::log($e);

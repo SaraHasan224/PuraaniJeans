@@ -93,6 +93,10 @@ class Customer extends Authenticatable
         return self::where('id', $id)->first();
     }
 
+    public static function findByRef($ref){
+        return self::where('reference', $ref)->first();
+    }
+
     public static function findByPhoneNumber($code, $phone)
     {
         return self::where('country_code',$code)
@@ -136,20 +140,20 @@ class Customer extends Authenticatable
         $this->update($updateCols);
     }
 
-    public static function createCustomer( $requestData )
+    public static function createCustomer( $requestData, $identifier )
     {
         $emptyString = "";
 
         $data = [
             'first_name'            => $requestData['first_name'],
             'last_name'             => $requestData['last_name'],
-            'email'                 => $requestData['email'],
-            'country_code'          => $requestData['country_code'] ?? $emptyString,
-            'phone_number'          => $requestData['phone_number'] ?? $emptyString,
+            'email'                 => $requestData['email_address'],
+            'country_code'          => array_key_exists("country_code", $requestData) ? $requestData['country_code'] : $emptyString,
+            'phone_number'          => array_key_exists("phone_number", $requestData) ? $requestData['phone_number'] : $emptyString,
             'country_id'            => $requestData['country_id'],
             'status'                => Constant::CUSTOMER_STATUS['Active'],
             'subscription_status'   => $requestData['subscription_status'] ?? $emptyString,
-            'identifier'            => v4(),
+            'identifier'            => $identifier,
         ];
 
         return self::create($data);

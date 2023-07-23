@@ -211,7 +211,19 @@ class CategoryController extends Controller
             $listOptions = [
                 "categoryIds" => $merchantCategoryIds,
                 "bsCategorySlug" => $categorySlug,
-                'filter_by_product_ids' => $productIds
+                'filter_by_product_ids' => $productIds,
+                'filters' => [
+                    'sort_by' =>  [
+                        'newest_arrival' => 1,
+                        'featured' => 0,
+                        'price_high_to_low' => 0,
+                        'price_low_to_high' => 0,
+                    ],
+                    'price_range' => [
+                        "max" => '',
+                        "min" => 0
+                    ]
+                ]
             ];
             return PimProduct::getProductsForApp($listType, $perPage, $listOptions);
 //        });
@@ -257,6 +269,16 @@ class CategoryController extends Controller
      *                     description="filters",
      *                     type="object",
      *                      @OA\Property(
+     *                         property="records_range",
+     *                         description="Record Range",
+     *                         type="object",
+     *                         @OA\Property(
+     *                              property="show_count",
+     *                              description="24",
+     *                              type="string",
+     *                          )
+     *                      ),
+     *                      @OA\Property(
      *                         property="price_range",
      *                         description="Price Range",
      *                         type="object",
@@ -270,11 +292,6 @@ class CategoryController extends Controller
      *                              description="1",
      *                              type="string",
      *                          )
-     *                      ),
-     *                      @OA\Property(
-     *                         property="store_slug",
-     *                         description="Filter by store slug",
-     *                         type="string"
      *                      ),
      *                      @OA\Property(
      *                         property="sort_by",
@@ -325,6 +342,7 @@ class CategoryController extends Controller
             }
 
             $filterData = $requestData['filters'];
+            $showCount = array_key_exists("filters", $requestData) && !empty($requestData['filters'])&& !empty($requestData['filters']['show_count']) ? $requestData['filters']['show_count'] : 15;
             $bSecureCategoryIds = $this->getCachedSubCategoriesIds( $categorySlug );
 
             if( $bSecureCategoryIds )
@@ -336,7 +354,6 @@ class CategoryController extends Controller
                 {
                     return ApiResponseHandler::validationError($validator->errors());
                 }
-
                 $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'];
                 $listOptions = [
                     "categoryIds" => $merchantCategoryIds,
@@ -344,7 +361,7 @@ class CategoryController extends Controller
                     'filters' => $filterData,
                     'filter_by_product_ids' => $this->getCachedPimCategoryProductIds( $categorySlug, $merchantCategoryIds )
                 ];
-                $response = PimProduct::getProductsForApp($listType, 15, $listOptions);
+                $response = PimProduct::getProductsForApp($listType, $showCount, $listOptions);
 
                 return ApiResponseHandler::success( $response, __('messages.general.success') );
             }
