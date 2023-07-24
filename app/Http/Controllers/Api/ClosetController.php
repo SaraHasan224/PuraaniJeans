@@ -13,15 +13,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
-class StoresController extends Controller
+class ClosetController extends Controller
 {
     /**
      * @OA\Get(
      *
-     *     path="/api/stores/list/{type}",
+     *     path="/api/closets/get-all/{type}",
      *     tags={"Closet"},
      *     summary="Manage Store",
-     *     operationId="getAllStores",
+     *     operationId="getAllClosets",
      *
      *     @OA\Response(response=200,description="Success"),
      *
@@ -38,7 +38,7 @@ class StoresController extends Controller
      *     }
      * )
      */
-    public function getAllStores(Request $request, $type)
+    public function getAllClosets(Request $request, $type)
     {
         try
         {
@@ -82,7 +82,7 @@ class StoresController extends Controller
     /**
      * @OA\Get(
      *
-     *     path="/api/stores/{slug}",
+     *     path="/api/closet/{slug}",
      *     tags={"Closet"},
      *     summary="Manage Store",
      *     operationId="getStore",
@@ -102,7 +102,7 @@ class StoresController extends Controller
      *     }
      * )
      */
-    public function getStore(Request $request, $storeSlug)
+    public function getCloset(Request $request, $storeSlug)
     {
         try
         {
@@ -139,10 +139,10 @@ class StoresController extends Controller
     /**
      * @OA\Post(
      *
-     *     path="/api/filter/stores/{slug}/product",
+     *     path="/api/filter/closet/{slug}/product",
      *     tags={"Closet"},
      *     summary="Store Products",
-     *     operationId="getFilteredStoreProducts",
+     *     operationId="getFilteredClosetProducts",
      *
      *     @OA\Response(response=200,description="Success"),
      *
@@ -174,7 +174,7 @@ class StoresController extends Controller
      *     }
      * )
      */
-    public function getFilteredStoreProducts(Request $request, $storeSlug)
+    public function getFilteredClosetProducts(Request $request, $storeSlug)
     {
         try
         {
@@ -225,10 +225,10 @@ class StoresController extends Controller
     /**
      * @OA\Get(
      *
-     *     path="/api/stores/{slug}/product",
+     *     path="/api/closet/{slug}/product",
      *     tags={"Closet"},
      *     summary="Store Products",
-     *     operationId="getStoreProducts",
+     *     operationId="getClosetProducts",
      *
      *     @OA\Response(response=200,description="Success"),
      *
@@ -245,7 +245,7 @@ class StoresController extends Controller
      *     }
      * )
      */
-    public function getStoreProducts(Request $request, $storeSlug)
+    public function getClosetProducts(Request $request, $storeSlug)
     {
         try
         {
@@ -315,7 +315,7 @@ class StoresController extends Controller
     /**
      * @OA\Get(
      *
-     *     path="/api/stores/{slug}/category/{catSlug}",
+     *     path="/api/closet/{slug}/category/{catSlug}",
      *     tags={"Closet"},
      *     summary="Manage Store Category Products",
      *     operationId="getStoreCategories",
@@ -342,7 +342,7 @@ class StoresController extends Controller
      *     }
      * )
      */
-    public function getStoreCategory(Request $request, $storeSlug, $catSlug)
+    public function getClosetCategory(Request $request, $storeSlug, $catSlug)
     {
         try
         {
@@ -391,10 +391,10 @@ class StoresController extends Controller
     /**
      * @OA\Get(
      *
-     *     path="/api/stores/{slug}/category/{catSlug}/product",
+     *     path="/api/closet/{slug}/category/{catSlug}/product",
      *     tags={"Closet"},
      *     summary="Manage Store Category Products",
-     *     operationId="getStoreCategoryProducts",
+     *     operationId="getClosetCategoryProducts",
      *
      *     @OA\Response(response=200,description="Success"),
      *
@@ -418,7 +418,7 @@ class StoresController extends Controller
      *     }
      * )
      */
-    public function getStoreCategoryProducts(Request $request, $storeSlug, $catSlug)
+    public function getClosetCategoryProducts(Request $request, $storeSlug, $catSlug)
     {
         try
         {

@@ -220,16 +220,166 @@
                 ]
             }
         },
-        "/api/categories/{slug}/products": {
+        "/api/closets/get-all/{type}": {
             "get": {
                 "tags": [
-                    "Categories"
+                    "Closet"
                 ],
-                "summary": "Get Category Products",
-                "operationId": "getCategoryProducts",
+                "summary": "Manage Store",
+                "operationId": "getAllClosets",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "description": "type",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/closet/{slug}": {
+            "get": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Manage Store",
+                "operationId": "getStore",
                 "parameters": [
                     {
                         "name": "slug",
+                        "in": "path",
+                        "description": "store slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/filter/closet/{slug}/product": {
+            "post": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Store Products",
+                "operationId": "getFilteredClosetProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "store slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Resend OTP",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "filters": {
+                                        "description": "Network Id of customer's phone number",
+                                        "type": "object",
+                                        "example": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/closet/{slug}/product": {
+            "get": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Store Products",
+                "operationId": "getClosetProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "store slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": [],
+                        "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/closet/{slug}/category/{catSlug}": {
+            "get": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Manage Store Category Products",
+                "operationId": "getStoreCategories",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "catSlug",
                         "in": "path",
                         "description": "category slug",
                         "required": true,
@@ -251,13 +401,13 @@
                 ]
             }
         },
-        "/api/filter/categories/{slug}/products": {
-            "post": {
+        "/api/closet/{slug}/category/{catSlug}/product": {
+            "get": {
                 "tags": [
-                    "Categories"
+                    "Closet"
                 ],
-                "summary": "Get Filtered Category Products",
-                "operationId": "getFilteredCategoryProducts",
+                "summary": "Manage Store Category Products",
+                "operationId": "getClosetCategoryProducts",
                 "parameters": [
                     {
                         "name": "slug",
@@ -267,66 +417,17 @@
                         "schema": {
                             "type": "string"
                         }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Set Order Shipment Details",
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "filters": {
-                                        "description": "filters",
-                                        "properties": {
-                                            "price_range": {
-                                                "description": "Price Range",
-                                                "properties": {
-                                                    "min": {
-                                                        "description": "1",
-                                                        "type": "string"
-                                                    },
-                                                    "max": {
-                                                        "description": "1",
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            },
-                                            "store_slug": {
-                                                "description": "Filter by store slug",
-                                                "type": "string"
-                                            },
-                                            "sort_by": {
-                                                "description": "Sort by",
-                                                "properties": {
-                                                    "newest_arrival": {
-                                                        "description": "1",
-                                                        "type": "integer"
-                                                    },
-                                                    "featured": {
-                                                        "description": "1",
-                                                        "type": "integer"
-                                                    },
-                                                    "price_high_to_low": {
-                                                        "description": "1",
-                                                        "type": "integer"
-                                                    },
-                                                    "price_low_to_high": {
-                                                        "description": "0",
-                                                        "type": "integer"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "type": "object"
-                                    }
-                                },
-                                "type": "object"
-                            }
+                    },
+                    {
+                        "name": "catSlug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
                     "200": {
                         "description": "Success"
@@ -424,10 +525,10 @@
                 }
             }
         },
-        "/v1/portal/otp/send": {
+        "/api/verify-phone": {
             "post": {
                 "tags": [
-                    "Verification"
+                    "Auth Verification"
                 ],
                 "summary": "Send Otp",
                 "operationId": "sendOtp",
@@ -619,13 +720,113 @@
                 ]
             }
         },
-        "/api/featured-products": {
+        "/api/categories/{slug}/products": {
             "get": {
                 "tags": [
-                    "Products"
+                    "Categories"
                 ],
-                "summary": "Get Homepage featured products",
-                "operationId": "getFeaturedProducts",
+                "summary": "Get Category Products",
+                "operationId": "getCategoryProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/filter/categories/{slug}/products": {
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get Filtered Category Products",
+                "operationId": "getFilteredCategoryProducts",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Set Order Shipment Details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "filters": {
+                                        "description": "filters",
+                                        "properties": {
+                                            "records_range": {
+                                                "description": "Record Range",
+                                                "properties": {
+                                                    "show_count": {
+                                                        "description": "24",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            "price_range": {
+                                                "description": "Price Range",
+                                                "properties": {
+                                                    "min": {
+                                                        "description": "1",
+                                                        "type": "string"
+                                                    },
+                                                    "max": {
+                                                        "description": "1",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            "sort_by": {
+                                                "description": "Sort by",
+                                                "properties": {
+                                                    "newest_arrival": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "featured": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "price_high_to_low": {
+                                                        "description": "1",
+                                                        "type": "integer"
+                                                    },
+                                                    "price_low_to_high": {
+                                                        "description": "0",
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Success"
@@ -639,24 +840,13 @@
                 ]
             }
         },
-        "/api/recently-viewed/products": {
-            "post": {
+        "/api/featured-products": {
+            "get": {
                 "tags": [
                     "Products"
                 ],
-                "summary": "Get customer's recently viewed products",
-                "operationId": "getRecentlyViewedProducts",
-                "parameters": [
-                    {
-                        "name": "productId",
-                        "in": "path",
-                        "description": "product id",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
+                "summary": "Get Homepage featured products",
+                "operationId": "getFeaturedProducts",
                 "responses": {
                     "200": {
                         "description": "Success"
@@ -748,211 +938,21 @@
                 ]
             }
         },
-        "/api/stores/list/{type}": {
-            "get": {
-                "tags": [
-                    "Closet"
-                ],
-                "summary": "Manage Store",
-                "operationId": "getAllStores",
-                "parameters": [
-                    {
-                        "name": "type",
-                        "in": "path",
-                        "description": "type",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                },
-                "security": [
-                    {
-                        "user_access_token": [],
-                        "locale": []
-                    }
-                ]
-            }
-        },
-        "/api/stores/{slug}": {
-            "get": {
-                "tags": [
-                    "Closet"
-                ],
-                "summary": "Manage Store",
-                "operationId": "getStore",
-                "parameters": [
-                    {
-                        "name": "slug",
-                        "in": "path",
-                        "description": "store slug",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                },
-                "security": [
-                    {
-                        "user_access_token": [],
-                        "locale": []
-                    }
-                ]
-            }
-        },
-        "/api/filter/stores/{slug}/product": {
+        "/api/recently-viewed/products": {
             "post": {
                 "tags": [
-                    "Closet"
+                    "Products"
                 ],
-                "summary": "Store Products",
-                "operationId": "getFilteredStoreProducts",
+                "summary": "Get customer's recently viewed products",
+                "operationId": "getRecentlyViewedProducts",
                 "parameters": [
                     {
-                        "name": "slug",
+                        "name": "productId",
                         "in": "path",
-                        "description": "store slug",
+                        "description": "product id",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Resend OTP",
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "filters": {
-                                        "description": "Network Id of customer's phone number",
-                                        "type": "object",
-                                        "example": null
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                },
-                "security": [
-                    {
-                        "user_access_token": [],
-                        "locale": []
-                    }
-                ]
-            }
-        },
-        "/api/stores/{slug}/product": {
-            "get": {
-                "tags": [
-                    "Closet"
-                ],
-                "summary": "Store Products",
-                "operationId": "getStoreProducts",
-                "parameters": [
-                    {
-                        "name": "slug",
-                        "in": "path",
-                        "description": "store slug",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                },
-                "security": [
-                    {
-                        "user_access_token": [],
-                        "locale": []
-                    }
-                ]
-            }
-        },
-        "/api/stores/{slug}/category/{catSlug}": {
-            "get": {
-                "tags": [
-                    "Closet"
-                ],
-                "summary": "Manage Store Category Products",
-                "operationId": "getStoreCategories",
-                "parameters": [
-                    {
-                        "name": "slug",
-                        "in": "path",
-                        "description": "category slug",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "catSlug",
-                        "in": "path",
-                        "description": "category slug",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                },
-                "security": [
-                    {
-                        "user_access_token": [],
-                        "locale": []
-                    }
-                ]
-            }
-        },
-        "/api/stores/{slug}/category/{catSlug}/product": {
-            "get": {
-                "tags": [
-                    "Closet"
-                ],
-                "summary": "Manage Store Category Products",
-                "operationId": "getStoreCategoryProducts",
-                "parameters": [
-                    {
-                        "name": "slug",
-                        "in": "path",
-                        "description": "category slug",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "catSlug",
-                        "in": "path",
-                        "description": "category slug",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     }
                 ],

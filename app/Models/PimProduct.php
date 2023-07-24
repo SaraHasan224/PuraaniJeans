@@ -168,46 +168,40 @@ class PimProduct extends Model
         return self::where('id', $id)->where('status', Constant::Yes)->first();
     }
 
+    public static function getByHandle($handle)
+    {
+        return self::where('handle', $handle)->where('status', Constant::Yes)->first();
+    }
+
     public static function getProductImagePlaceholder()
     {
         return env('IMGIX_BASE_PATH') . '/' . env('ENV_FOLDER') . env('UNIVERSAL_CHECKOUT_PRODUCT_IMAGE_PLACEHOLDER');
     }
 
 
-    public static function getProductDetailForCustomerPortal($productId, $productListingType = 0, $productStoreSlug = '')
+    public static function getProductDetailForCustomerPortal($productHandle, $productListingType = 0, $productStoreSlug = '')
     {
         $fields = [
             'pim_products.id as id',
             'name',
             'price',
-            'merchant_id',
-            'store_id',
+            'closet_id',
             'max_quantity',
             'short_description',
             'pim_products.has_variants as has_variants',
         ];
 
-        $product = self::whereId($productId)
+        $product = self::where("handle",$productHandle)
             ->select($fields)
             ->with([
                 'defaultImage:id,product_id,url,position',
                 'closet' => function($query) {
                     $query->select([
                         'id',
-                        'merchant_id',
-                        'store_slug',
-                        'name',
-                        'is_bshop_enabled',
-                        'area_based_shipment'
-                    ])->with([
-                        'branding'  => function($query) {
-                            $query->select([
-                                'id',
-                                'store_id',
-                                'favicon',
-                                'website',
-                            ]);
-                        },
+                        'closet_name',
+                        'closet_reference',
+                        'logo',
+                        'about_closet'
                     ]);
                 },
                 'attribute' => function($query) {
@@ -233,25 +227,12 @@ class PimProduct extends Model
                     $query->where('status', Constant::Yes);
                 }
             ])
-            ->whereHas('merchant', function($query) {
-                $query->select('id','status','user_id')->where('status',Constant::Yes)
-                    ->whereHas('user', function ($records)
-                    {
-                        $records->where("status",  Constant::Yes);
-                    });
-            })
             ->whereHas('activeVariants', function($query) {
                 $query->where('status', Constant::Yes);
             })
             ->where('pim_products.status', Constant::Yes)->first();
-        $productStore = "";
         if(!empty($product)) {
-            $productStore = $product->store;
-            unset($product['store']);
-
-            $campaign = '';
-
-
+            $productStore = $product->closet;
             $defaultImage = PimProductImage::getPlaceholder();
             $product['images'] =  $product->images()->count() == 0 ? [
                 [
@@ -263,11 +244,11 @@ class PimProduct extends Model
 
             $image = optional(optional($product)->defaultImage)->url;
             $product['image'] = !empty($image) ? $image : Helper::getProductImagePlaceholder();
-            $product['store'] = [
-                'store_name' => $productStore->name,
-                'store_slug' => $productStore->store_slug,
-                'store_favicon' => $productStore->getStoreAppFavicon(),
-                'store_website' => $productStore->getStoreAppFavicon(),
+            $product['closet'] = [
+                'name' => $productStore->closet_name,
+                'reference' => $productStore->closet_reference,
+                'logo' => $productStore->logo,
+                'website' => $productStore->about_closet,
             ];
             $productVariants = $product->activeVariants;
             $variantAttributes = [];
@@ -384,19 +365,15 @@ class PimProduct extends Model
             $product['listing_slug'] = '';
             $product['attributes'] = $attributes;
 
-            unset($product['store_id']);
-            unset($product['merchant_id']);
+            unset($product['closet_id']);
             unset($product['defaultImage']);
             unset($product['attribute']);
             unset($product['attributeOption']);
             unset($product['closet']);
             unset($product['activeVariants']);
-            unset($product['merchant']);
-            unset($product['default_shipment_methods']);
+            unset($product['id']);
         }
-        return [
-            'product' => $product
-        ];
+        return $product;
     }
 
     public static function getProductsForApp($listingType = Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS'], $perPage, $listOptions = [], $disablePagination = false)
@@ -420,6 +397,7 @@ class PimProduct extends Model
             'price',
             'closet_id',
             'brand_id',
+            'handle',
             'max_quantity',
             'short_description',
             'has_variants',
@@ -662,6 +640,8 @@ class PimProduct extends Model
                             'type' => $discountType,
                         ],
                         'image' => !empty($image) ? $image : Helper::getProductImagePlaceholder(),
+                        'images' => $item->images,
+                        'images1' => $item->images->first(),
                         'position' => $position,
                         'qty' => $item->max_quantity,
                         'handle' => $item->handle,
@@ -684,6 +664,8 @@ class PimProduct extends Model
                         'max_quantity' => $item->max_quantity,
                         'has_variants' => $item->has_variants,
                         'image' => !empty($image) ? $image : Helper::getProductImagePlaceholder(),
+                        'images' => $item->images,
+                        'images1' => $item->images->first(),
                         'position' => $position,
                         'variant_count' => $item->activeVariants->count(),
                         'attribute_count' => $item->attribute->count(),

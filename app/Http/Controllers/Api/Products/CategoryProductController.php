@@ -15,55 +15,121 @@ use Illuminate\Validation\Validator;
 class CategoryProductController extends Controller
 {
 
+
     /**
      * @OA\Get(
      *
-     *     path="/api/category/{slug}/products",
-     *     tags={"Products"},
-     *     summary="Get category products",
+     *     path="/api/categories/{slug}/products",
+     *     tags={"Categories"},
+     *     summary="Get Category Products",
      *     operationId="getCategoryProducts",
      *
      *     @OA\Response(response=200,description="Success"),
      *
-     *     @OA\RequestBody(
-     *         description="category",
-     *         @OA\MediaType(
-     *             mediaType="application/json",
-     *
-     *                         @OA\Property(
-     *                              property="type",
-     *                              description="1",
-     *                              type="string",
-     *                          ),
-     *         ),
-     *     ),
+     *     @OA\Parameter(
+     *         name="slug",
+     *         in="path",
+     *         description="category slug",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     )
      * )
      */
 
-    public function getCategoryProducts(Request $request)
+    public function getProducts(Request $request, $categorySlug)
     {
-        try {
-            $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'];
-            $listOptions = [];
-            $response = PimProduct::getProductsForApp($listType, 20, $listOptions);
+        try
+        {
+            $bSecureCategoryIds = $this->getCachedSubCategoriesIds( $categorySlug );
+            if( $bSecureCategoryIds )
+            {
+                $merchantCategoryIds = $this->getCachedMerchantCategories( $categorySlug, $bSecureCategoryIds );
+                $productIds = $this->getCachedPimCategoryProductIds( $categorySlug, $merchantCategoryIds );
+                $response = $this->getCachedProducts( $request, $categorySlug, $merchantCategoryIds, $productIds );
 
-            return ApiResponseHandler::success($response, __('messages.general.success'));
-        } catch (\Exception $e) {
+                return ApiResponseHandler::success( $response, __('messages.general.success') );
+            }
+
+            return ApiResponseHandler::failure( 'Category not found', '', ['not_found' => Constant::Yes] );
+        }
+        catch( \Exception $e )
+        {
             AppException::log($e);
-            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
+            return ApiResponseHandler::failure( __('messages.general.failed'), $e->getMessage() );
         }
     }
+
+    public function getCachedMerchantCategories( $categorySlug, $bSecureCategoryIds )
+    {
+//        $cacheKey = 'bsecure_categories_mapped_'.$categorySlug;
+//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($bSecureCategoryIds) {
+        return PimBsCategoryMapping::getAllMerchantCategoryIds( $bSecureCategoryIds );
+//        });
+    }
+
+    public function getCachedSubCategoriesIds( $categorySlug )
+    {
+//        $cacheKey = 'get_all_subcategory_ids_'.$categorySlug;
+//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($categorySlug) {
+        return PimBsCategory::getAllSubCategoryIds( $categorySlug );
+//        });
+    }
+
+    public function getCachedPimCategoryProductIds( $categorySlug, $merchantCategoryIds )
+    {
+//        $cacheKey = 'get_products_'.$categorySlug;
+//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($merchantCategoryIds) {
+        return PimProduct::getPimCategoryProductIds($merchantCategoryIds);
+//        });
+    }
+
+    public function getCachedProducts( $request, $categorySlug, $merchantCategoryIds, $productIds )
+    {
+        $page = $request->input('page') ?? 1;
+        $perPage = 10;
+        $cacheKey = 'get_products_'.$categorySlug.'_'.$page.'_'.$perPage;
+//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($merchantCategoryIds, $perPage, $categorySlug, $productIds) {
+        $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'];
+        $listOptions = [
+            "categoryIds" => $merchantCategoryIds,
+            "bsCategorySlug" => $categorySlug,
+            'filter_by_product_ids' => $productIds,
+            'filters' => [
+                'sort_by' =>  [
+                    'newest_arrival' => 1,
+                    'featured' => 0,
+                    'price_high_to_low' => 0,
+                    'price_low_to_high' => 0,
+                ],
+                'price_range' => [
+                    "max" => '',
+                    "min" => 0
+                ]
+            ]
+        ];
+        return PimProduct::getProductsForApp($listType, $perPage, $listOptions);
+//        });
+    }
+
 
     /**
      * @OA\Post(
      *
-     *     path="/api/filter/featured-products",
-     *     tags={"Products"},
-     *     summary="Get Homepage featured products",
+     *     path="/api/filter/categories/{slug}/products",
+     *     tags={"Categories"},
+     *     summary="Get Filtered Category Products",
      *     operationId="getFilteredCategoryProducts",
      *
      *     @OA\Response(response=200,description="Success"),
      *
+     *     @OA\Parameter(
+     *         name="slug",
+     *         in="path",
+     *         description="category slug",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     *
      *     @OA\RequestBody(
      *         description="Set Order Shipment Details",
      *         @OA\MediaType(
@@ -74,6 +140,16 @@ class CategoryProductController extends Controller
      *                     property="filters",
      *                     description="filters",
      *                     type="object",
+     *                      @OA\Property(
+     *                         property="records_range",
+     *                         description="Record Range",
+     *                         type="object",
+     *                         @OA\Property(
+     *                              property="show_count",
+     *                              description="24",
+     *                              type="string",
+     *                          )
+     *                      ),
      *                      @OA\Property(
      *                         property="price_range",
      *                         description="Price Range",
@@ -90,21 +166,16 @@ class CategoryProductController extends Controller
      *                          )
      *                      ),
      *                      @OA\Property(
-     *                         property="store_slug",
-     *                         description="Filter by store slug",
-     *                         type="string"
-     *                      ),
-     *                      @OA\Property(
      *                         property="sort_by",
      *                         description="Sort by",
      *                         type="object",
      *                         @OA\Property(
-     *                              property="featured",
+     *                              property="newest_arrival",
      *                              description="1",
      *                              type="integer",
      *                          ),
      *                         @OA\Property(
-     *                              property="newest_arrival",
+     *                              property="featured",
      *                              description="1",
      *                              type="integer",
      *                          ),
@@ -123,12 +194,17 @@ class CategoryProductController extends Controller
      *              )
      *         )
      *     ),
+     *
+     *     security={
+     *          {"user_access_token": {}, "locale": {}}
+     *     }
      * )
      */
 
-    public function getFilteredCategoryProducts(Request $request)
+    public function getFilteredCategoryProducts(Request $request, $categorySlug)
     {
-        try {
+        try
+        {
             $requestData = $request->all();
             $validator = Validator::make($requestData, PimProduct::getValidationRules('filters',$requestData));
 
@@ -138,18 +214,36 @@ class CategoryProductController extends Controller
             }
 
             $filterData = $requestData['filters'];
-            $listOptions = [
-                'filters' => $filterData
-            ];
+            $showCount = array_key_exists("filters", $requestData) && !empty($requestData['filters'])&& !empty($requestData['filters']['show_count']) ? $requestData['filters']['show_count'] : 15;
+            $bSecureCategoryIds = $this->getCachedSubCategoriesIds( $categorySlug );
 
-            $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'];
+            if( $bSecureCategoryIds )
+            {
+                $merchantCategoryIds = $this->getCachedMerchantCategories( $categorySlug, $bSecureCategoryIds );
+                $validator = Validator::make($requestData, PimProduct::getValidationRules('filters',$requestData));
 
-            $response = PimProduct::getProductsForApp($listType, 20, $listOptions);
+                if( $validator->fails() )
+                {
+                    return ApiResponseHandler::validationError($validator->errors());
+                }
+                $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'];
+                $listOptions = [
+                    "categoryIds" => $merchantCategoryIds,
+                    "bsCategorySlug" => $categorySlug,
+                    'filters' => $filterData,
+                    'filter_by_product_ids' => $this->getCachedPimCategoryProductIds( $categorySlug, $merchantCategoryIds )
+                ];
+                $response = PimProduct::getProductsForApp($listType, $showCount, $listOptions);
 
-            return ApiResponseHandler::success($response, __('messages.general.success'));
-        } catch (\Exception $e) {
+                return ApiResponseHandler::success( $response, __('messages.general.success') );
+            }
+
+            return ApiResponseHandler::failure( 'Category not found', '', ['not_found' => Constant::Yes] );
+        }
+        catch( \Exception $e )
+        {
             AppException::log($e);
-            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
+            return ApiResponseHandler::failure( __('messages.general.failed'), $e->getMessage() );
         }
     }
 }

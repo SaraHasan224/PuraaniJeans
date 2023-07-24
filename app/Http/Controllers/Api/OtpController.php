@@ -109,7 +109,7 @@ class OtpController extends BaseCustomerController
     /**
      * @OA\Post(
      *     path="/v1/portal/otp/verify",
-     *     tags={"Verification"},
+     *     tags={"Auth Verification"},
      *     summary="Verify Otp",
      *     operationId="verifyOtp",
      *
@@ -209,7 +209,7 @@ class OtpController extends BaseCustomerController
     /**
      * @OA\Post(
      *     path="/v1/portal/otp/resend",
-     *     tags={"Verification"},
+     *     tags={"Auth Verification"},
      *     summary="Resend Otp",
      *     operationId="resendOtp",
      *

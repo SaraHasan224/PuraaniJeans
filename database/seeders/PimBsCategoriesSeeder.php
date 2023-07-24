@@ -151,22 +151,18 @@ class PimBsCategoriesSeeder extends Seeder
                 $image = array_key_exists("bs_image", $d) ? ImageUpload::downloadExternalFile($path, $d['bs_image'], $d['name'] . "-" . strtotime("now")) : "";
                 $isFeatured = array_key_exists("is_featured", $d) ? $d['is_featured'] : "";
                 $isFeaturedWeight = array_key_exists("is_featured_weight", $d) ? $d['is_featured_weight'] : "";
-                $attr = self::createCategory($d, $d['name'], Constant::No, $image, $position, $isFeatured, $isFeaturedWeight);
+                $attr = self::createCategory($d['name'], Constant::No, $image, $position, $isFeatured, $isFeaturedWeight);
                 if(array_key_exists('options',$d)) {
                     foreach ($d['options'] as $key2 => $sd) {
                         if(is_array($sd)) {
-                            $name = $key2;
-                            $position = 1+$key;
-                            $subAttr = self::createCategory($attr, $name, $attr->id, '', $position);
+                            $subAttr = self::createCategory($key2, $attr->id, '', $key+1);
                             foreach ($sd as $key3 => $s) {
-                                $name = $s;
-                                $position = 1+$key+$key3;
-                                self::createCategory($subAttr, $name, $subAttr->id, '', $position);
+                                self::createCategory($s, $subAttr->id, '', $key+$key3+1);
                             }
                         }else {
                             $name = $sd;
                             $position = $key2+1+$key;
-                            self::createCategory($attr, $name, $attr->id, '', $position);
+                            self::createCategory($name, $attr->id, '', $position);
                         }
                     }
                 }
@@ -176,23 +172,22 @@ class PimBsCategoriesSeeder extends Seeder
         }
     }
 
-    private static function createCategory($attr, $name, $parentId, $image, $position, $isFeatured = null, $isFeaturedWeight = null) {
-       try {
-           return PimBsCategory::create([
-               'parent_id' => $parentId,
-               'name' => $name,
-               'slug' => Helper::generateSlugReference($name),
-               'icon' => '',
-               'image' => $image,
-               'is_featured' => $isFeatured,
-               'is_featured_weight' => $isFeaturedWeight,
-               'position' => $position,
-               'status' => Constant::Yes,
 
-           ]);
-       }catch( \Exception $e ) {
+    private static function createCategory($name, $parentId, $image, $position, $isFeatured = 0, $isFeaturedWeight = 0) {
+        try {
+            return PimBsCategory::create([
+                'parent_id' => $parentId,
+                'name' => $name,
+                'slug' => Helper::generateSlugReference($name),
+                'image' => $image,
+                'is_featured' => $isFeatured,
+                'is_featured_weight' => $isFeaturedWeight,
+                'position' => $position,
+                'status' => Constant::Yes,
+            ]);
+        } catch (\Exception $e) {
             AppException::log($e);
 
-       }
+        }
     }
 }

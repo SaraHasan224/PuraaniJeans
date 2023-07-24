@@ -14,7 +14,7 @@ class PimBsCategory extends Model
     public $table = 'pim_bs_categories';
 
     protected $fillable = [
-         'parent_id', 'name', 'slug', 'position' , 'status'
+         'parent_id', 'name', 'slug', 'position' , 'status', 'image', 'is_featured', 'is_featured_weight'
     ];
     public function getNameAttribute($value)
     {

@@ -4,11 +4,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\Products\CategoryProductController;
+use App\Http\Controllers\Api\Products\FeaturedProductController;
+use App\Http\Controllers\Api\Products\RecentlyViewedProductController;
+use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\MetadataController;
 use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\PlaygroundTestController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ClosetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,47 +30,48 @@ use App\Http\Controllers\Api\AuthController;
 //    return $request->user();
 //});
 Route::post('cloudinary/image-upload-test', [PlaygroundTestController::class, 'uploadImageToCloudinary']);
-//Route::post('disk/image-upload-test', [PlaygroundTestController::class, 'uploadImage']);
 
 Route::get('countries-meta-data', [MetadataController::class, 'getMetaData']);
 Route::get('country-list', [MetadataController::class, 'getCountriesList']);
 
 Route::get('meta-data', [HomeController::class, 'getMetaContent']);
 Route::get('mega-menu', [HomeController::class, 'getMegaMenu']);
-Route::get('homepage', [HomeController::class, 'getHomePageContent']);
-Route::get('homepage/featured-section', [HomeController::class, 'getHomePageFeaturedContent']);
 
 
 Route::post('login', [AuthController::class, "login"]);
 Route::post('register', [AuthController::class, "register"]);
 
+#Home Page
+Route::get('homepage', [HomeController::class, 'getHomePageContent']);
+Route::get('homepage/featured-section', [HomeController::class, 'getHomePageFeaturedContent']);
 
-//Route::get('/signup-or-signin', [OtpC::class, 'index'])->name('users'); //completed
-
-//#Featured Products
-//Route::get('/featured-products', 'ProductController@getFeaturedProducts');
-//Route::post('/filter/featured-products', 'ProductController@getFilteredFeaturedProducts');
-
+Route::post('/product/{handle}',  [ProductController::class, 'getProductDetail']);
+#Featured Products
+Route::get('/featured-products',  [FeaturedProductController::class, 'getFeaturedProducts']);
+Route::post('/filter/featured-products', [FeaturedProductController::class, 'getFeaturedProducts']);
+#Recently Viewed Products
+Route::get('/recently-viewed-products',  [RecentlyViewedProductController::class, 'getRecentlyViewedProducts']);
+Route::post('/filter/recently-viewed-products', [RecentlyViewedProductController::class, 'getCachedRecentlyViewedProducts']);
 #categories
-//Route::get('/categories', 'CategoryController@getCategories');
-//Route::get('/categories/{slug}', 'CategoryController@getSubCategories');
-Route::get('/categories/{slug}/products', [CategoryController::class, 'getProducts']);
-//Route::post('/filter/categories/{slug}/products', 'CategoryController@getFilteredCategoryProducts');
+Route::get('/categories', [CategoryController::class, 'getCategories']);
+Route::get('/categories/{slug}', [CategoryController::class, 'getSubCategories']);
+#category products
+Route::get('/categories/{slug}/products', [CategoryProductController::class, 'getProducts']);
+Route::get('/filter/categories/{slug}/products', [CategoryProductController::class, 'getFilteredCategoryProducts']);
+
 
 #Closet List
-//Route::get('/stores/list/{type}', 'StoresController@getAllStores');
+Route::get('/closets/get-all/{type}', [ClosetController::class, 'getAllClosets']);
 #Closets
-//Route::get('/stores/{slug}', 'StoresController@getStore');
-//Route::get('/stores/{slug}/product', 'StoresController@getStoreProducts');
-//Route::post('/filter/stores/{slug}/product', 'StoresController@getFilteredStoreProducts');
+Route::get('/closet/{slug}', [ClosetController::class, 'getCloset']);
+#Closet Products
+Route::get('/closet/{slug}/product', [ClosetController::class, 'getClosetProducts']);
+Route::get('/filter/closet/{slug}/product', [ClosetController::class, 'getFilteredClosetProducts']);
 #Closet Category
-//Route::get('/stores/{slug}/category/{catSlug}', 'StoresController@getStoreCategory');
-//Route::get('/stores/{slug}/category/{catSlug}/product', 'StoresController@getStoreCategoryProducts');
+Route::get('/closet/{slug}/category/{catSlug}', [ClosetController::class, 'getClosetCategory']);
+Route::get('/closet/{slug}/category/{catSlug}/product', [ClosetController::class, 'getClosetCategoryProducts']);
 
 Route::middleware(['tokenValidation', 'auth:api'])->group(function () {
     Route::post('verify-phone', [OtpController::class, "sendOtp"]);
-    Route::middleware('')->get('/user', function (Request $request) {
-        return $request->user();
-    });
 
 });
