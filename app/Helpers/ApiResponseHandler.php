@@ -167,19 +167,4 @@ class ApiResponseHandler
             'exception' =>  $exception
         ], $status, [], JSON_UNESCAPED_UNICODE );
     }
-
-    /**
-     * @param $customer
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public static function userBlockedException( $session, $reason, $sessionId, $customer = "" ){
-        OtpBlocklist::blockCustomerIP($session,$reason, $customer);
-        $error_body = [];
-//        $error_body['reinitialize_app'] = Constant::Yes;
-        $error_body['customer_blocked'] = Constant::Yes;
-        if (Auth::user()) {
-            Auth::user()->killSession($sessionId);
-        }
-        return ApiResponseHandler::failure(__('messages.customer.otp.customer_is_blocked'), '', (object) $error_body);
-    }
 }

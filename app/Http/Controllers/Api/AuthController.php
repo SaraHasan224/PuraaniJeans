@@ -70,7 +70,7 @@ class AuthController extends Controller
         }
 
         $requestData['password'] = Hash::make($requestData['password']);
-        $requestData['country_id'] = Country::getCountryByCountryCode($requestData['country'], true);
+        $requestData['country_id'] = Country::getCountryByCountryCode($requestData['country'], true)->id;
         $requestData['remember_token'] = Str::random(10);
         $identifier = v4();
         $customer = Customer::createCustomer($requestData, $identifier);

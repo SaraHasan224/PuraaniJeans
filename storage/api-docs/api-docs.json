@@ -525,7 +525,7 @@
                 }
             }
         },
-        "/api/verify-phone": {
+        "/api/send/otp": {
             "post": {
                 "tags": [
                     "Auth Verification"
@@ -566,10 +566,10 @@
                 ]
             }
         },
-        "/v1/portal/otp/verify": {
+        "/api/verify/otp": {
             "post": {
                 "tags": [
-                    "Verification"
+                    "Auth Verification"
                 ],
                 "summary": "Verify Otp",
                 "operationId": "verifyOtp",
@@ -602,10 +602,10 @@
                 ]
             }
         },
-        "/v1/portal/otp/resend": {
+        "/api/resend/otp": {
             "post": {
                 "tags": [
-                    "Verification"
+                    "Auth Verification"
                 ],
                 "summary": "Resend Otp",
                 "operationId": "resendOtp",
@@ -696,10 +696,6 @@
                                         "description": "referrer type",
                                         "type": "string",
                                         "example": "Featured Product"
-                                    },
-                                    "customer_address_id": {
-                                        "description": "customer address id",
-                                        "type": "integer"
                                     }
                                 },
                                 "type": "object"
@@ -711,13 +707,7 @@
                     "200": {
                         "description": "Success"
                     }
-                },
-                "security": [
-                    {
-                        "user_access_token": [],
-                        "locale": []
-                    }
-                ]
+                }
             }
         },
         "/api/categories/{slug}/products": {

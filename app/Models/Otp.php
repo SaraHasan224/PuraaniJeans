@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 use App\Helpers\Helper;
+use App\Helpers\SmsHandler;
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Session;
@@ -19,9 +20,12 @@ use Jenssegers\Agent\Agent;
 
 class Otp extends Model
 {
-    protected $fillable = [
-        'model', 'model_id', 'email_otp', 'phone_otp', 'action',
-    ];
+//    protected $fillable = [
+//        'model',
+//        'model_id',
+//        'email_otp',
+//        'phone_otp', 'action',
+//    ];
 
     protected $guarded = [];
 
@@ -29,13 +33,9 @@ class Otp extends Model
         'send' => [
             'country_code' => 'required|string',
             'phone_number' => 'required|string',
-            'network_id' => 'nullable|exists:mobile_telecom_networks,id'
         ],
         'verify' => [
             'otp' => 'required|min:6|max:6'
-        ],
-        'resend' => [
-            'network_id' => 'nullable|exists:mobile_telecom_networks,id'
         ],
     ];
 
@@ -51,10 +51,10 @@ class Otp extends Model
             ->first();
     }
 
-    public static function getOtpByRequestId( $request_id )
+    public static function getOtpByReferenceId($request_id)
     {
         return self::where('model', Constant::OTP_MODULES['customers'])
-            ->where('request_id', $request_id)
+            ->where('reference_id', $request_id)
             ->where('is_verified', Constant::No)
             ->where('is_used', Constant::No)
             //->where('expire_at', '>', NOW())
@@ -68,162 +68,98 @@ class Otp extends Model
         Session::put('opt_created_at', Carbon::now());
     }
 
-    public static function doesVerificationRequired( $user, $request )
+    public static function getLastOtpSentToCustomer($customer_id, $identifier, $callFrom)
     {
-        $otpVerifyGapInSeconds = env('OTP_VERIFY_GAP');
-        $time = date("Y-m-d H:i:s", time() - $otpVerifyGapInSeconds);
-        $iPDetails = Http::getIpDetails($request);
+        return self::where('model', Constant::OTP_MODULES['customers'])
+            ->where('order_ref', $identifier)
+            ->where('model_id', $customer_id)->latest('created_at')->first();
+
+    }
+
+    public static function createOtp($otpData, $request)
+    {
+        $allowEmailOtp = false;
+        $allowSmsOtp = true;
+        $otp = new self;
+
+        if ($otpData['action'] == Constant::OTP_EVENTS['resend'] && isset($otpData['phone_otp'])) {
+            $otp_encrypt = decrypt($otpData['phone_otp']);
+        } else {
+            $otp_encrypt = Helper::randomDigits();
+        }
+
+        $phoneNumber = $otpData['phone_number'];
+
+        $timerVal = Constant::OTP_EXPIRE_TIME;
+        $expireTime = Carbon::now()->addSeconds($timerVal);
+
         $agent = new Agent();
-        $verificationCountQuery = self::where('model_id', $user->id)
-            ->where('model', Constant::OTP_MODULES['users'])
-            ->where('is_verified', Constant::Yes)
-            ->where('country', $iPDetails['country_name'] )
-            ->where('user_agent', $agent->getUserAgent())
-            ->where('verified_at', '>', $time);
-        $verificationCount = $verificationCountQuery->count();
-        return ! $verificationCount > 0;
-    }
+        $data = [
+            'model' => Constant::OTP_MODULES['customers'],
+            'model_id' => $otpData['customer_id'],
+            'reference_id' => $otpData['identifier'],
+            'action' => $otpData['action'],
+            'phone_number' => $phoneNumber,
+            'country_code' => $otpData['country_code'],
+            'email_otp' => encrypt($otp_encrypt),
+            'phone_otp' => encrypt($otp_encrypt),
+            'expire_at' => $expireTime,
+            'user_agent' => $agent->getUserAgent(),
+            'email' => null,
+        ];
 
-    public static function getLastOtpSentToCustomer( $customer_id, $identifier, $callFrom )
-    {
-        if( $callFrom == "checkout" )
-        {
-            return self::where('model', Constant::OTP_MODULES['customers'])
-                ->where('order_ref', $identifier)
-                ->where('model_id', $customer_id)->latest('created_at')->first();
-        }
-        elseif( $callFrom == "sso" || $callFrom == "identity-verification")
-        {
-            return self::where('model', Constant::OTP_MODULES['customers'])
-                ->where('request_id', $identifier)
-                ->where('model_id', $customer_id)->latest('created_at')->first();
-        }
-        elseif( $callFrom == "customer-portal")
-        {
-            return self::where('model', Constant::OTP_MODULES['customers'])
-                ->where('request_id', $identifier)
-                ->where('model_id', $customer_id)->latest('created_at')->first();
-        }
-    }
-
-    public static function createOtp($action = 'register', $user, $resend = false, $phoneNumber = false, $sendSms = false)
-    {
-        try{
-            $otp = new self;
-
-            Otp::where('model_id', $user->id)->where('action',$action)->update(['is_used' => 1]);
-            $optCreatedAt = session('opt_created_at');
-            $diffInMinutes = Carbon::now()->diffInMinutes($optCreatedAt);
-
-            if ($resend && $diffInMinutes <= config("app.OTP_resend_time"))
-            {
-                $emailOtp = session('email_otp');
-                $phoneOtp = session('phone_otp');
-            }
-            else
-            {
-                $randomNumber = Helper::randomDigits();
-                $emailOtp = $randomNumber;
-                $phoneOtp = $randomNumber;
-                self::storeOtpInSession($emailOtp, $phoneOtp);
-            }
-
-            if(!$phoneNumber){
-                $phoneNumber = $user->country_code . $user->phone;
-            }
-
-            $otp->fill([
-                'model'     => Constant::OTP_MODULES['users'],
-                'model_id'  => $user->id,
-                'action'    => $action,
-                'email_otp' => Hash::make($emailOtp),
-                'phone_otp' => Hash::make($phoneOtp),
-            ])->id;
-
-            $otp->save();
-            $otp['non_hashed_email_otp'] = $emailOtp;
-            return $otp;
-        }catch (\Exception $e){
-            AppException::log($e);
-            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
-        }
-    }
-
-    public static function verifyUser($action, $data)
-    {
-        $userId = $data['user_id'];
-        $emailOtp = $data['email_code'];
-        $phoneOtp = $data['email_code'];
-        // $phoneOtp = $data['phone_code'];
-
-        if (!config("app.OTP_ENABLED"))
-        {
-            if ($emailOtp == config("app.GeneralOTP") && $phoneOtp == config("app.GeneralOTP"))
-            {
-                self::markUserAttemptVerified($userId, $action);
-                return true;
+        if (!array_key_exists('otp_provider', $data)) {
+            if ($allowEmailOtp) {
+                $data['otp_provider'] = Constant::OTP_PROVIDERS['EMAIL'];
+            } elseif ($allowSmsOtp) {
+                $data['otp_provider'] = Constant::OTP_PROVIDERS['SMS'];
             }
         }
-        else
-        {
-            $userOtp = Otp::getOtpByUserId($action, $userId);
-            if ($userOtp)
-            {
-                if (Hash::check($emailOtp, $userOtp->email_otp) && Hash::check($phoneOtp, $userOtp->phone_otp))
-                {
-                    self::markUserAttemptVerified($userId, $action);
-                    return true;
-                }
+        $ip = Helper::getUserIP($request);
+        $data['ip'] = $ip;
+        $otp->fill($data);
+        if ($otp->save()) {
+            if (env('ENABLE_SMS')) {
+//               SmsHandler::otpSms($otp, $otpData, $otp_encrypt, $appType);
             }
         }
-        return false;
+        return $otp;
     }
 
-    public static function markUserAttemptVerified($userId, $action)
+    public function markUserAttemptVerified()
     {
-        Otp::where('model_id', $userId)->where('action', $action)->update(['is_verified' => 1]);
-        User::markUserOtpVerified($userId);
+        $this->update([
+            'is_verified' => Constant::Yes,
+            'verified_at' => Carbon::now(),
+        ]);
     }
 
-    public static function revokeOldOtpForCustomer( $customer_id, $model, $order_ref)
+    public static function revokeOldOtpForCustomer($model_id, $model, $ref)
     {
-        self::where('model',$model)
-            ->where('model_id', $customer_id)
+        self::where('model', $model)
+            ->where('model_id', $model_id)
             ->where('is_verified', Constant::No)
-            ->where(function ( $query ) use ($order_ref){
-                $query->where('order_ref', $order_ref)
-                    ->orWhere('request_id', $order_ref);
+            ->where(function ($query) use ($ref) {
+                $query->where('reference_id', $ref);
             })->update(['is_used' => 1]);
     }
 
-    public static function verifyCustomerPortalOtp($session_id, $phoneOtp )
+    public static function verifyCustomerOtp($identifier, $phoneOtp)
     {
-        $userOtp = Otp::getOtpByRequestId( $session_id );
-        return self::__verify( $userOtp, $phoneOtp, 'vault' );
+        $userOtp = Otp::getOtpByReferenceId($identifier);
+        return self::__verify($userOtp, $phoneOtp);
     }
 
-    private static function __verify( $userOtp, $phoneOtp, $callFrom )
+    private static function __verify($userOtp, $phoneOtp)
     {
-        if( $userOtp )
-        {
-            $phoneWithCountryCode = $userOtp->country_code.$userOtp->phone_number;
-            $playStoreAndAppStoreTestingNumbers = explode( ",", env('APP_PLAY_STORE_NUMBERS'));
-            $isPlayStoreOrAppStoreRequest = $playStoreAndAppStoreTestingNumbers &&
-                is_array( $playStoreAndAppStoreTestingNumbers ) &&
-                in_array( $phoneWithCountryCode, $playStoreAndAppStoreTestingNumbers );
-
-            if( (env('OTP_ENABLED') == 0) || ( $isPlayStoreOrAppStoreRequest && $callFrom == "vault" ) )
-            {
-                if( $phoneOtp == env('GeneralOTP') )
-                {
+        if ($userOtp) {
+            if (!env('ENABLE_SMS')) {
+                if ($phoneOtp == env('GeneralOTP')) {
                     $userOtp->markUserAttemptVerified();
                     return $userOtp;
                 }
-            }
-            else
-            {
-                if( Helper::matchOtp( $phoneOtp, $userOtp->phone_otp ) )
-                {
+            } else {
+                if (Helper::matchOtp($phoneOtp, $userOtp->phone_otp)) {
                     $userOtp->markUserAttemptVerified();
                     return $userOtp;
                 }
@@ -231,6 +167,20 @@ class Otp extends Model
         }
 
         return false;
+    }
+
+
+    public static function allowOtpReSend($customer_id, $identifier)
+    {
+        $query = self::where('model_id', $customer_id)
+            ->where('model', Constant::OTP_MODULES['customers'])
+            ->where('is_verified', Constant::No)
+            ->where('reference_id', $identifier);
+        $attempts = $query->count();
+
+        $max_tries = env('MAX_OTP_TRIES') ?? 3;
+
+        return $attempts <= $max_tries;
     }
 
 }

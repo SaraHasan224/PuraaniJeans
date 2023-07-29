@@ -46,24 +46,12 @@ class ValidateUserAccessToken extends CheckCredentials
 
             $psr = $this->server->validateAuthenticatedRequest($psr);
 
-            $order_ref = null;
-            $sso_request_id = null;
-
             if ($psr->getAttribute('oauth_client_id') == env('PASSPORT_PERSONAL_ACCESS_CLIENT_ID')) {
                 $customerAccessToken = AccessToken::getById($psr->getAttribute('oauth_access_token_id'));
 
                 if ($customerAccessToken->can("customer")) {
                     $customerIdentifier = $customerAccessToken->name;
                     $customer = Customer::findByRef($customerIdentifier);
-//                        RequestResponseLog::addData( $request, [
-//                            'customer_id'    => $psr->getAttribute('oauth_user_id'),
-//                            'client_id'      => $psr->getAttribute('oauth_client_id'),
-//                            'oauth_token_id' => $psr->getAttribute('oauth_access_token_id'),
-//                            'order_ref'      => $order_ref,
-//                            'merchant_id'      => optional($order)->merchant_id,
-//                            'store_id'      => optional($order)->store_id,
-//                            'env_id'      => optional($order)->env_id,
-//                        ]);
                     if ($customer) {
                         $request->request->set('customer_id', $customer->id);
                         $request->request->set('customer_ref', $customerIdentifier);
@@ -100,12 +88,6 @@ class ValidateUserAccessToken extends CheckCredentials
                 $error_response['result'] = $request->get('result');
             }
 
-            if ($request->path() == Constant::CustomerIdentificationFromTokeRoute) {
-                $response = [];
-                $response['user_identified'] = Constant::No;
-                $response['user_details'] = (object)[];
-                return ApiResponseHandler::success($response, $e->getMessage());
-            }
 
             return ApiResponseHandler::failure($e->getMessage(), null, $error_response);
             //return ApiResponseHandler::authenticationError();

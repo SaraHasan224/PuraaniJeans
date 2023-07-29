@@ -22,7 +22,7 @@ class OtpController extends BaseCustomerController
 {
     /**
      * @OA\Post(
-     *     path="/api/verify-phone",
+     *     path="/api/send/otp",
      *     tags={"Auth Verification"},
      *     summary="Send Otp",
      *     operationId="sendOtp",
@@ -66,38 +66,37 @@ class OtpController extends BaseCustomerController
             if ($validator->fails()) {
                 return ApiResponseHandler::validationError($validator->errors());
             }
-            $country_code = $requestData['country_code'];
-            $phone_number = $requestData['phone_number'];
 
-            $customer = Customer::findByPhoneNumber($country_code, $phone_number);
+            $customerId = $requestData['customer_id'];
+            $customerRef = $requestData['customer_ref'];
+            $customer = Customer::findById($customerId);
+            if (empty($customer)) {
+                return ApiResponseHandler::failure(__('Customer not found'));
+            }
             if (!empty($customer) && $customer->status == Constant::CUSTOMER_STATUS['Blocked']) {
                 if (Auth::user()) {
-                    //  Auth::user()->killSession($request->session_id);
+                      Auth::user()->killSession($request->customer_ref);
                 }
-                return ApiResponseHandler::failure(__('messages.customer.otp.customer_is_blocked'), '', $error_body);
+                return ApiResponseHandler::failure(__('Customer blocked'));
+            }
+            $allowOtpSend = Otp::allowOtpReSend($customerId, $customerRef);
+            if($allowOtpSend) {
+                DB::beginTransaction();
+                $country_code = $requestData['country_code'];
+                $phone_number = $requestData['phone_number'];
+
+                $otpData = [
+                    'identifier' => $customer->identifier,
+                    'action' => Constant::OTP_EVENTS['send'],
+                    'customer_id' => $customer->id,
+                    'phone_number' => $phone_number,
+                    'country_code' => $country_code,
+                ];
+                Otp::revokeOldOtpForCustomer($customerId, Constant::OTP_MODULES['customers'], $customer->identifier);
+                Otp::createOtp( $otpData, $request);
+                DB::commit();
             }
 
-            DB::beginTransaction();
-
-            $otpData = [
-                'session_id' => $customer->identifier,
-                'action' => Constant::OTP_EVENTS['send'],
-                'customer_id' => $customer->id,
-                'phone_number' => $phone_number,
-                'country_code' => $country_code,
-            ];
-
-            Otp::revokeOldOtpForCustomer($request->customer_id, Constant::OTP_MODULES['customers'], $request->session_id);
-            Otp::createOtp($otpData, $request);
-
-            $timerVal = env('OTP_EXPIRE_TIME');
-            $sessionId = $requestData['session_id'];
-
-            CustomerAppSession::updateJourney($sessionId, Constant::APP_JOURNEY['ONBOARDING']);
-
-            DB::commit();
-
-            $response['otp_timer'] = Helper::convertSecondsIntoMilliseconds($timerVal);
             return ApiResponseHandler::success($response, __('messages.general.success'));
         } catch (\Exception $e) {
             DB::rollBack();
@@ -108,7 +107,7 @@ class OtpController extends BaseCustomerController
 
     /**
      * @OA\Post(
-     *     path="/v1/portal/otp/verify",
+     *     path="/api/verify/otp",
      *     tags={"Auth Verification"},
      *     summary="Verify Otp",
      *     operationId="verifyOtp",
@@ -149,50 +148,12 @@ class OtpController extends BaseCustomerController
 
             DB::beginTransaction();
 
-            $verifiedOtp = Otp::verifyCustomerPortalOtp($request->session_id, $requestData['otp']);
-
+            $customerRef = $requestData['customer_ref'];
+            $verifiedOtp = Otp::verifyCustomerOtp($customerRef, $requestData['otp']);
             if ($verifiedOtp) {
-                $existingCustomer = Customer::findNonAnonymousCustomerByOtp($verifiedOtp);
-                $askReferralCode = Constant::No;
-                
-                if ($existingCustomer) {
-                    $existingCustomer->updateAnonymousOrNonVerifiedCustomer($verifiedOtp);
-                    $verifiedOtp->updateCustomer($existingCustomer);
-                    
-                    $customer = $existingCustomer;
-
-                    if(!empty($customer) && $customer->status == Constant::CUSTOMER_STATUS['Blocked']){
-                        $session = CustomerAppSession::findLatestBySessionId($request->session_id);
-                        $reason = "Customer with phone# {$customer->country_code}{$customer->phone_number} is blocked thus the session ip has been blocked on verifyOtp Call";
-                        return ApiResponseHandler::userBlockedException( $session, $reason, $request->session_id, $customer );
-                    }
-                    
-                    CustomerProductRecentlyViewed::updateRecentlyViewedCustomerId($request->customer_id, $customer->id);
-                    Customer::removeCustomer($request->customer_id);
-
-                } //elseif( Auth::user()->is_anonymous == Constant::Yes || Auth::user()->is_verified == Constant::No )
-                else {
-                    Auth::user()->updateAnonymousOrNonVerifiedCustomer($verifiedOtp);
-                    
-                    $customer = Auth::user();
-                    $askReferralCode = Constant::Yes;
-                }
-
-                $session = $customer->createAccessToken($request, true);
-                $sessionToken = $session['token'];
-                $sessionId = $session['id'];
-                $response['session_token'] = $sessionToken;
-                $response['session_id'] = $sessionId;
-
-                CustomerAppSession::updateOtpVerified($sessionId);
-
-                $response['user_id'] = $customer->token;
-                $response['address_count'] = $customer->addresses->count();
-                $response['default_payment_method_id'] = $customer->default_payment_method_id;
-                $response['ask_referral'] = $askReferralCode;
-                $response['session_config'] = $this->getCustomerAppSessionConfig($sessionId);
-                $response['customer'] = $this->__getCustomerInfo($customer);
-
+                $customer = Customer::findByRef($customerRef);
+                $customer->updateNonVerifiedCustomer($verifiedOtp);
+                $response['token'] =  $customer->createToken($customer->identifier, ['customer'])->accessToken;
                 DB::commit();
                 return ApiResponseHandler::success($response, __('messages.customer.otp.success'));
             } else {
@@ -208,7 +169,7 @@ class OtpController extends BaseCustomerController
 
     /**
      * @OA\Post(
-     *     path="/v1/portal/otp/resend",
+     *     path="/api/resend/otp",
      *     tags={"Auth Verification"},
      *     summary="Resend Otp",
      *     operationId="resendOtp",
@@ -247,39 +208,36 @@ class OtpController extends BaseCustomerController
                 return ApiResponseHandler::validationError($validator->errors());
             }
 
-            $customer = Auth::user();
-
-//            $allow_otp_resend = Otp::allowOtpReSend($customer->id, $request->session_id, 'customer-portal');
-
+            $customerRef = $requestData['customer_ref'];
+            $customerId = $requestData['customer_id'];
             DB::beginTransaction();
-            $allowOtpSend = Otp::allowOtpSendOnApp($request->customer_id);
+            $allowOtpSend = Otp::allowOtpReSend($customerId, $customerRef);
+//            $allowOtpSend = Otp::allowOtpSendOnApp($request->customer_id);
             if ($allowOtpSend) {
-                Otp::revokeOldOtpForCustomer($customer->id, Constant::OTP_MODULES['customers'], $request->session_id);
+                Otp::revokeOldOtpForCustomer($customerId, Constant::OTP_MODULES['customers'], $request->session_id);
 
-                $lastOtpSent = Otp::getLastOtpSentToCustomer($customer->id, $request->session_id, 'customer-portal');
+                $lastOtpSent = Otp::getLastOtpSentToCustomer($customerId, $customerRef);
 
                 if($lastOtpSent->country_code == 92) {
                     $otpData = [
-                        'session_id' => $request->session_id,
+                        'session_id' => $customerRef,
                         'action' => Constant::OTP_EVENTS['resend'],
-                        'customer_id' => $request->customer_id,
+                        'customer_id' => $customerId,
                         'network_id' => 0,
                         'phone_number' => $lastOtpSent->phone_number,
                         'country_code' => $lastOtpSent->country_code,
                         'phone_otp' => $lastOtpSent->phone_otp,
                     ];
 
-                    Otp::createOtp($otpData, $request, "customer-portal");
+                    Otp::createOtp($otpData, $request);
                 }
-                $timerVal = env('OTP_EXPIRE_TIME');
-                $response['otp_timer'] = Helper::convertSecondsIntoMilliseconds($timerVal);
                 DB::commit();
 
                 return ApiResponseHandler::success([], __('messages.customer.otp.resend.success'));
             } else {
                 $error_body = [];
                 #TODO: Delete in next sprint start
-                Auth::user()->killSession($request->session_id);
+                Auth::user()->killSession($request->customer_ref);
                 #TODO: Delete in next sprint start
                 return ApiResponseHandler::failure(__('messages.customer.otp.customer_is_blocked'), '', $error_body);
             }

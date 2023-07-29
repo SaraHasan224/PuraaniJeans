@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PimAttributeAndAttributeOptionsSeeder::class);
         $this->call(PimSeeder::class);
         $this->call(PimProductDefaultImageSeeder::class);
+        $this->call(PimBsCategoryMappingSeeder::class);
 
 
 

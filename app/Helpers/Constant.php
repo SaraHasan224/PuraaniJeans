@@ -10,6 +10,10 @@ class Constant
 
     const unSerializableFields = [];
 
+    const M3TechSMSResponseCodes = [
+        'success'   => '00',
+    ];
+
     const USER_TYPES = [
         'Admin'       => 1,
         'Closet'      => 2,
@@ -67,8 +71,8 @@ class Constant
     ];
 
     const OTP_EVENTS = [
-        'send' => 'send',
-        'resend' => 'resend'
+        'send' => 1,
+        'resend' => 2
     ];
 
     const OTP_PROVIDERS = [

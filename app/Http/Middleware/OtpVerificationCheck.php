@@ -37,7 +37,7 @@ class OtpVerificationCheck
         elseif( $request->has('sso_request_id') )
         {
             $sso_request = $request->sso_request_id;
-            $inCompleteOtp = Otp::getOtpByRequestId( $sso_request );
+            $inCompleteOtp = Otp::getOtpByReferenceId( $sso_request );
 
             if( $inCompleteOtp || Auth::user()->isAnonymous() )
             {

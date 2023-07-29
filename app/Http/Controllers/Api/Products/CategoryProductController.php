@@ -7,6 +7,8 @@ use App\Helpers\AppException;
 use App\Helpers\Constant;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerProductRecentlyViewed;
+use App\Models\PimBsCategory;
+use App\Models\PimBsCategoryMapping;
 use App\Models\PimProduct;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
@@ -71,7 +73,7 @@ class CategoryProductController extends Controller
     {
 //        $cacheKey = 'get_all_subcategory_ids_'.$categorySlug;
 //        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($categorySlug) {
-        return PimBsCategory::getAllSubCategoryIds( $categorySlug );
+        return PimBsCategory    ::getAllSubCategoryIds( $categorySlug );
 //        });
     }
 

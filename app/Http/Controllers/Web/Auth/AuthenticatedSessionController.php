@@ -60,7 +60,6 @@ class AuthenticatedSessionController extends Controller
             {
                 return redirect()->back()->with('error', __('messages.user.invalid_access_forbidden'))->withInput();
             }
-            // $otp = User::createSignInOtp('login', $user);
             User::setUsersLoginAttempts($user->id, 0);
             //Sms: Admin Sign in
             //User::sendOtp($user, $otp, 'signin');

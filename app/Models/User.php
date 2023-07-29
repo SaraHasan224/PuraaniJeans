@@ -151,18 +151,6 @@ class User extends Authenticatable
         return false;
     }
 
-    public static function createSignInOtp($action, $user, $resend = false, $phone = false, $sendSms = false)
-    {
-        $otp = Otp::createOtp($action, $user, $resend, $phone, $sendSms);
-
-//        if (env('OTP_ENABLED'))
-//        {
-//            $data = ['otp' => $otp, 'user' => $user];
-//            Mail::to($user->email)->send(new UserRegistered($data));
-//        }
-        return $otp;
-    }
-
     public static function getUsersByFilters($filter)
     {
         $data = self::select('id', 'name', 'email', 'country_code', 'phone_number', 'user_type', 'login_attempts', 'last_login', 'status', 'created_at','updated_at','deleted_at');

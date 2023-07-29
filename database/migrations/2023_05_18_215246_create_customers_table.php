@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('last_name')->nullable();
             $table->string('username')->nullable();
             $table->string('email')->unique()->index();
+            $table->string('password')->nullable();
             $table->string('country_code', 7)->index()->nullable();
             $table->string('phone_number',25)->index()->nullable();
             $table->unsignedBigInteger('country_id')->index()->nullable();

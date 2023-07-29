@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\HasApiTokens;
 use phpseclib3\System\SSH\Agent;
 use function Ramsey\Uuid\v4; // include this
@@ -27,9 +28,22 @@ class Customer extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'username',
         'email',
         'password',
+        'country_code',
+        'phone_number',
+        'country_id',
+        'status',
+        'subscription_status',
+        'identifier',
+        'last_login',
+        'login_attempts',
+        'origin_source',
+        'email_verified_at',
+        'phone_verified_at',
     ];
 
     /**
@@ -54,7 +68,7 @@ class Customer extends Authenticatable
     public static $validationRules = [
         'register' => [
             'country' => 'required|string',
-            'email_address' => 'required|email',
+            'email_address' => 'required|email|email:rfc,dns|unique:customers,email',
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'password' => 'required|string|min:6|confirmed',
@@ -94,7 +108,7 @@ class Customer extends Authenticatable
     }
 
     public static function findByRef($ref){
-        return self::where('reference', $ref)->first();
+        return self::where('identifier', $ref)->first();
     }
 
     public static function findByPhoneNumber($code, $phone)
@@ -106,9 +120,7 @@ class Customer extends Authenticatable
 
     public static function findNonAnonymousCustomerByOtp( $otp )
     {
-        return self::where('is_anonymous', Constant::No)
-            ->where('id', '!=', Auth::user()->id )
-            ->where('country_code', $otp->country_code)
+        return self::where('country_code', $otp->country_code)
             ->where('phone_number', $otp->phone_number)
             ->whereNull('deleted_at')
             ->first();
@@ -120,23 +132,14 @@ class Customer extends Authenticatable
         self::where('id', $customer_id )->delete();
     }
 
-    public function updateAnonymousOrNonVerifiedCustomer( $verifiedOtp )
+    public function updateNonVerifiedCustomer( $verifiedOtp )
     {
         $updateCols = [
-            'is_anonymous' => Constant::No,
             'is_verified' => Constant::Yes,
             'country_code' => $verifiedOtp->country_code,
-            'phone_network_id' => $verifiedOtp->network_id,
             'phone_number' => $verifiedOtp->phone_number,
+            'email_verified_at' => Now(),
         ];
-
-        if($verifiedOtp->otp_provider == Constant::OTP_PROVIDERS['SMS']){
-            $this->updateIsDummyPhone();
-            $updateCols['phone_verified_at'] = Now();
-        }else{
-            $updateCols['email_verified_at'] = Now();
-        }
-
         $this->update($updateCols);
     }
 
@@ -151,8 +154,9 @@ class Customer extends Authenticatable
             'country_code'          => array_key_exists("country_code", $requestData) ? $requestData['country_code'] : $emptyString,
             'phone_number'          => array_key_exists("phone_number", $requestData) ? $requestData['phone_number'] : $emptyString,
             'country_id'            => $requestData['country_id'],
+            'password'              => Hash::make($requestData['password']),
             'status'                => Constant::CUSTOMER_STATUS['Active'],
-            'subscription_status'   => $requestData['subscription_status'] ?? $emptyString,
+            'subscription_status'   => $requestData['subscription_status'] ?? 0,
             'identifier'            => $identifier,
         ];
 

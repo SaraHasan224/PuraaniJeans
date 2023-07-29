@@ -70,8 +70,10 @@ Route::get('/filter/closet/{slug}/product', [ClosetController::class, 'getFilter
 #Closet Category
 Route::get('/closet/{slug}/category/{catSlug}', [ClosetController::class, 'getClosetCategory']);
 Route::get('/closet/{slug}/category/{catSlug}/product', [ClosetController::class, 'getClosetCategoryProducts']);
-
-Route::middleware(['tokenValidation', 'auth:api'])->group(function () {
-    Route::post('verify-phone', [OtpController::class, "sendOtp"]);
-
+//, 'auth:api'
+Route::middleware(['tokenValidation'])->group(function () {
+    Route::post('send/otp', [OtpController::class, "sendOtp"]);
+    Route::post('resend/otp', [OtpController::class, "resendOtp"]);
+    Route::post('verify/otp', [OtpController::class, "verifyOtp"]);
+//
 });
