@@ -58,7 +58,9 @@ class OtpController extends BaseCustomerController
     public function sendOtp(Request $request)
     {
         try {
-            $response = [];
+            $response = [
+                'phone' => ""
+            ];
             $requestData = $request->all();
             $error_body = [];
             $validator = Validator::make($requestData, Otp::$validationRules['send']);
@@ -95,6 +97,8 @@ class OtpController extends BaseCustomerController
                 Otp::revokeOldOtpForCustomer($customerId, Constant::OTP_MODULES['customers'], $customer->identifier);
                 Otp::createOtp( $otpData, $request);
                 DB::commit();
+
+                $response['phone'] = "+({$country_code}){$phone_number}";
             }
 
             return ApiResponseHandler::success($response, __('messages.general.success'));
@@ -154,6 +158,15 @@ class OtpController extends BaseCustomerController
                 $customer = Customer::findByRef($customerRef);
                 $customer->updateNonVerifiedCustomer($verifiedOtp);
                 $response['token'] =  $customer->createToken($customer->identifier, ['customer'])->accessToken;
+                $response['customer'] = [
+                    'first_name' => $customer->first_name,
+                    'last_name' => $customer->last_name,
+                    'email' => $customer->email,
+                    'country_code' => $customer->country_code,
+                    'phone_number' => $customer->phone_number,
+                    'identifier' => $customer->identifier,
+                    'closet_ref' => optional($customer->closet)->closet_referenc,
+                ];
                 DB::commit();
                 return ApiResponseHandler::success($response, __('messages.customer.otp.success'));
             } else {

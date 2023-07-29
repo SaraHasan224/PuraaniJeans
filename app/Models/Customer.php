@@ -74,6 +74,10 @@ class Customer extends Authenticatable
             'password' => 'required|string|min:6|confirmed',
             'subscription' => 'required|boolean',
         ],
+        'login' => [
+            'email_address' => 'required|email|email:rfc,dns',
+            'password' => 'required|string',
+        ]
     ];
 
     public static function getValidationRules($type, $params = [])
@@ -103,8 +107,23 @@ class Customer extends Authenticatable
         return $rules[$type];
     }
 
+    public function getPhoneNumberInternationalFormat()
+    {
+        return "+{$this->country_code}{$this->phone_number}";
+    }
+
+    public function getPhoneNumberHiddenInternationalFormat()
+    {
+        $phone = Helper::obfuscateString($this->phone_number);
+        return "+({$this->country_code}){$phone}";
+    }
+
     public static function findById($id){
         return self::where('id', $id)->first();
+    }
+
+    public static function findByEmail($email){
+        return self::where('email', $email)->first();
     }
 
     public static function findByRef($ref){
@@ -138,7 +157,7 @@ class Customer extends Authenticatable
             'is_verified' => Constant::Yes,
             'country_code' => $verifiedOtp->country_code,
             'phone_number' => $verifiedOtp->phone_number,
-            'email_verified_at' => Now(),
+            'phone_verified_at' => Now(),
         ];
         $this->update($updateCols);
     }
@@ -154,7 +173,7 @@ class Customer extends Authenticatable
             'country_code'          => array_key_exists("country_code", $requestData) ? $requestData['country_code'] : $emptyString,
             'phone_number'          => array_key_exists("phone_number", $requestData) ? $requestData['phone_number'] : $emptyString,
             'country_id'            => $requestData['country_id'],
-            'password'              => Hash::make($requestData['password']),
+            'password'              => $requestData['password'],
             'status'                => Constant::CUSTOMER_STATUS['Active'],
             'subscription_status'   => $requestData['subscription_status'] ?? 0,
             'identifier'            => $identifier,

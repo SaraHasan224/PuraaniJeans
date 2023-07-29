@@ -8,6 +8,7 @@ use App\Models\Country;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -127,16 +128,31 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $validator = $request->validate([
-            'email' => 'email|required',
-            'password' => 'required'
-        ]);
-        if (!auth()->attempt($validator)) {
-            return response()->json(['error' => 'Unauthorised'], 401);
-        } else {
-            $success['token'] = auth()->user()->createToken('customer')->accessToken;
-            $success['user'] = auth()->user();
-            return response()->json(['success' => $success])->setStatusCode(200);
+        $requestData = $request->all();
+        $response = [];
+        $error_body = [];
+
+        $validator = Validator::make($requestData, Customer::$validationRules['login']);
+
+        if ($validator->fails()) {
+            return ApiResponseHandler::validationError($validator->errors());
         }
+        $customer = Customer::findByEmail($requestData['email_address']);
+        if (Hash::check($requestData['password'], $customer->password)) {
+            $response['token'] = $customer->createToken($customer->identifier, ['customer'])->accessToken;
+            $response['customer'] = [
+                'first_name' => $customer->first_name,
+                'last_name' => $customer->last_name,
+                'email' => $customer->email,
+                'country_code' => $customer->country_code,
+                'phone_number' => $customer->phone_number,
+                'identifier' => $customer->identifier,
+                'closet_ref' => optional($customer->closet)->closet_referenc,
+            ];
+            return ApiResponseHandler::success($response, "You have successfully registered to " . env('APP_NAME') . ".");
+        }else {
+                return ApiResponseHandler::failure("Incorrect password");
+        }
+
     }
 }
