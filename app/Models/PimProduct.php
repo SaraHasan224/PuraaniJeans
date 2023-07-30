@@ -621,10 +621,10 @@ class PimProduct extends Model
         $productsTransformed = $productsTransformed
             ->map(function ($item) use ($slug, $listingType, $category, $filters) {
                 $defaultVariant = $item->activeVariants->first();
-                $discountType = $defaultVariant->ultimate_best_discount_type;
-                $price = $defaultVariant->ultimate_best_price;
-                $discount = $defaultVariant->ultimate_discount;
-                $discountedPrice = $defaultVariant->ultimate_best_discounted_price;
+                $discountType = $defaultVariant->discount_type;
+                $price = $defaultVariant->price;
+                $discount = $defaultVariant->discount;
+                $discountedPrice = $defaultVariant->discounted_price;
                 $productListingType = 0;
                 if ($listingType == Constant::PJ_PRODUCT_LIST['CATEGORY_PRODUCTS']) {
                     $position = $item->rank;
@@ -637,60 +637,38 @@ class PimProduct extends Model
                 }
 
                 $image = optional(optional($item)->defaultImage)->url;
-                if($listingType == Constant::PJ_PRODUCT_LIST['FEATURED_PRODUCTS']) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->name,
-                        'listing_type' => $productListingType,
-                        'list_type' => $listingType,
-                        'discount' => empty($discount) ? 0 : $discount,
-                        'price' => $price,
-                        'discounted_price' => $discountedPrice,
-                        'discount_badge' => [
-                            'show' => ($discountedPrice >= $price) ? Constant::No : Constant::Yes,
-                            'discount' => $discount,
-                            'type' => $discountType,
-                        ],
-                        'image' => !empty($image) ? $image : Helper::getProductImagePlaceholder(),
-                        'images' => $item->images,
-                        'images1' => $item->images->first(),
-                        'position' => $position,
-                        'qty' => $item->max_quantity,
-                        'handle' => $item->handle,
-                        'short_description' => $item->short_description
-                    ];
-                }else {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->name,
-                        'listing_type' => $productListingType,
-                        'list_type' => $listingType,
-                        'discount' => empty($discount) ? 0 : $discount,
-                        'price' => $price,
-                        'discounted_price' => $discountedPrice,
-                        'discount_badge' => [
-                            'show' => ($discountedPrice >= $price) ? Constant::No : Constant::Yes,
-                            'discount' => $discount,
-                            'type' => $discountType,
-                        ],
-                        'max_quantity' => $item->max_quantity,
-                        'has_variants' => $item->has_variants,
-                        'image' => !empty($image) ? $image : Helper::getProductImagePlaceholder(),
-                        'images' => $item->images,
-                        'images1' => $item->images->first(),
-                        'position' => $position,
-                        'variant_count' => $item->activeVariants->count(),
-                        'attribute_count' => $item->attribute->count(),
-                        'default_variant_id' => $defaultVariant->variant_id,
-                        'category_name' => !empty($category) && !empty($category->parent) ? $category->parent->name : optional($category)->name,
-                        'category_id' => !empty($category) && !empty($category->parent) ? $category->parent->id : optional($category)->id,
-                        'sub_category_name' => !empty($category) && !empty($category->parent) ? $category->name : null,
-                        'sub_category_id' => !empty($category) && !empty($category->parent) ? $category->id : null,
-                        'closet_name' => $item->closet->closet_name,
-                        'closet_slug' => $item->closet->closet_reference,
-                        'closet_favicon' => $item->closet->logo,
-                    ];
-                }
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'handle' => $item->handle,
+                    'listing_type' => $productListingType,
+                    'list_type' => $listingType,
+                    'discount' => empty($discount) ? 0 : $discount,
+                    'price' => $price,
+                    'discounted_price' => $discountedPrice,
+                    'discount_badge' => [
+                        'show' => ($discountedPrice >= $price) ? Constant::No : Constant::Yes,
+                        'discount' => $discount,
+                        'type' => $discountType,
+                    ],
+                    'max_quantity' => $item->max_quantity,
+                    'has_variants' => $item->has_variants,
+                    'image' => !empty($image) ? $image : Helper::getProductImagePlaceholder(),
+                    'images' => $item->images,
+                    'images1' => $item->images->first(),
+                    'position' => $position,
+                    'description' => $item->short_description,
+                    'variant_count' => $item->activeVariants->count(),
+                    'attribute_count' => $item->attribute->count(),
+                    'default_variant_id' => $defaultVariant->variant_id,
+                    'category_name' => !empty($category) && !empty($category->parent) ? $category->parent->name : optional($category)->name,
+                    'category_id' => !empty($category) && !empty($category->parent) ? $category->parent->id : optional($category)->id,
+                    'sub_category_name' => !empty($category) && !empty($category->parent) ? $category->name : null,
+                    'sub_category_id' => !empty($category) && !empty($category->parent) ? $category->id : null,
+                    'closet_name' => $item->closet->closet_name,
+                    'closet_slug' => $item->closet->closet_reference,
+                    'closet_favicon' => $item->closet->logo,
+                ];
             })
             ->toArray();
 

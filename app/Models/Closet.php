@@ -89,7 +89,7 @@ class Closet extends Model
         ];
     }
 
-    public static function getClosetListing($perPage = "", $type)
+    public static function getClosetListing($perPage = "", $type, $disablePagination = false)
     {
         $fields = [
             'id',
@@ -117,11 +117,18 @@ class Closet extends Model
 
         $closetTransformed = $closetList
             ->getCollection()
-            ->map(function ($item) {
+            ->map(function ($item) use($type){
+                if($type == Constant::PJ_CLOSETS_LIST_TYPES['Trending']){
+                    $item['country'] = $item->customer->country->name;
+                }
+                unset($item->customer);
+                unset($item->id);
                 unset($item->customer_id);
                 return $item;
             })->toArray();
-
+        if($disablePagination) {
+            return $closetTransformed;
+        }
         return new \Illuminate\Pagination\LengthAwarePaginator(
             $closetTransformed,
             $closetList->total(),

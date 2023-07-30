@@ -329,10 +329,7 @@ class HomeController
 
     private static function getRecommendedSellerClosets()
     {
-        return Closet::select('closet_name', "closet_reference", "logo")
-            ->where('status', Constant::Yes)
-            ->take(6)
-            ->get()->toArray();
+        return Closet::getClosetListing(7, Constant::PJ_CLOSETS_LIST_TYPES['Trending'], true);
     }
 
     public function getCachedCities()

@@ -71,6 +71,11 @@ class Customer extends Authenticatable
         return $this->hasOne(Closet::class, 'id', 'customer_id');
     }
 
+    public function country()
+    {
+        return $this->hasOne(Country::class, 'id', 'country_id');
+    }
+
     public static $validationRules = [
         'register' => [
             'country' => 'required|string',
