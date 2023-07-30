@@ -64,6 +64,7 @@ Route::get('/filter/categories/{slug}/products', [CategoryProductController::cla
 
 #Closet List
 Route::get('/closets', [ClosetController::class, 'getAllClosets']);
+Route::get('/closets/trending', [ClosetController::class, 'getAllTrendingClosets']);
 #Closets
 //Route::get('/closet/{slug}', [ClosetProductsController::class, 'getCloset']);
 Route::get('/closet/{reference}', [ClosetController::class, 'getClosetDetails']);

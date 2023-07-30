@@ -103,10 +103,9 @@ class Constant
     ];
 
 
-    const CUSTOMER_APP_STORE_LISTING_TYPE = [
-        'Featured' => 1,
+    const PJ_CLOSETS_LIST_TYPES = [
+        'Trending' => 1,
         'All' => 2,
-        'Filters' => 3,
     ];
 
     const SORT_BY_FILTERS = [

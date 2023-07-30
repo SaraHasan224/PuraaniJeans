@@ -89,15 +89,13 @@ class Closet extends Model
         ];
     }
 
-    public static function getClosetListing($perPage = "")
+    public static function getClosetListing($perPage = "", $type)
     {
         $fields = [
             'id',
             'customer_id',
             'closet_name',
             'logo',
-//            'banner',
-//            'about_closet',
             'closet_reference',
         ];
         $query = self::select($fields)->where('status', Constant::Yes);
@@ -105,7 +103,13 @@ class Closet extends Model
         $query->whereHas('customer', function($query) {
             $query->where('status',Constant::Yes);
         });
-        $query->orderBy('closet_name', 'ASC');
+        if($type == Constant::PJ_CLOSETS_LIST_TYPES['Trending']) {
+            $query->where('is_trending', Constant::Yes)
+                  ->orderBy('trending_position', 'DESC');
+        }else {
+            $query->orderBy('closet_name', 'ASC');
+
+        }
 
         $closetList = $query
             ->whereHas('products')

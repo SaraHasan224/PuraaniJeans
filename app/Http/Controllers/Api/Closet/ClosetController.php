@@ -23,7 +23,6 @@ use function Ramsey\Uuid\v4;
 
 class ClosetController
 {
-
     /**
      * @OA\Post(
      *
@@ -34,9 +33,6 @@ class ClosetController
      *
      *     @OA\Response(response=200,description="Success"),
      *
-     *     security={
-     *          {"user_access_token": {}, "locale": {}}
-     *     }
      * )
      */
     public function getAllClosets(Request $request)
@@ -54,28 +50,42 @@ class ClosetController
         }
     }
 
-    public function getCachedClosetsList($request){
+    /**
+     * @OA\Post(
+     *
+     *     path="/api/closets/trending",
+     *     tags={"Closet"},
+     *     summary="Manage Closet",
+     *     operationId="getAllTrendingClosets",
+     *
+     *     @OA\Response(response=200,description="Success"),
+     * )
+     */
+    public function getAllTrendingClosets(Request $request)
+    {
+        try
+        {
+            $response = [];
+            $response['closets'] = self::getCachedClosetsList($request, Constant::PJ_CLOSETS_LIST_TYPES['Trending']);
+            return ApiResponseHandler::success($response, __('messages.general.success'));
+        }
+        catch (\Exception $e)
+        {
+            AppException::log($e);
+            return ApiResponseHandler::failure(__('messages.general.failure'), $e->getMessage());
+        }
+    }
+
+    public function getCachedClosetsList($request, $type = Constant::PJ_CLOSETS_LIST_TYPES['All']){
         $page = $request->input('page') ?? 1;
         $perPage = 20;
         $cacheType = "all_closets";
 //        $cacheKey = 'get_app_'.$cacheType;
 //        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use($type, $perPage) {
-        return Closet::getClosetListing($perPage);
+        return Closet::getClosetListing($perPage, $type);
 //        });
     }
 
-    private function getCachedClosetConfig($closet, $response = []) {
-        $response['closet_ref'] = $closet->closet_reference;
-        $response['closet'] = [
-            'name' => $closet->closet_name,
-            'logo' => $closet->logo,
-            'banner' => $closet->banner,
-            'about_closet' => $closet->about_closet,
-            'closet_ref' => $closet->closet_reference,
-            'email' => $closet->customer->email,
-        ];
-        return $response;
-    }
     /**
      * @OA\Post(
      *     path="/api/closet/{reference}",
@@ -84,10 +94,6 @@ class ClosetController
      *     operationId="getClosetDetails",
      *
      *     @OA\Response(response=200,description="Success"),
-     *
-     *     security={
-     *          {"user_access_token": {}}
-     *     }
      * )
      */
     public function getClosetDetails(Request $request, $reference)
@@ -107,6 +113,19 @@ class ClosetController
             $response = self::getCachedClosetConfig($closet, $result);
             return ApiResponseHandler::success($response);
         }
+    }
+
+    private function getCachedClosetConfig($closet, $response = []) {
+        $response['closet_ref'] = $closet->closet_reference;
+        $response['closet'] = [
+            'name' => $closet->closet_name,
+            'logo' => $closet->logo,
+            'banner' => $closet->banner,
+            'about_closet' => $closet->about_closet,
+            'closet_ref' => $closet->closet_reference,
+            'email' => $closet->customer->email,
+        ];
+        return $response;
     }
 
     private function getCachedTrendingProducts($closet){
@@ -180,10 +199,7 @@ class ClosetController
      *                 )
      *              )
      *         )
-     *     ),
-     *     security={
-     *          {"user_access_token": {}}
-     *     }
+     *     )
      * )
      */
 
@@ -246,10 +262,6 @@ class ClosetController
      *         required=true,
      *         @OA\Schema(type="string")
      *     ),
-     *
-     *     security={
-     *          {"user_access_token": {}, "locale": {}}
-     *     }
      * )
      */
     public function getClosetCategory(Request $request, $closetRef, $catSlug)
