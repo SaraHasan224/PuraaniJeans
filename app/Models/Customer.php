@@ -65,6 +65,12 @@ class Customer extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+
+    public function closet()
+    {
+        return $this->hasOne(Closet::class, 'id', 'customer_id');
+    }
+
     public static $validationRules = [
         'register' => [
             'country' => 'required|string',
@@ -77,6 +83,9 @@ class Customer extends Authenticatable
         'login' => [
             'email_address' => 'required|email|email:rfc,dns',
             'password' => 'required|string',
+        ],
+        'create-closet' => [
+            'name' => 'required|string|max:255',
         ]
     ];
 
@@ -239,50 +248,6 @@ class Customer extends Authenticatable
             'count'   => $count,
             'offset'  => isset($filter['start']) ? $filter['start'] : 0,
             'records' => $data->get()
-        ];
-    }
-
-    public function createAccessToken( $request, $revokeOldToken = false, $refreshOldSession = false )
-    {
-        $identifier = $request->identifier ?? v4();
-
-        if( $revokeOldToken )
-        {
-            AccessToken::revokeOldTokensByName( $identifier );
-        }
-
-        $ip = Helper::getUserIP( $request );
-        $identifier = Http::getRequestIdentifiers($identifier, 'customer-portal');
-        $iPDetails = Http::getIpDetails($request, "access-token", $identifier, "Upon creating taptap customer access-token save customer ip details for future use");
-        $agent = new Agent();
-
-        $token = $this->createToken( $identifier,['customer-portal']);
-        $token->token->ip = $ip;
-        $token->token->country = isset($iPDetails['country_name']) ? $iPDetails['country_name'] : null;
-        $token->token->user_agent = $agent->getUserAgent();
-        $token->token->save();
-        $sessionData = [
-            'ip' => $ip,
-            'ip_details' => $iPDetails,
-            'token' => $token,
-            'revokeOldToken' => $revokeOldToken,
-            'customer' => $this,
-            'user_agent' => $agent->getUserAgent(),
-        ];
-
-        CustomerAppSession::createSession($sessionData, $refreshOldSession);
-
-        if(!$revokeOldToken){
-            RequestResponseLog::addData( $request, [
-                'session_id'      => $token->token->name,
-                'customer_id'      => $this->id,
-            ]);
-        }
-
-        return [
-            'token' => $token->accessToken,
-            'id' => $token->token->name,
-            'session' => $token->token,
         ];
     }
 }

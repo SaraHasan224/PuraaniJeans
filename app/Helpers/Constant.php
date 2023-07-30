@@ -89,12 +89,19 @@ class Constant
         'flat'       => 1,
         'percentage' => 2,
     ];
-    const CUSTOMER_APP_PRODUCT_LISTING = [
+    const PJ_PRODUCT_LIST = [
         'FEATURED_PRODUCTS'           => 1,
         'CATEGORY_PRODUCTS'           => 2,
-        'STORES_PRODUCTS'             => 3,
-        'RECENTLY_VIEWED_PRODUCTS'    => 4
+        'CLOSET_PRODUCTS'             => 3,
+        'RECENTLY_VIEWED_PRODUCTS'    => 4,
+        'CLOSET_TRENDING_PRODUCTS'    => 5,
+        'CLOSET_CATEGORY_PRODUCTS'    => 6
     ];
+
+    const PJ_ORDER_LIST = [
+        'CLOSET_ORDERS'    => 1,
+    ];
+
 
     const CUSTOMER_APP_STORE_LISTING_TYPE = [
         'Featured' => 1,

@@ -21,7 +21,7 @@ class CustomerProductRecentlyViewed extends Model
             'customer_id'     => $requestData['customer_id'],
             'product_id'      => $requestData['product_id'],
         ], [
-            'referrer_type'   => array_key_exists('referrer_type', $requestData) ? $requestData['referrer_type'] : Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS'],
+            'referrer_type'   => array_key_exists('referrer_type', $requestData) ? $requestData['referrer_type'] : Constant::PJ_PRODUCT_LIST['FEATURED_PRODUCTS'],
             'viewed_at'       => Carbon::now()
         ]);
     }

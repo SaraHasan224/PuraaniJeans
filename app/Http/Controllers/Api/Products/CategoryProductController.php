@@ -91,7 +91,7 @@ class CategoryProductController extends Controller
         $perPage = 10;
         $cacheKey = 'get_products_'.$categorySlug.'_'.$page.'_'.$perPage;
 //        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($merchantCategoryIds, $perPage, $categorySlug, $productIds) {
-        $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'];
+        $listType = Constant::PJ_PRODUCT_LIST['CATEGORY_PRODUCTS'];
         $listOptions = [
             "categoryIds" => $merchantCategoryIds,
             "bsCategorySlug" => $categorySlug,
@@ -228,7 +228,7 @@ class CategoryProductController extends Controller
                 {
                     return ApiResponseHandler::validationError($validator->errors());
                 }
-                $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['CATEGORY_PRODUCTS'];
+                $listType = Constant::PJ_PRODUCT_LIST['CATEGORY_PRODUCTS'];
                 $listOptions = [
                     "categoryIds" => $merchantCategoryIds,
                     "bsCategorySlug" => $categorySlug,

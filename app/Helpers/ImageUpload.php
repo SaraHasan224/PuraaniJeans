@@ -26,7 +26,7 @@ class ImageUpload
         return $data;
     }
 
-    public static function downloadFile( $folderPath, $imageContent, $imgName = null )
+    public static function  downloadFile( $folderPath, $imageContent, $imgName = null )
     {
         if($imgName == null) {
             $imgName = strtotime("now");

@@ -54,7 +54,7 @@ class RecentlyViewedProductController extends Controller
 
     public function getCachedRecentlyViewedProducts($customerId, $productId)
     {
-        $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['RECENTLY_VIEWED_PRODUCTS'];
+        $listType = Constant::PJ_PRODUCT_LIST['RECENTLY_VIEWED_PRODUCTS'];
         $listOptions = [
             'limit_record' => 5,
             'customer_id' => $customerId,

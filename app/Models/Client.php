@@ -57,10 +57,6 @@ class Client extends PassportClient
         return $this->belongsTo(Merchant::class, 'merchant_id');
     }
 
-    public function merchantStores()
-    {
-        return $this->hasMany(MerchantStore::class, 'merchant_id', 'id');
-    }
     public static function getClientById( $id )
     {
         return self::where('id',$id)->first();

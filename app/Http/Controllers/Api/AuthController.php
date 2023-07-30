@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Helpers\ApiResponseHandler;
+use App\Helpers\Constant;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\Customer;
@@ -138,20 +139,30 @@ class AuthController extends Controller
             return ApiResponseHandler::validationError($validator->errors());
         }
         $customer = Customer::findByEmail($requestData['email_address']);
-        if (Hash::check($requestData['password'], $customer->password)) {
-            $response['token'] = $customer->createToken($customer->identifier, ['customer'])->accessToken;
-            $response['customer'] = [
-                'first_name' => $customer->first_name,
-                'last_name' => $customer->last_name,
-                'email' => $customer->email,
-                'country_code' => $customer->country_code,
-                'phone_number' => $customer->phone_number,
-                'identifier' => $customer->identifier,
-                'closet_ref' => optional($customer->closet)->closet_referenc,
-            ];
-            return ApiResponseHandler::success($response, "You have successfully registered to " . env('APP_NAME') . ".");
+        if (empty($customer)) {
+            return ApiResponseHandler::failure(__('Customer not found'));
+        }
+        if (!empty($customer) && $customer->status == Constant::CUSTOMER_STATUS['Blocked']) {
+            return ApiResponseHandler::failure(__('Customer blocked'));
         }else {
+            if (Hash::check($requestData['password'], $customer->password)) {
+                $response['token'] = $customer->createToken($customer->identifier, ['customer'])->accessToken;
+                $response['screen'] = empty($customer->country_code) && empty($customer->country_code) ? "phone" : (
+                empty($customer->phone_verified_at) ? "otp" : "login"
+                );
+                $response['customer'] = [
+                    'first_name' => $customer->first_name,
+                    'last_name' => $customer->last_name,
+                    'email' => $customer->email,
+                    'country_code' => $customer->country_code,
+                    'phone_number' => $customer->phone_number,
+                    'identifier' => $customer->identifier,
+                    'closet_ref' => optional($customer->closet)->closet_referenc,
+                ];
+                return ApiResponseHandler::success($response, "You have successfully registered to " . env('APP_NAME') . ".");
+            }else {
                 return ApiResponseHandler::failure("Incorrect password");
+            }
         }
 
     }

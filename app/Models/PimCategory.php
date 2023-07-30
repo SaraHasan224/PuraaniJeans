@@ -31,4 +31,12 @@ class PimCategory extends Model
         ]);
         return $category;
     }
+
+
+    public static function getClosetCategoryByCategoryRef($catSlug,$closetId)
+    {
+        return self::where('closet_id', $closetId)->where('pim_cat_reference', $catSlug)->first();
+    }
+
+
 }

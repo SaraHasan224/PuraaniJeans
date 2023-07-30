@@ -220,12 +220,72 @@
                 ]
             }
         },
-        "/api/closets/get-all/{type}": {
-            "get": {
+        "/api/closet/{reference}": {
+            "post": {
                 "tags": [
                     "Closet"
                 ],
-                "summary": "Manage Store",
+                "summary": "get closet details",
+                "operationId": "getClosetDetails",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": []
+                    }
+                ]
+            }
+        },
+        "/api/closet/image-upload": {
+            "post": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Closet Icon and Banner Avatar",
+                "operationId": "imageUpload",
+                "requestBody": {
+                    "description": "Icon and Banner Upload for a Closet",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "banner": {
+                                        "description": "base64 ",
+                                        "type": "string",
+                                        "example": "base64:"
+                                    },
+                                    "icon": {
+                                        "description": "base64 ",
+                                        "type": "string",
+                                        "example": "base64:"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": []
+                    }
+                ]
+            }
+        },
+        "/api/closets/get-all/{type}": {
+            "post": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "/Manage Closet",
                 "operationId": "getAllClosets",
                 "parameters": [
                     {
@@ -256,7 +316,7 @@
                 "tags": [
                     "Closet"
                 ],
-                "summary": "Manage Store",
+                "summary": "Manage Closet",
                 "operationId": "getStore",
                 "parameters": [
                     {
@@ -366,7 +426,7 @@
                 "tags": [
                     "Closet"
                 ],
-                "summary": "Manage Store Category Products",
+                "summary": "Manage Closet Category Products",
                 "operationId": "getStoreCategories",
                 "parameters": [
                     {
@@ -406,7 +466,7 @@
                 "tags": [
                     "Closet"
                 ],
-                "summary": "Manage Store Category Products",
+                "summary": "Manage Closet Category Products",
                 "operationId": "getClosetCategoryProducts",
                 "parameters": [
                     {
@@ -437,6 +497,41 @@
                     {
                         "user_access_token": [],
                         "locale": []
+                    }
+                ]
+            }
+        },
+        "/api/closet/create": {
+            "post": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "create closet",
+                "operationId": "createCloset",
+                "requestBody": {
+                    "description": "create closet",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "user_access_token": []
                     }
                 ]
             }

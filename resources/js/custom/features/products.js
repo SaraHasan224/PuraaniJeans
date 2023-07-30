@@ -497,35 +497,6 @@ App.Products = {
         }
     },
 
-    updateStoreCategories: function (store_id, form_id, category_id) {
-        const url = App.Helpers.generateApiURL(App.Constants.endPoints.getMerchantCategoriesByStoreId);
-        let isFilter = App.Constants.ON;
-        if (!category_id) {
-            category_id = 'merchant_product_category_id';
-            isFilter = App.Constants.OFF;
-        }
-
-        let onSuccess = function (response) {
-          $("#" + form_id + " #"+category_id).find('option').remove();
-          if(isFilter == App.Constants.ON){
-            $("#" + form_id + " #"+category_id).prepend(new Option('Product Category', '')).attr('readonly','readonly');
-          }
-            $.each(response.storeCategories, function (key, value) {
-                $("#" + form_id + " #"+category_id).append(new Option(value.replace('&amp;', '&'), key));
-            });
-          if(isFilter == App.Constants.OFF && response.defaultCategory){
-            $("#" + form_id + " #"+category_id).val(response.defaultCategory);
-          }
-        };
-
-        let requestData = {
-            'store_id': store_id,
-            'is_filter': isFilter
-        };
-
-        App.Ajax.get(url, requestData, onSuccess, false, {}, 0);
-    },
-
     publishCatalog: function () {
 
         let action = function (isConfirm) {

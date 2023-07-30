@@ -57,7 +57,7 @@ class ProductController extends Controller
             $response = [];
             $requestData = $request->all();
             $requestData['product_id'] = (int)$productHandle;
-            $requestData['actions_allowed'] = Constant::CUSTOMER_APP_PRODUCT_LISTING;
+            $requestData['actions_allowed'] = Constant::PJ_PRODUCT_LIST;
 //            $validator = Validator::make($requestData, PimProduct::getValidationRules('product-detail', $requestData));
 //
 //            if ($validator->fails()) {
@@ -67,7 +67,7 @@ class ProductController extends Controller
             $products = PimProduct::getByHandle($productHandle);
             if (!empty($products)) {
 //                CustomerProductRecentlyViewed::viewProduct($requestData);
-                $result = PimProduct::getProductDetailForCustomerPortal($productHandle);
+                $result = PimProduct::getProductDetail($productHandle);
 
                 if (!empty($result)) {
                     $response = $result;

@@ -98,47 +98,4 @@ class Http
             AppException::log($e);
         }
     }
-
-    public static function getRequestIdentifiers($object, $callFrom = '', $hasObjectDetails = Constant::Yes){
-        $identifier = [
-            'merchant_id' => '',
-            'store_id' => '',
-            'env_id' => '',
-            'request_id' => '',
-            'request_from' => '',
-        ];
-
-        if ($callFrom == "checkout") {
-            if($hasObjectDetails == Constant::No) {
-                $object = Order::getByReference($object);
-            }
-            $identifier['merchant_id'] = optional($object)->merchant_id;
-            $identifier['store_id'] = optional($object)->store_id;
-            $identifier['env_id'] = optional($object)->env_id;
-            $identifier['request_id'] = optional($object)->order_ref;
-            $identifier['request_from'] = $callFrom;
-        }
-        else if ($callFrom == "sso" || $callFrom == "identity-verification") {
-            if($hasObjectDetails == Constant::No) {
-                $object = SsoRequest::getByRequestId( $object, Constant::Yes );
-            }
-            $identifier['merchant_id'] = optional(optional($object)->store)->merchant_id;
-            $identifier['store_id'] = optional($object)->store_id;
-            $identifier['env_id'] = optional(optional($object)->client)->env_id;
-            $identifier['request_id'] = optional($object)->request_id;
-            $identifier['request_from'] = $callFrom;
-        }
-        else if ($callFrom == "customer-portal") {
-            $store = MerchantStore::getCustomerPortalStore();
-
-            $identifier['merchant_id'] = optional($store)->merchant_id;
-            $identifier['store_id'] = $store->id;
-            $identifier['env_id'] = env('UNIVERSAL_CHECKOUT_INTEGRATION_TYPE');
-            $identifier['request_id'] = $object;
-            $identifier['request_from'] = $callFrom;
-        }
-
-        return (object) $identifier;
-    }
-
 }

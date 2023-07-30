@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\Products\CategoryProductController;
 use App\Http\Controllers\Api\Products\FeaturedProductController;
@@ -13,7 +14,8 @@ use App\Http\Controllers\Api\MetadataController;
 use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\PlaygroundTestController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ClosetController;
+use App\Http\Controllers\Api\Closet\ClosetProductsController;
+use App\Http\Controllers\Api\Closet\ClosetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,19 +63,22 @@ Route::get('/filter/categories/{slug}/products', [CategoryProductController::cla
 
 
 #Closet List
-Route::get('/closets/get-all/{type}', [ClosetController::class, 'getAllClosets']);
+Route::get('/closets', [ClosetController::class, 'getAllClosets']);
 #Closets
-Route::get('/closet/{slug}', [ClosetController::class, 'getCloset']);
+//Route::get('/closet/{slug}', [ClosetProductsController::class, 'getCloset']);
+Route::get('/closet/{reference}', [ClosetController::class, 'getClosetDetails']);
 #Closet Products
-Route::get('/closet/{slug}/product', [ClosetController::class, 'getClosetProducts']);
-Route::get('/filter/closet/{slug}/product', [ClosetController::class, 'getFilteredClosetProducts']);
+Route::get('/closet/{slug}/product', [ClosetProductsController::class, 'getClosetProducts']);
+Route::get('/filter/closet/{slug}/product', [ClosetProductsController::class, 'getFilteredClosetProducts']);
 #Closet Category
-Route::get('/closet/{slug}/category/{catSlug}', [ClosetController::class, 'getClosetCategory']);
-Route::get('/closet/{slug}/category/{catSlug}/product', [ClosetController::class, 'getClosetCategoryProducts']);
+Route::get('/closet/{slug}/category/{catSlug}', [ClosetProductsController::class, 'getClosetCategory']);
+Route::get('/closet/{slug}/category/{catSlug}/product', [ClosetProductsController::class, 'getClosetCategoryProducts']);
 //, 'auth:api'
 Route::middleware(['tokenValidation'])->group(function () {
     Route::post('send/otp', [OtpController::class, "sendOtp"]);
     Route::post('resend/otp', [OtpController::class, "resendOtp"]);
     Route::post('verify/otp', [OtpController::class, "verifyOtp"]);
-//
+
+
+    Route::post('/closet/create', [CustomerController::class, 'createCloset']);
 });

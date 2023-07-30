@@ -9,57 +9,60 @@
 namespace App\Http\Controllers\Api;
 
 
-use App\Helpers\Constant;
-use App\Models\Country;
+use App\Helpers\ApiResponseHandler;
+use App\Models\Closet;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use function Ramsey\Uuid\v4;
+use Illuminate\Support\Facades\Validator;
 
 class CustomerController
 {
-    public function register(Request $request)
+    /**
+     * @OA\Post(
+     *     path="/api/closet/create",
+     *     tags={"Closet"},
+     *     summary="create closet",
+     *     operationId="createCloset",
+     *
+     *     @OA\Response(response=200,description="Success"),
+     *
+     *     @OA\RequestBody(
+     *         description="create closet",
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="name",
+     *                     example="",
+     *                     type="string"
+     *                 )
+     *              )
+     *         )
+     *     ),
+     *     security={
+     *          {"user_access_token": {}}
+     *     }
+     * )
+     */
+    public function createCloset(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|max:255',
-            'email' => 'required|email|unique:users',
-        ]);
+        $requestData = $request->all();
+        $response = [];
+        $validator = Validator::make($requestData, Customer::$validationRules['create-closet']);
 
-        $country = Country::getCountryByCountryCode("PK");
-        $user = Customer::create([
-            'first_name' => 'Sara',
-            'last_name' => 'Hasan',
-            'username' => 'Sara.hasan',
-            'email' => 'sarahasan224@gmail.com',
-            'country_code' => "92",
-            'phone_number' => "3452099689",
-            'country_id' => $country->id,
-            'status' => Constant::Yes,
-            'subscription_status' => Constant::Yes,
-            'identifier' => v4(),
-            'login_attempts' => Constant::No,
-        ]);
-
-        $token = $user->createToken('API Token')->accessToken;
-
-        return response([ 'user' => $user, 'token' => $token]);
-    }
-
-    public function login(Request $request)
-    {
-        $data = $request->validate([
-            'email' => 'email|required',
-            'password' => 'required'
-        ]);
-
-        if (!auth()->attempt($data)) {
-            return response(['error_message' => 'Incorrect Details. 
-            Please try again']);
+        if ($validator->fails()) {
+            return ApiResponseHandler::validationError($validator->errors());
         }
+        $closet = Closet::createCloset($requestData);
 
-        $token = auth()->user()->createToken('API Token')->accessToken;
-
-        return response(['user' => auth()->user(), 'token' => $token]);
-
+        $response['closet_ref'] = $closet->closet_reference;
+        $response['closet'] = [
+            'name' => $closet->name,
+            'closet_ref' => $closet->closet_reference,
+            'email' => $closet->customer->email,
+        ];
+        return ApiResponseHandler::success($response, "You have successfully registered to " . env('APP_NAME') . ".");
     }
 
 }

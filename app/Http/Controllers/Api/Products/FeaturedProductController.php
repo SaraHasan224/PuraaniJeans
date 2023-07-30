@@ -33,7 +33,7 @@ class FeaturedProductController extends Controller
     public function getFeaturedProducts(Request $request)
     {
         try {
-            $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS'];
+            $listType = Constant::PJ_PRODUCT_LIST['FEATURED_PRODUCTS'];
             $listOptions = [];
             $response = PimProduct::getProductsForApp($listType, 10, $listOptions);
 
@@ -137,7 +137,7 @@ class FeaturedProductController extends Controller
                 'filters' => $filterData
             ];
 
-            $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS'];
+            $listType = Constant::PJ_PRODUCT_LIST['FEATURED_PRODUCTS'];
 
             $response = PimProduct::getProductsForApp($listType, 50, $listOptions);
 

@@ -352,7 +352,7 @@ class HomeController
 
     public function getCachedFeaturedCategoryProducts($type)
     {
-        $listType = Constant::CUSTOMER_APP_PRODUCT_LISTING['FEATURED_PRODUCTS'];
+        $listType = Constant::PJ_PRODUCT_LIST['FEATURED_PRODUCTS'];
         $listOptionsSectionA = [
             'limit_record' => 8
         ];

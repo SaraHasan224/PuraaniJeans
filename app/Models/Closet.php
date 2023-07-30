@@ -3,13 +3,20 @@
 namespace App\Models;
 
 
+use App\Helpers\Constant;
+use App\Helpers\Helper;
 use Illuminate\Database\Eloquent\Model;
+use function Ramsey\Uuid\v4;
 
 class Closet extends Model
 {
     protected $table ="closets";
 
     public function getLogoAttribute($value)
+    {
+        return asset("storage/".$value);
+    }
+    public function getBannerAttribute($value)
     {
         return asset("storage/".$value);
     }
@@ -26,6 +33,34 @@ class Closet extends Model
         'banner_public_path',
     ];
 
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, "customer_id", "id");
+    }
+    public function products()
+    {
+        return $this->hasMany(PimProduct::class, 'closet_id', 'id');
+    }
+//    public function orders()
+//    {
+//        return $this->hasMany(Customer::class, 'closet_id', 'id');
+//    }
+
+    public static $validationRules = [
+        'image-upload' => [
+            'banner' => 'required',
+            'icon' => 'required',
+        ],
+        'storeCategories' => [
+            'closet_ref' => 'required|string|exists:closets,closet_reference',
+            'category_slug' => 'required|exists:pim_categories,pim_cat_reference',
+        ],
+    ];
+
+
+    public static function findByReference($ref){
+        return self::where('closet_reference', $ref)->first();
+    }
 
     public static function getByFilters($filter)
     {
@@ -53,4 +88,59 @@ class Closet extends Model
             'records' => $data->get()
         ];
     }
+
+    public static function getClosetListing($perPage = "")
+    {
+        $fields = [
+            'id',
+            'customer_id',
+            'closet_name',
+            'logo',
+//            'banner',
+//            'about_closet',
+            'closet_reference',
+        ];
+        $query = self::select($fields)->where('status', Constant::Yes);
+//
+        $query->whereHas('customer', function($query) {
+            $query->where('status',Constant::Yes);
+        });
+        $query->orderBy('closet_name', 'ASC');
+
+        $closetList = $query
+            ->whereHas('products')
+            ->paginate($perPage);
+
+        $closetTransformed = $closetList
+            ->getCollection()
+            ->map(function ($item) {
+                unset($item->customer_id);
+                return $item;
+            })->toArray();
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $closetTransformed,
+            $closetList->total(),
+            $closetList->perPage(),
+            $closetList->currentPage(), [
+                'path' => \Request::url(),
+                'query' => [
+                    'page' => $closetList->currentPage()
+                ]
+            ]
+        );
+    }
+
+    public static function createCloset( $requestData )
+    {
+        $data = [
+            'customer_id' => $requestData['customer_id'],
+            'closet_name' => $requestData['name'],
+            'closet_reference' => v4(),
+
+        ];
+
+        return self::create($data);
+    }
+
 }
