@@ -220,6 +220,34 @@
                 ]
             }
         },
+        "/api/closets": {
+            "post": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Manage Closet",
+                "operationId": "getAllClosets",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/closets/trending": {
+            "post": {
+                "tags": [
+                    "Closet"
+                ],
+                "summary": "Manage Closet",
+                "operationId": "getAllTrendingClosets",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
         "/api/closet/{reference}": {
             "post": {
                 "tags": [
@@ -231,12 +259,7 @@
                     "200": {
                         "description": "Success"
                     }
-                },
-                "security": [
-                    {
-                        "user_access_token": []
-                    }
-                ]
+                }
             }
         },
         "/api/closet/image-upload": {
@@ -272,57 +295,30 @@
                     "200": {
                         "description": "Success"
                     }
-                },
-                "security": [
-                    {
-                        "user_access_token": []
-                    }
-                ]
+                }
             }
         },
-        "/api/closets/get-all/{type}": {
-            "post": {
-                "tags": [
-                    "Closet"
-                ],
-                "summary": "/Manage Closet",
-                "operationId": "getAllClosets",
-                "parameters": [
-                    {
-                        "name": "type",
-                        "in": "path",
-                        "description": "type",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                },
-                "security": [
-                    {
-                        "user_access_token": [],
-                        "locale": []
-                    }
-                ]
-            }
-        },
-        "/api/closet/{slug}": {
+        "/api/closet/{slug}/category/{catSlug}": {
             "get": {
                 "tags": [
                     "Closet"
                 ],
-                "summary": "Manage Closet",
-                "operationId": "getStore",
+                "summary": "Manage Closet Category Products",
+                "operationId": "getStoreCategories",
                 "parameters": [
                     {
                         "name": "slug",
                         "in": "path",
-                        "description": "store slug",
+                        "description": "category slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "catSlug",
+                        "in": "path",
+                        "description": "category slug",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -333,13 +329,7 @@
                     "200": {
                         "description": "Success"
                     }
-                },
-                "security": [
-                    {
-                        "user_access_token": [],
-                        "locale": []
-                    }
-                ]
+                }
             }
         },
         "/api/filter/closet/{slug}/product": {
@@ -402,46 +392,6 @@
                         "name": "slug",
                         "in": "path",
                         "description": "store slug",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                },
-                "security": [
-                    {
-                        "user_access_token": [],
-                        "locale": []
-                    }
-                ]
-            }
-        },
-        "/api/closet/{slug}/category/{catSlug}": {
-            "get": {
-                "tags": [
-                    "Closet"
-                ],
-                "summary": "Manage Closet Category Products",
-                "operationId": "getStoreCategories",
-                "parameters": [
-                    {
-                        "name": "slug",
-                        "in": "path",
-                        "description": "category slug",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "catSlug",
-                        "in": "path",
-                        "description": "category slug",
                         "required": true,
                         "schema": {
                             "type": "string"

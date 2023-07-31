@@ -383,6 +383,7 @@ class PimProduct extends Model
         $closet = array_key_exists('closet', $listOptions) ? $listOptions['closet'] : [];
         $categoryId = array_key_exists('categoryId', $listOptions) ? $listOptions['categoryId'] : [];
         $categoryIds = array_key_exists('categoryIds', $listOptions) ? $listOptions['categoryIds'] : [];
+        $customerId = array_key_exists('customer_id', $listOptions) ? $listOptions['customer_id'] : [];
         $bsCategorySlug = array_key_exists('bsCategorySlug', $listOptions) ? $listOptions['bsCategorySlug'] : '';
         $filters = array_key_exists('filters', $listOptions) ? $listOptions['filters'] : '';
         $limitRecord = array_key_exists('limit_record', $listOptions) ? $listOptions['limit_record'] : '';
@@ -418,14 +419,14 @@ class PimProduct extends Model
         }
         $products = self::select($fields);
 
-//        if($listingType == Constant::PJ_PRODUCT_LIST['RECENTLY_VIEWED_PRODUCTS']){
-//            $products = $products->join('customer_product_recently_viewed as cp_recently_viewed', 'cp_recently_viewed.product_id', '=', 'pim_products.id')
-//                        ->where('cp_recently_viewed.customer_id', $customerId)
-//                        ->orderBy('cp_recently_viewed.viewed_at', 'DESC');
-//            if(!empty($excludedProductId)){
-//                $products->where('pim_products.id', '<>', $excludedProductId);
-//            }
-//        }
+        if($listingType == Constant::PJ_PRODUCT_LIST['RECENTLY_VIEWED_PRODUCTS']){
+            $products = $products->join('customer_product_recently_viewed as cp_recently_viewed', 'cp_recently_viewed.product_id', '=', 'pim_products.id')
+                        ->where('cp_recently_viewed.customer_id', $customerId)
+                        ->orderBy('cp_recently_viewed.viewed_at', 'DESC');
+            if(!empty($excludedProductId)){
+                $products->where('pim_products.id', '<>', $excludedProductId);
+            }
+        }
 
         if (!empty($filterByProductIds)) {
             $products = $products->whereIn('pim_products.id', $filterByProductIds);

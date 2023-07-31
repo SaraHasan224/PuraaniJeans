@@ -127,18 +127,18 @@ class CategoryController extends Controller
 
     public function getCachedCategory( $categorySlug )
     {
-        $cacheKey = 'get_category_'.$categorySlug;
-        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($categorySlug) {
+//        $cacheKey = 'get_category_'.$categorySlug;
+//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($categorySlug) {
             return PimBsCategory::getCategoryBySlug( $categorySlug );
-        });
+//        });
     }
 
     public function getCachedSubCategories( $category )
     {
-        $cacheKey = 'get_subcategories_'.$category->slug;
-        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($category) {
+//        $cacheKey = 'get_subcategories_'.$category->slug;
+//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($category) {
             return PimBsCategory::getCategories( $category->id );
-        });
+//        });
     }
 
 }

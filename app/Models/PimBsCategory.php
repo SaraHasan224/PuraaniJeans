@@ -224,6 +224,7 @@ class PimBsCategory extends Model
                 'index' => $item->id,
                 'image' => $item->image,
                 'text' => $item->name,
+                'slug' => $item->slug,
                 'product_count' => 70,//$item->product_count,
                 'is_centered' => $featuredCategoryId->id == $item->id ? Constant::Yes : Constant::No,
             ];

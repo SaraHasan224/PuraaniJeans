@@ -51,9 +51,6 @@ Route::post('/product/{handle}',  [ProductController::class, 'getProductDetail']
 #Featured Products
 Route::get('/featured-products',  [FeaturedProductController::class, 'getFeaturedProducts']);
 Route::post('/filter/featured-products', [FeaturedProductController::class, 'getFeaturedProducts']);
-#Recently Viewed Products
-Route::get('/recently-viewed-products',  [RecentlyViewedProductController::class, 'getRecentlyViewedProducts']);
-Route::post('/filter/recently-viewed-products', [RecentlyViewedProductController::class, 'getCachedRecentlyViewedProducts']);
 #categories
 Route::get('/categories', [CategoryController::class, 'getCategories']);
 Route::get('/categories/{slug}', [CategoryController::class, 'getSubCategories']);
@@ -80,6 +77,9 @@ Route::middleware(['tokenValidation'])->group(function () {
     Route::post('resend/otp', [OtpController::class, "resendOtp"]);
     Route::post('verify/otp', [OtpController::class, "verifyOtp"]);
 
+    #Recently Viewed Products
+    Route::post('/recently-viewed-products',  [RecentlyViewedProductController::class, 'getRecentlyViewedProducts']);
 
     Route::post('/closet/create', [CustomerController::class, 'createCloset']);
+    Route::post('/product/{handle}',  [ProductController::class, 'getProductDetail']);
 });
