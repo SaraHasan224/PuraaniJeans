@@ -109,13 +109,14 @@ class ClosetController
             $result['recent_orders'] = self::getCachedRecentClosetOrders($closet);
             $result['all_products'] = self::getCachedAllClosetProducts($request, $closet);
             $result['all_orders'] = self::getCachedAllClosetOrders($closet);
+            $result['categories'] = PimCategory::getClosetCategory($closet->id);
 
             $response = self::getCachedClosetConfig($closet, $result);
             return ApiResponseHandler::success($response);
         }
     }
 
-    private function getCachedClosetConfig($closet, $response = []) {
+    private function getCachedClosetConfig($closet, $response) {
         $response['closet_ref'] = $closet->closet_reference;
         $response['closet'] = [
             'name' => $closet->closet_name,

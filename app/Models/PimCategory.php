@@ -33,6 +33,12 @@ class PimCategory extends Model
     }
 
 
+    public static function getClosetCategory($closetId)
+    {
+        return self::select('name', 'pim_cat_reference', 'image')->where('closet_id', $closetId)->orderBy('position', "ASC")->get()->toArray();
+    }
+
+
     public static function getClosetCategoryByCategoryRef($catSlug,$closetId)
     {
         return self::where('closet_id', $closetId)->where('pim_cat_reference', $catSlug)->first();
