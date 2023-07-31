@@ -95,7 +95,8 @@ class Constant
         'CLOSET_PRODUCTS'             => 3,
         'RECENTLY_VIEWED_PRODUCTS'    => 4,
         'CLOSET_TRENDING_PRODUCTS'    => 5,
-        'CLOSET_CATEGORY_PRODUCTS'    => 6
+        'CLOSET_CATEGORY_PRODUCTS'    => 6,
+        'ALL_PRODUCTS'                => 7
     ];
 
     const PJ_ORDER_LIST = [

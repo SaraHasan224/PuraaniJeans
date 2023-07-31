@@ -47,6 +47,7 @@ Route::post('register', [AuthController::class, "register"]);
 Route::get('homepage', [HomeController::class, 'getHomePageContent']);
 Route::get('homepage/featured-section', [HomeController::class, 'getHomePageFeaturedContent']);
 
+Route::get('/products',  [ProductController::class, 'getProducts']);
 Route::post('/product/{handle}',  [ProductController::class, 'getProductDetail']);
 #Featured Products
 Route::get('/featured-products',  [FeaturedProductController::class, 'getFeaturedProducts']);
@@ -57,7 +58,6 @@ Route::get('/categories/{slug}', [CategoryController::class, 'getSubCategories']
 #category products
 Route::get('/categories/{slug}/products', [CategoryProductController::class, 'getProducts']);
 Route::get('/filter/categories/{slug}/products', [CategoryProductController::class, 'getFilteredCategoryProducts']);
-
 
 #Closet List
 Route::get('/closets', [ClosetController::class, 'getAllClosets']);
