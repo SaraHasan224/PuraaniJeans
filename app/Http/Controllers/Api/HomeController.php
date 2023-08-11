@@ -12,21 +12,13 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHandler;
 use App\Helpers\AppException;
 use App\Helpers\Constant;
-use App\Helpers\Helper;
-use App\Helpers\ImageUpload;
 use App\Models\Closet;
+use App\Models\Customer;
 use App\Models\PimBrand;
 use App\Models\PimBsCategory;
-use App\Models\PimCategory;
 use App\Models\PimProduct;
-use App\Models\PimProductCategory;
-use App\Models\PimProductImage;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
-use function Ramsey\Uuid\v4;
 
 class HomeController
 {
@@ -40,7 +32,6 @@ class HomeController
      *     operationId="getMetaContent",
      *
      *     @OA\Response(response=200,description="Success"),
-     *
      * )
      */
 

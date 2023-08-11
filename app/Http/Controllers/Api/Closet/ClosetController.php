@@ -122,7 +122,7 @@ class ClosetController
             'name' => $closet->closet_name,
             'logo' => $closet->logo,
             'banner' => $closet->banner,
-            'about_closet' => $closet->about_closet,
+            'description' => $closet->about_closet,
             'closet_ref' => $closet->closet_reference,
             'email' => $closet->customer->email,
         ];

@@ -707,7 +707,8 @@ class PimProduct extends Model
                         ->select('name', 'id')
                         ->where('status', Constant::Yes)
                         ->get(),
-                    'colors' => Constant::COLORS_BY_FILTERS,
+//                    'colors' => Constant::COLORS_BY_FILTERS,
+                    'colors' => [],
                     'size' => Constant::SIZE_BY_FILTERS,
                     'sort_by' => $sortByFilters,
                     'price_range' => [

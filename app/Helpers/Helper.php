@@ -4,6 +4,7 @@
 namespace App\Helpers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 
@@ -471,5 +472,33 @@ class Helper
         {
             $file->move(public_path($destinationPath), $fileName);
         }
+    }
+
+    static function uploadFileToApp($file, $fileName, $filePath) {
+        if (!File::exists(public_path($filePath))) {
+            File::makeDirectory(public_path($filePath), 0775, true);
+        }
+
+        list($mime, $data)   = explode(';', $file);
+        list(, $data)       = explode(',', $data);
+        $data = base64_decode($data);
+
+        $mime = explode(':',$mime)[1];
+        $ext = explode('/',$mime)[1];
+        $savePath = $filePath.$fileName.'.'.$ext;
+
+        file_put_contents(public_path().'/'.$savePath, $data);
+        return $savePath;
+    }
+
+    static function getMimeType($imagedata)
+    {
+        $pos  = strpos($imagedata, ';');
+        $type = explode(':', substr($imagedata, 0, $pos))[1];
+        return $type;
+    }
+
+    static function convertUrlToDataURI($image) {
+        return base64_encode(file_get_contents($image));
     }
 }

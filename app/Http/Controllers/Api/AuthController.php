@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHandler;
 use App\Helpers\Constant;
 use App\Http\Controllers\Controller;
+use App\Models\AccessToken;
+use App\Models\Closet;
 use App\Models\Country;
 use App\Models\Customer;
 use App\Models\User;
@@ -146,10 +148,10 @@ class AuthController extends Controller
             return ApiResponseHandler::failure(__('Customer blocked'));
         }else {
             if (Hash::check($requestData['password'], $customer->password)) {
+                $closet = Closet::findByCustomerId($customer->id);
+                AccessToken::revokeOldTokensByName($customer->identifier);
                 $response['token'] = $customer->createToken($customer->identifier, ['customer'])->accessToken;
-                $response['screen'] = empty($customer->country_code) && empty($customer->country_code) ? "phone" : (
-                empty($customer->phone_verified_at) ? "otp" : "login"
-                );
+                $response['screen'] = $this->appScreen($customer);
                 $response['customer'] = [
                     'first_name' => $customer->first_name,
                     'last_name' => $customer->last_name,
@@ -157,7 +159,8 @@ class AuthController extends Controller
                     'country_code' => $customer->country_code,
                     'phone_number' => $customer->phone_number,
                     'identifier' => $customer->identifier,
-                    'closet_ref' => optional($customer->closet)->closet_referenc,
+                    'closet_ref' => optional($closet)->closet_reference,
+                    'closet' => $closet,
                 ];
                 return ApiResponseHandler::success($response, "You have successfully registered to " . env('APP_NAME') . ".");
             }else {
@@ -165,5 +168,14 @@ class AuthController extends Controller
             }
         }
 
+    }
+
+    private function appScreen($customer) {
+        if(empty($customer->country_code) && empty($customer->country_code)) {
+            return "phone";
+        }else if(empty($customer->phone_verified_at)) {
+            return "otp";
+        }
+        return "login";
     }
 }

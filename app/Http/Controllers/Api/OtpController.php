@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\AccessToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -157,6 +158,7 @@ class OtpController extends BaseCustomerController
             if ($verifiedOtp) {
                 $customer = Customer::findByRef($customerRef);
                 $customer->updateNonVerifiedCustomer($verifiedOtp);
+                AccessToken::revokeOldTokensByName($customer->identifier);
                 $response['token'] =  $customer->createToken($customer->identifier, ['customer'])->accessToken;
                 $response['customer'] = [
                     'first_name' => $customer->first_name,
@@ -165,7 +167,7 @@ class OtpController extends BaseCustomerController
                     'country_code' => $customer->country_code,
                     'phone_number' => $customer->phone_number,
                     'identifier' => $customer->identifier,
-                    'closet_ref' => optional($customer->closet)->closet_referenc,
+                    'closet_ref' => optional(optional($customer)->closet)->closet_reference,
                 ];
                 DB::commit();
                 return ApiResponseHandler::success($response, __('messages.customer.otp.success'));

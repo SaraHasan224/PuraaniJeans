@@ -91,7 +91,9 @@ class Customer extends Authenticatable
         ],
         'create-closet' => [
             'name' => 'required|string|max:255',
-        ]
+            'logo' => 'required',
+            'banner' => 'required'
+        ],
     ];
 
     public static function getValidationRules($type, $params = [])
@@ -116,6 +118,9 @@ class Customer extends Authenticatable
                 ],
                 'password' => 'same:confirm-password',
             ],
+            'update-closet' => [
+                'name' => 'required|string|max:255',
+            ]
         ];
 
         return $rules[$type];

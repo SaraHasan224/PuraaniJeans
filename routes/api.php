@@ -72,14 +72,21 @@ Route::get('/filter/closet/{slug}/product', [ClosetProductsController::class, 'g
 Route::get('/closet/{slug}/category/{catSlug}', [ClosetProductsController::class, 'getClosetCategory']);
 Route::get('/closet/{slug}/category/{catSlug}/product', [ClosetProductsController::class, 'getClosetCategoryProducts']);
 //, 'auth:api'
+
+Route::post('customer', [CustomerController::class, 'getCustomerMetaContent'])->middleware(['tokenValidation']);
+
 Route::middleware(['tokenValidation'])->group(function () {
+
     Route::post('send/otp', [OtpController::class, "sendOtp"]);
     Route::post('resend/otp', [OtpController::class, "resendOtp"]);
     Route::post('verify/otp', [OtpController::class, "verifyOtp"]);
 
+    Route::post('/closet/create', [CustomerController::class, 'createCloset']);
+    Route::post('/closet/{reference}/edit', [CustomerController::class, 'updateCloset']);
+
     #Recently Viewed Products
     Route::post('/recently-viewed-products',  [RecentlyViewedProductController::class, 'getRecentlyViewedProducts']);
 
-    Route::post('/closet/create', [CustomerController::class, 'createCloset']);
+//    Route::post('/closet/create', [CustomerController::class, 'createCloset']);
     Route::post('/product/{handle}',  [ProductController::class, 'getProductDetail']);
 });

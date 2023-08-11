@@ -65,6 +65,10 @@ class Constant
         2 => "danger",
         1 => "success"
     ];
+    const CLOSET_STATUS = [
+        "enabled" => 1,
+        "disabled" => 2
+    ];
     const OTP_MODULES = [
         'users'     => 'User',
         'customers' => 'Customer'

@@ -6,6 +6,10 @@ namespace App\Models;
 use App\Helpers\Constant;
 use App\Helpers\Helper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 use function Ramsey\Uuid\v4;
 
 class Closet extends Model
@@ -14,11 +18,11 @@ class Closet extends Model
 
     public function getLogoAttribute($value)
     {
-        return asset("storage/".$value);
+        return asset($value)."?v=".time();
     }
     public function getBannerAttribute($value)
     {
-        return asset("storage/".$value);
+        return asset($value)."?v=".time();
     }
 
     protected $fillable = [
@@ -57,6 +61,10 @@ class Closet extends Model
         ],
     ];
 
+
+    public static function findByCustomerId($customerId){
+        return self::where('customer_id', $customerId)->first();
+    }
 
     public static function findByReference($ref){
         return self::where('closet_reference', $ref)->first();
@@ -146,12 +154,87 @@ class Closet extends Model
     {
         $data = [
             'customer_id' => $requestData['customer_id'],
+            'about_closet' => $requestData['about'],
             'closet_name' => $requestData['name'],
             'closet_reference' => v4(),
+            'status' => Constant::CLOSET_STATUS['enabled'],
 
         ];
+        $closet = self::create($data);
 
-        return self::create($data);
+// base64 encoded data doesn't contain commas
+//        $logoFile = $requestData['logo'];
+//        $imageName = Helper::clean(trim(strtolower($closet->closet_name)));
+//        $imageMimeType = Helper::getMimeType($logoFile);
+//        $imageExt = str_replace("image/", "", $imageMimeType);
+//        $imagePath = "images/closets/" . $closet->id . "/logo/" ;
+//        if (!File::exists(public_path($imagePath))) {
+//            File::makeDirectory(public_path($imagePath), 0775, true);
+//        }
+//
+//        list($mime, $data)   = explode(';', $logoFile);
+//        list(, $data)       = explode(',', $data);
+//        $data = base64_decode($data);
+//
+//        $mime = explode(':',$mime)[1];
+//        $ext = explode('/',$mime)[1];
+//        $name = mt_rand().time();
+//        $savePath = $imagePath.$name.'.'.$ext;
+//
+//        file_put_contents(public_path().'/'.$savePath, $data);
+
+
+        $logoFile = $requestData['logo'];
+        $logoFileName = Helper::clean(trim(strtolower($closet->closet_name)));
+        $logoFilePath = "images/closets/" . $closet->id . "/logo/" ;
+        $logoImage = Helper::uploadFileToApp($logoFile, $logoFileName, $logoFilePath);
+
+        $bannerFile = $requestData['banner'];
+        $bannerFileName = Helper::clean(trim(strtolower($closet->closet_name)));
+        $bannerFilePath = "images/closets/" . $closet->id . "/banner/" ;
+        $bannerImage = Helper::uploadFileToApp($bannerFile, $bannerFileName, $bannerFilePath);
+
+        $closet->update([
+            'logo' => $logoImage,
+            'banner' => $bannerImage,
+        ]);
+        $closet->fresh();
+        return $closet;
+    }
+
+    public static function updateCloset( $reference, $requestData )
+    {
+        $closet = Closet::findByReference($reference);
+
+        $logoImage = $closet->logo;
+        $logoFile = $requestData['logo'];
+        if(!empty($logoImage)) {
+            $logoFileName = Helper::clean(trim(strtolower($closet->closet_name)));
+            $logoFilePath = "images/closets/" . $closet->id . "/logo/";
+            $file = new Filesystem();
+            $file->cleanDirectory(public_path($logoFilePath));
+            $logoImage = Helper::uploadFileToApp($logoFile, $logoFileName, $logoFilePath);
+        }
+        $bannerFile = $requestData['banner'];
+        $bannerImage = $closet->banner;
+        if(!empty($bannerFile)) {
+            $bannerFileName = Helper::clean(trim(strtolower($closet->closet_name)));
+            $bannerFilePath = "images/closets/" . $closet->id . "/banner/" ;
+            $file = new Filesystem();
+            $file->cleanDirectory(public_path($bannerFilePath));
+
+            $bannerImage = Helper::uploadFileToApp($bannerFile, $bannerFileName, $bannerFilePath);
+        }
+
+        $closet->update([
+            'logo' => $logoImage,
+            'banner' => $bannerImage,
+            'about_closet' => $requestData['about'],
+            'closet_name' => $requestData['name'],
+        ]);
+        $closet->fresh();
+
+        return $closet;
     }
 
 }
