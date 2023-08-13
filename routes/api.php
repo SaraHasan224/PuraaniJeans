@@ -39,7 +39,6 @@ Route::get('country-list', [MetadataController::class, 'getCountriesList']);
 Route::get('meta-data', [HomeController::class, 'getMetaContent']);
 Route::get('mega-menu', [HomeController::class, 'getMegaMenu']);
 
-
 Route::post('login', [AuthController::class, "login"]);
 Route::post('register', [AuthController::class, "register"]);
 
@@ -83,6 +82,9 @@ Route::middleware(['tokenValidation'])->group(function () {
 
     Route::post('/closet/create', [CustomerController::class, 'createCloset']);
     Route::post('/closet/{reference}/edit', [CustomerController::class, 'updateCloset']);
+
+    Route::get('/meta-data/product',  [ClosetProductsController::class, 'getProductMeta']);
+    Route::get('/add/product',  [ClosetProductsController::class, 'addProduct']);
 
     #Recently Viewed Products
     Route::post('/recently-viewed-products',  [RecentlyViewedProductController::class, 'getRecentlyViewedProducts']);

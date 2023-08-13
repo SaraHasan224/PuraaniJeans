@@ -25,43 +25,19 @@ class PimAttributeAndAttributeOptionsSeeder extends Seeder
             $data = [
                 [
                     'name' => "Size",
-                    'options' => [
-                        "Extra Small",
-                        "Small",
-                        "Medium",
-                        "Large",
-                        "Extra Large"
-                    ]
+                    'options' => Constant::SIZE_BY_FILTERS
                 ],
                 [
                     'name' => "Condition",
-                    'options' => [
-                        "New",
-                        "Used"
-                    ]
+                    'options' => Constant::CONDITION_BY_FILTERS
                 ],
                 [
-                    'name' => "Style",
-                    'options' => [
-                        "Glam",
-                        "Retro",
-                        "90s",
-                        "Vintage",
-                        "Festive",
-                    ]
+                    'name' => "Standard",
+                    'options' => Constant::STANDARD_BY_FILTERS
                 ],
                 [
                     'name' => "Color",
-                    'options' => [
-                        "Purple",
-                        "Lilac",
-                        "Black",
-                        "Blue",
-                        "White",
-                        "Red",
-                        "Orange",
-                        "Yellow",
-                    ]
+                    'options' => Constant::COLORS_BY_FILTERS
                 ],
             ];
 

@@ -7,14 +7,16 @@ use App\Helpers\AppException;
 use App\Helpers\Constant;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerProductRecentlyViewed;
+use App\Models\PimBrand;
+use App\Models\PimBsCategory;
 use App\Models\PimProduct;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Validator;
 
 class ProductController extends Controller
 {
-
 
     /**
      * @OA\Get(

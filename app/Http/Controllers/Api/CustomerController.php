@@ -41,6 +41,7 @@ class CustomerController
             $requestData = $request->all();
             $customerId = $requestData['customer_id'];
             $customer = Customer::findById($customerId);
+            $closet = Closet::findByCustomerId($customerId);
 
             $response = [
                 'customer' => [
@@ -51,7 +52,7 @@ class CustomerController
                     'phone_number' => optional($customer)->phone_number,
                     'identifier' => optional($customer)->identifier,
                     'closet' => [
-                        'closet_ref' => optional(optional($customer)->closet)->closet_reference,
+                        'closet_ref' => optional($closet)->closet_reference,
                     ],
                 ],
             ];

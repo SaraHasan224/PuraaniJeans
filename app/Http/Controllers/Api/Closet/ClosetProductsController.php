@@ -8,6 +8,8 @@ use App\Helpers\Constant;
 use App\Http\Controllers\Controller;
 use App\Models\Closet;
 use App\Models\MerchantStore;
+use App\Models\PimBrand;
+use App\Models\PimBsCategory;
 use App\Models\PimCategory;
 use App\Models\PimProduct;
 use Illuminate\Http\Request;
@@ -17,6 +19,97 @@ use Illuminate\Support\Facades\Validator;
 class ClosetProductsController extends Controller
 {
 
+    /**
+     * @OA\Get(
+     *
+     *     path="/api/meta-data/product",
+     *     tags={"Products"},
+     *     summary="Get Meta Data Products",
+     *     operationId="getProductMeta",
+     *
+     *     @OA\Response(response=200,description="Success"),
+     *
+     * )
+     */
+
+    public function getProductMeta()
+    {
+        try {
+            $response = [
+                'categories' => PimBsCategory::getAllProductCategories(),
+                'brands' => PimBrand::getAllBrandCategories(),
+                'condition' => $this->formatMetaOptions(Constant::CONDITION_BY_FILTERS),
+                'size' => $this->formatMetaOptions(Constant::SIZE_BY_FILTERS),
+                'standard' => $this->formatMetaOptions(Constant::STANDARD_BY_FILTERS),
+                'color' => $this->formatMetaOptions(array_flip(Constant::COLORS_BY_FILTERS))
+            ];
+            return ApiResponseHandler::success($response, __('messages.general.success'));
+        } catch (\Exception $e) {
+            AppException::log($e);
+            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
+        }
+    }
+
+    private function formatMetaOptions($array) {
+        $arrayObj = [];
+        foreach ($array as $key => $value) {
+            $arrayObj[] = [
+                'label' => $value,
+                'value' => $key
+            ];
+        }
+        return $arrayObj;
+    }
+
+
+    /**
+     * @OA\Post(
+     *
+     *     path="/api/add/product",
+     *     tags={"Closet"},
+     *     summary="Add New Products",
+     *     operationId="addProduct",
+     *
+     *     @OA\Response(response=200,description="Success"),
+     *
+     *     @OA\RequestBody(
+     *         description="Add New Products",
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="filters",
+     *                     description="Network Id of customer's phone number",
+     *                     type="object",
+     *                     example=Null
+     *                 )
+     *              )
+     *         )
+     *     ),
+     *     security={
+     *          {"user_access_token": {}, "locale": {}}
+     *     }
+     * )
+     */
+
+    public function addProduct()
+    {
+        try {
+            $response = [
+                'categories' => PimBsCategory::getAllProductCategories(),
+                'brands' => PimBrand::getAllBrandCategories(),
+                'condition' => $this->formatMetaOptions(Constant::CONDITION_BY_FILTERS),
+                'size' => $this->formatMetaOptions(Constant::SIZE_BY_FILTERS),
+                'standard' => $this->formatMetaOptions(Constant::STANDARD_BY_FILTERS),
+                'color' => $this->formatMetaOptions(array_flip(Constant::COLORS_BY_FILTERS))
+            ];
+            return ApiResponseHandler::success($response, __('messages.general.success'));
+        } catch (\Exception $e) {
+            AppException::log($e);
+            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
+        }
+    }
 
     /**
      * @OA\Post(
@@ -166,7 +259,6 @@ class ClosetProductsController extends Controller
         });
     }
 
-
     public function getCachedClosetProducts($request, $store, $shipment){
         $page = $request->input('page') ?? 1;
         $perPage = 12;
@@ -250,7 +342,6 @@ class ClosetProductsController extends Controller
         }
     }
 
-
     public function getCachedCategory($catSlug, $storeId){
         $cacheKey = 'get_store_'.$storeId.'_category_'.$catSlug;
         return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($catSlug, $storeId) {
@@ -271,6 +362,4 @@ class ClosetProductsController extends Controller
             return PimProduct::getProductsForApp($listType, $perPage, $listOptions);
         });
     }
-
-
 }

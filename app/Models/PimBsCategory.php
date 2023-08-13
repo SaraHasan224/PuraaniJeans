@@ -203,6 +203,64 @@ class PimBsCategory extends Model
         return $allCategoriesTransformed;
     }
 
+    public static function getAllProductCategories()
+    {
+        $allCategories = self::select('id',"name", "slug")
+            ->where('status', Constant::Yes)
+            ->where('parent_id', Constant::No)
+            ->with('children:id,parent_id,name,slug')
+            ->get();
+        $allCategoriesTransformed = $allCategories->map(function ($item) {
+            $childCategories = $item->children()->get();
+            $childCategoryCount = $childCategories->count();
+            $megaMenuType = "";
+//                if ($childCategoryCount > 12 && $childCategories->count() < 18) {
+//                    $megaMenuType = "small";
+//                }else
+            if($childCategories->count() > 12) {
+                $megaMenuType = $childCategories->count() < 30 ? "medium" : "large";
+            }
+            $menuItem = [
+                "label" => $item->name,
+                "value" => $item->slug,
+                "children" => $childCategoryCount > 0 ? true : false,
+            ];
+            if($childCategoryCount > 0) {
+                $menuItem['children'] =  $childCategories->map(function ($subItem) use($menuItem) {
+                    $subChildCategories = $subItem->children()->get();
+                    $subChildCategoryCount = $subItem->count();
+                    $subMenuItem = [
+                        "label" => $subItem->name,
+                        "value" => $subItem->slug,
+                        "children" => $subChildCategoryCount > 0 ? Constant::Yes : Constant::No,
+                    ];
+
+                    $subMenuItemChild = [];
+                    if($subChildCategoryCount > 0) {
+                        $subMenuItem['children'] = $subChildCategories->map(function ($subChildItem, $key) use($menuItem, $subMenuItem, $subMenuItemChild) {
+                            $subMenuItemChild[$key] = [
+                                "label" => $subChildItem->name,
+                                "value" => $subChildItem->slug,
+                                "children" => Constant::No,
+                            ];
+                            return $subMenuItemChild[$key];
+                        });
+                        return $subMenuItem;
+                    }else {
+                        return $subMenuItem;
+                    }
+                });
+            }
+            return $menuItem;
+        })
+            ->toArray();
+//        [
+//            'CategoriesTransformed' => $allCategoriesTransformed,
+//            'allCategories' => $allCategories,
+//        ];
+        return $allCategoriesTransformed;
+    }
+
 
     public static function getAllFeaturedCategories()
     {
