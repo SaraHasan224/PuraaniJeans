@@ -68,7 +68,7 @@ class Customer extends Authenticatable
 
     public function closet()
     {
-        return $this->hasOne(Closet::class, 'id', 'customer_id');
+        return $this->belongsTo(Closet::class, 'id', 'customer_id');
     }
 
     public function country()

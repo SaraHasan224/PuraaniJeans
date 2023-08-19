@@ -84,7 +84,7 @@ Route::middleware(['tokenValidation'])->group(function () {
     Route::post('/closet/{reference}/edit', [CustomerController::class, 'updateCloset']);
 
     Route::get('/meta-data/product',  [ClosetProductsController::class, 'getProductMeta']);
-    Route::get('/add/product',  [ClosetProductsController::class, 'addProduct']);
+    Route::post('/add/product',  [ClosetProductsController::class, 'addProduct']);
 
     #Recently Viewed Products
     Route::post('/recently-viewed-products',  [RecentlyViewedProductController::class, 'getRecentlyViewedProducts']);

@@ -27,6 +27,21 @@ class PimProduct extends Model
         $customerId = array_key_exists('customer_id', $params) ? $params['customer_id'] : [];
         $cartId = array_key_exists('cart_id', $params) ? $params['cart_id'] : [];
         $rules = [
+            'add-product' => [
+                "name" => "required|string",
+                'sku'      => 'required|string|'.Rule::unique('pim_products', 'sku')->where('closet', $activationCode),
+                "short_description" => "required|string",
+                "price" => 'required|numeric',
+                "discounted_price" => 'required|numeric|lt:price',
+                'product_qty' => 'required|numeric|gt:0',
+
+                'category' => 'required',
+                'category.parent' => 'required|string|'.Rule::exists('pim_bs_categories', 'slug'),
+                'category.child' => 'nullable|numeric|'.Rule::exists('pim_bs_categories', 'slug'),
+
+                'brands' => 'required',
+                'brands.value' => 'required|string|'.Rule::exists('pim_brands', 'id'),
+            ],
             'filters' => [
                 'filters' => 'required',
                 'filters.price_range' =>  "required",
