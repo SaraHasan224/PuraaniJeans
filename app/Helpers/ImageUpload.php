@@ -56,4 +56,17 @@ class ImageUpload
 
         return $fileName;
     }
+
+    public static function saveDataImage($file, $fileName, $folderPath) {
+        $base64Image = explode(";base64,", $file);
+
+        $explodeImage = explode("image/", $base64Image[0]);
+        $image_base64 = base64_decode($base64Image[1]);
+
+        $imageType = $explodeImage[1];
+        $file = public_path($folderPath . $fileName . '. '.$imageType);
+
+        file_put_contents($file, $image_base64);
+        return $file;
+    }
 }

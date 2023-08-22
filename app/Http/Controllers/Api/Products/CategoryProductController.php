@@ -65,7 +65,7 @@ class CategoryProductController extends Controller
     {
 //        $cacheKey = 'bsecure_categories_mapped_'.$categorySlug;
 //        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($bSecureCategoryIds) {
-        return PimBsCategoryMapping::getAllMerchantCategoryIds( $bSecureCategoryIds );
+        return PimBsCategoryMapping::getAllClosetCategoryIds( $bSecureCategoryIds );
 //        });
     }
 

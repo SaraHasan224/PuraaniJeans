@@ -33,28 +33,9 @@ class Client extends PassportClient
                 'client_secret' => 'required|string|exists:oauth_clients,secret',
                 'grant_type' => 'required|string|'.Rule::in('client_credentials'),
             ],
-            'merchant-store' => [
-                'client_id' => 'required|string|exists:oauth_clients,id',
-                'store_id' => 'nullable|string|'.Rule::exists('merchant_stores', 'store_slug')->where('merchant_id', $merchantId),
-            ],
-            'sso-request'  => [
-                'client_id' => 'required|string',//|exists:oauth_clients,id
-                'scope' => 'required|string|'.Rule::in('profile'),
-                'response_type' => 'required|string|'.Rule::in('code'),
-                'state' => 'required|string',
-            ],
-            'sso-store' => [
-                'client_id' => 'required|string|exists:oauth_clients,id',
-                'store_id' => 'nullable|string|'.Rule::exists('merchant_stores', 'store_slug')->where('merchant_id', $merchantId),
-            ],
         ];
 
         return $rules[ $type ];
-    }
-
-    public function merchant()
-    {
-        return $this->belongsTo(Merchant::class, 'merchant_id');
     }
 
     public static function getClientById( $id )

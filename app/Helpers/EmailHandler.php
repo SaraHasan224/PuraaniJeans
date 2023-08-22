@@ -34,51 +34,13 @@ class EmailHandler
 
     const EMAIL_SUBJECTS = [
         'signin' => [
-            'Admin' => 'Your bSecure Sign in OTP!',
-        ],
-        'signup' => [
-            'Admin' => 'Your bSecure Sign up OTP!',
-        ],
-        'otp_retry' => [
-            'signin'               => [
-                'Admin' => 'Your bSecure Sign in OTP!',
-            ],
-            'signup'               => [
-                'Admin' => 'Your bSecure Sign in OTP!',
-            ],
-            'update_email'         => [
-                'Admin' => 'Your bSecure change email OTP!',
-            ],
-            'update_phone'         => [
-                'Admin' => 'Your bSecure change phone number OTP!',
-            ]
-        ],
-        'create_user' => [
-            'admin' => [
-                'Admin' => 'New User Created',
-            ],
-            'user' => [
-                'Admin' => 'New User Created',
-            ],
-        ],
-        'reset_password'       => 'Reset Password Notification',
-        'agency_approval'      => 'Agency Access Approval',
-        'user_blocked'         => 'User Blocked',
-        'admin_blocked'        => 'Admin Blocked',
-        'update_email'         => [
-            'Admin' => 'Your bSecure change email OTP!',
-        ],
-        'update_phone'         => [
-            'Admin' => 'Your bSecure change phone number OTP!',
+            'Admin' => 'Your Sign in OTP!',
         ],
 
     ];
 
     const EMAIL_EVENTS = [
         'signin'        => 'Sign in',
-        'signup'        => 'Sign up',
-        'update_email'  => 'Change Email Address',
-        'update_phone'  => 'Change Phone Number',
     ];
 
     public static function getActionLinks()

@@ -4,7 +4,9 @@ namespace App\Models;
 
 use App\Helpers\Constant;
 use App\Helpers\Helper;
+use Faker\Core\File;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class PimProductImage extends Model
 {
@@ -12,7 +14,8 @@ class PimProductImage extends Model
 
     public function getUrlAttribute($value)
     {
-        return asset("storage/".$value);
+        $filePath = asset($value);
+        return $filePath;
     }
 
     public static function getPlaceholder(){

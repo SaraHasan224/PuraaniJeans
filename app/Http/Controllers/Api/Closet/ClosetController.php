@@ -220,7 +220,7 @@ class ClosetController
             $customer = Customer::findById($requestData['customer_id']);
 
             $filename = trim($customer->request_id) .".png";
-            $imagePath = public_path('storage/images/closets/' .$customer->closet->id. '/'.$filename) ;
+            $imagePath = 'storage/images/closets/' .$customer->closet->id. '/'.$filename;
 
             $img = Image::make($requestData['image'])->resize(350,350);
             $img->save($imagePath);

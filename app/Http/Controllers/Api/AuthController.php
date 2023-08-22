@@ -87,6 +87,7 @@ class AuthController extends Controller
             'email' => $customer->email,
             'country_code' => $customer->country_code,
             'phone_number' => $customer->phone_number,
+            'country_id' => $customer->country_id,
             'identifier' => $customer->identifier,
         ];
         return ApiResponseHandler::success($response,"You have successfully registered to ".env('APP_NAME').".");
@@ -158,6 +159,7 @@ class AuthController extends Controller
                     'email' => $customer->email,
                     'country_code' => $customer->country_code,
                     'phone_number' => $customer->phone_number,
+                    'country_id' => $customer->country_id,
                     'identifier' => $customer->identifier,
                     'closet_ref' => optional($closet)->closet_reference,
                     'closet' => $closet,

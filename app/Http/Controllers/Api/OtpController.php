@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\AccessToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,12 +15,10 @@ use App\Helpers\Helper;
 use App\Helpers\ApiResponseHandler;
 
 use App\Models\Customer;
-use App\Models\CustomerAppSession;
-use App\Models\CustomerProductRecentlyViewed;
 use App\Models\Otp;
 
 
-class OtpController extends BaseCustomerController
+class OtpController extends Controller
 {
     /**
      * @OA\Post(
@@ -166,6 +165,7 @@ class OtpController extends BaseCustomerController
                     'email' => $customer->email,
                     'country_code' => $customer->country_code,
                     'phone_number' => $customer->phone_number,
+                    'country_id' => $customer->country_id,
                     'identifier' => $customer->identifier,
                     'closet_ref' => optional(optional($customer)->closet)->closet_reference,
                 ];

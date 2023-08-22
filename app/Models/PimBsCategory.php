@@ -18,7 +18,7 @@ class PimBsCategory extends Model
     ];
     public function getNameAttribute($value)
     {
-        return $this->attributes[ Helper::getLocalizedColumn('name') ];
+        return $this->attributes[ 'name' ];
     }
 
     public function getImageAttribute($value)

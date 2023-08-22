@@ -17,8 +17,14 @@ class PimProduct extends Model
             'product_id' => 'required|numeric|exists:pim_products,id',
             'customer_address_id' => 'required|numeric|exists:customer_addresses,id',
         ],
+        'store' => [
+            'store_slug' => 'required',
+        ],
+        'storeCategories' => [
+            'store_slug' => 'required|string|exists:merchant_stores,store_slug',
+            'category_slug' => 'required|exists:pim_categories,handle'
+        ],
     ];
-
     public static function getValidationRules( $type, $params = [] )
     {
         $cartAllowedActions = array_key_exists('cart_actions_allowed', $params) ? $params['cart_actions_allowed'] : [];
@@ -26,21 +32,40 @@ class PimProduct extends Model
         $productId = array_key_exists('product_id', $params) ? $params['product_id'] : [];
         $customerId = array_key_exists('customer_id', $params) ? $params['customer_id'] : [];
         $cartId = array_key_exists('cart_id', $params) ? $params['cart_id'] : [];
+        $closetId = array_key_exists('closet_id', $params) ? $params['closet_id'] : [];
         $rules = [
             'add-product' => [
                 "name" => "required|string",
-                'sku'      => 'required|string|'.Rule::unique('pim_products', 'sku')->where('closet', $activationCode),
+                'sku'      => 'required|string|'.Rule::unique('pim_products', 'sku')->where('closet_id', $closetId),
                 "short_description" => "required|string",
                 "price" => 'required|numeric',
                 "discounted_price" => 'required|numeric|lt:price',
-                'product_qty' => 'required|numeric|gt:0',
+                'max_quantity' => 'required|numeric|gt:0',
 
                 'category' => 'required',
                 'category.parent' => 'required|string|'.Rule::exists('pim_bs_categories', 'slug'),
-                'category.child' => 'nullable|numeric|'.Rule::exists('pim_bs_categories', 'slug'),
+                'category.child' => 'nullable|string|'.Rule::exists('pim_bs_categories', 'slug'),
 
                 'brands' => 'required',
-                'brands.value' => 'required|string|'.Rule::exists('pim_brands', 'id'),
+                'brands.value' => 'required|numeric|'.Rule::exists('pim_brands', 'id'),
+
+                'variants' => 'required',
+                'variants.*.price' => 'required|numeric',
+                'variants.*.discounted_price' => 'required|numeric',
+                'variants.*.qty' => 'required|numeric|gt:0',
+                'variants.*.description' => 'required|string',
+
+                'variants.variation.*' => 'required|array',
+                'variants.variation.*.name' => 'required|string|'.Rule::exists('pim_attributes', 'name'),
+                'variants.variation.*.value' => 'required|string|'.Rule::exists('pim_attribute_options', 'option_value'),
+
+                'images' => 'required',
+
+                'shipment' => 'required',
+                'shipment.country' => 'required|numeric|'.Rule::exists('countries', 'id'),
+                'shipment.freeShipping' => 'nullable|boolean',
+                'shipment.shippingPrice' => 'nullable|numeric|gt:0',
+                'shipment.worldWideShipping' => 'nullable|boolean',
             ],
             'filters' => [
                 'filters' => 'required',
@@ -67,20 +92,17 @@ class PimProduct extends Model
                 'product_attributes.*.attribute_id' =>  "nullable|integer",
                 'product_attributes.*.option_id' =>  "nullable|integer",
                 'product_attributes.*.option_value' =>  "nullable|string",
-                'listing_type' => 'required|numeric|'.Rule::in(Constant::PJ_PRODUCT_LIST),
             ],
             'remove-cart-item' => [
                 'cart_item_id' => 'nullable|numeric|'.Rule::exists('customer_cart_items', 'id')->where('cart_id', $cartId),
                 'product_id' => 'required|numeric|'.Rule::exists('pim_products', 'id'),
                 'product_variant_id' => 'required|numeric|'.Rule::exists('pim_product_variant', 'id')->where('product_id', $productId),
                 'product_qty' => 'nullable|numeric|gt:0',
-                'listing_type' => 'required|numeric|'.Rule::in(Constant::PJ_PRODUCT_LIST),
             ],
             'delete-cart-item' => [
                 'cart_item_id' => 'nullable|numeric|'.Rule::exists('customer_cart_items', 'id')->where('cart_id', $cartId),
                 'product_id' => 'required|numeric|'.Rule::exists('pim_products', 'id'),
                 'product_variant_id' => 'required|numeric|'.Rule::exists('pim_product_variant', 'id')->where('product_id', $productId),
-                'listing_type' => 'required|numeric|'.Rule::in(Constant::PJ_PRODUCT_LIST)
             ],
             'update-cart' => [
                 'customer_address_id' => 'required|numeric|exists:customer_addresses,id',
@@ -94,7 +116,6 @@ class PimProduct extends Model
                 'product_id' => 'required|numeric',
                 'referrer_type'      => 'nullable|numeric|'.Rule::in($allowedActions),
                 'customer_address_id' => 'nullable',
-                'listing_type' => 'nullable',
                 'slug' => 'nullable'
             ],
         ];
@@ -126,11 +147,6 @@ class PimProduct extends Model
         return $this->hasMany(PimProductAttribute::class, 'product_id', 'id');
     }
 
-    public function merchant()
-    {
-        return $this->belongsTo(Merchant::class, 'merchant_id');
-    }
-
     public function attributeOption()
     {
         return $this->hasMany(PimProductVariantOption::class, 'product_id', 'id');
@@ -155,6 +171,11 @@ class PimProduct extends Model
         return $this->belongsTo(Closet::class, 'closet_id', 'id');
     }
 
+    public function brand()
+    {
+        return $this->hasOne(PimBrand::class, 'id', 'brand_id');
+    }
+
     public function images()
     {
         return $this->hasMany(PimProductImage::class, 'product_id', 'id')
@@ -167,9 +188,9 @@ class PimProduct extends Model
         return $this->hasOne(PimProductImage::class, 'product_id', 'id')
             ->where('is_default',Constant::Yes)
             ->withDefault([
-                'id' => $defaultImage->id,
-                'product_id' => $defaultImage->product_id,
-                'url' => $defaultImage->getAttributes()['url'],
+                'id' => optional($defaultImage)->id,
+                'product_id' => optional($defaultImage)->product_id,
+                'url' => !empty($defaultImage) ? optional($defaultImage)->getAttributes()['url'] : PimProductImage::getPlaceholder(),
             ]);
     }
 
@@ -188,21 +209,20 @@ class PimProduct extends Model
         return self::where('handle', $handle)->where('status', Constant::Yes)->first();
     }
 
-    public static function getProductImagePlaceholder()
-    {
-        return env('IMGIX_BASE_PATH') . '/' . env('ENV_FOLDER') . env('UNIVERSAL_CHECKOUT_PRODUCT_IMAGE_PLACEHOLDER');
-    }
-
-
-    public static function getProductDetail($productHandle, $productListingType = 0, $productStoreSlug = '')
+    public static function getProductDetail($productHandle)
     {
         $fields = [
             'pim_products.id as id',
             'name',
             'price',
+            'handle',
             'closet_id',
             'max_quantity',
             'short_description',
+            'shipment_country',
+            'free_shipment',
+            'enable_world_wide_shipping',
+            'shipping_price',
             'pim_products.has_variants as has_variants',
         ];
 
@@ -258,6 +278,7 @@ class PimProduct extends Model
             ] : $product->images;
 
             $image = optional(optional($product)->defaultImage)->url;
+            $product['discounted_price'] = 0;
             $product['image'] = !empty($image) ? $image : Helper::getProductImagePlaceholder();
             $product['closet'] = [
                 'name' => $closet->closet_name,
@@ -269,6 +290,10 @@ class PimProduct extends Model
             $variantAttributes = [];
             $attributeOptions = [];
             $availableOptions = [];
+            $color = [];
+            $condition = [];
+            $size = [];
+            $standard = [];
             if(!empty($product['attributeOption'])){
                 foreach ($product['attributeOption'] as $attributeOption) {
                     if(array_key_exists($attributeOption->attribute_id, $availableOptions)){
@@ -294,6 +319,7 @@ class PimProduct extends Model
                 foreach ($product->attribute as $productAttribute) {
                     if(array_key_exists($productAttribute->attribute_id, $availableOptions)){
                         $options = [];
+                        $optionVal = [];
                         $optionsAllowed = array_key_exists($productAttribute->attribute_id, $availableOptions) ? $availableOptions[$productAttribute->attribute_id] : [];
 
                         foreach ($productAttribute['options'] as $option) {
@@ -302,20 +328,46 @@ class PimProduct extends Model
                                     'id' => $option->option_id,
                                     'value' => $option->option_value,
                                 ];
+//                                $optionVal[] = [
+//                                    'label' => $option->option_label,
+//                                    'value' => $option->option_value,
+//                                    'attribute_id' => $option->attribute_id
+//                                ];
+                                $optionVal[] = $option->option_value;
                             }else {
                                 if(in_array($option->option_id, $optionsAllowed)){
                                     $options[] = [
                                         'id' => $option->option_id,
                                         'value' => $option->option_value,
                                     ];
+//                                $optionVal[] = [
+//                                    'label' => $option->option_label,
+//                                    'value' => $option->option_value,
+//                                    'attribute_id' => $option->attribute_id
+//                                ];
+                                    $optionVal[] = $option->option_value;
                                 }
                             }
                         }
-                        $attributes[] = [
+                        $_attrDetail = [
                             'id' => $productAttribute->attribute_id,
                             'name' => $productAttribute->attribute_value,
                             'options' => $options
                         ];
+                        $optionVal = [];
+                        if($productAttribute->attribute_value == "color") {
+                            $color = $optionVal;
+                        }else if($productAttribute->attribute_value == "condition") {
+                            $condition = $optionVal;
+                        }
+                        if($productAttribute->attribute_value == "size") {
+                            $size = $optionVal;
+                        }
+                        if($productAttribute->attribute_value == "standard") {
+                            $standard = $optionVal;
+                        }
+
+                        $attributes[] = $_attrDetail;
                     }
                 }
             }
@@ -370,16 +422,32 @@ class PimProduct extends Model
                     'attributes' => $productVariantAttributes,
                 ];
             }
+            $categories = [];
+            $sub_categories = [];
+            foreach ($product->category as $category) {
+                if($category->category->parent_id == 0) {
+                    $categories[] = optional($category->category)->name;
+                }else {
+                    $sub_categories[] = optional($category->category)->name;
+                    $categories[] = optional(optional($category->category)->parentCategory)->name;
+                }
+            }
+
             $product['variants'] = $productVariantDetails;
-//            $product['variants'] = $productVariants;
-            $HexEqualsTo = "%3D";
-            $product['share_link'] = env('UNIVERSAL_PRODUCT_SHARE_DEEPLINK_URL')."productId".$HexEqualsTo."".$product->id;
+            $product['item_information'] = [
+                "category" => $categories,
+                "subCategory" => $sub_categories,
+				"brand" => $product->brand,
+                "condition" => $condition,
+                "size" => $size,
+                "standard" => $standard,
+                "color" => $color,
+            ];
             $product['variant_ref'] = $attributeOptions;
             $product['default_variant_id'] = $defaultVariantId;
-            $product['listing_type'] = $productListingType;
-            $product['listing_slug'] = '';
             $product['attributes'] = $attributes;
 
+            unset($product['category']);
             unset($product['closet_id']);
             unset($product['defaultImage']);
             unset($product['attribute']);
@@ -499,6 +567,7 @@ class PimProduct extends Model
             })
             ->where('pim_products.status', Constant::Yes);
 
+        $products->orderBy('id','DESC');
 
         $filteredProducts = $products;
         $filtersSortBy = "";
@@ -553,7 +622,8 @@ class PimProduct extends Model
                     $query->where('category_id',$categoryId);
                 });
             }
-            $products->orderBy('rank','ASC');
+            $products->orderBy('id','DESC');
+//            $products->orderBy('rank','ASC');
 
             if($filtersApplied) {
                 $filteredProducts->where('pim_products.closet_id', $closet->id)
@@ -641,7 +711,6 @@ class PimProduct extends Model
                 $price = $defaultVariant->price;
                 $discount = $defaultVariant->discount;
                 $discountedPrice = $defaultVariant->discounted_price;
-                $productListingType = 0;
                 if ($listingType == Constant::PJ_PRODUCT_LIST['CATEGORY_PRODUCTS']) {
                     $position = $item->rank;
                 } else if ($listingType == Constant::PJ_PRODUCT_LIST['FEATURED_PRODUCTS']) {
@@ -653,11 +722,14 @@ class PimProduct extends Model
                 }
 
                 $image = optional(optional($item)->defaultImage)->url;
+                $pimCategory = [];
+                foreach ($item->category as $_category) {
+                    $pimCategory[] = $_category->category->name;
+                }
                 return [
                     'id' => $item->id,
                     'name' => $item->name,
                     'handle' => $item->handle,
-                    'listing_type' => $productListingType,
                     'list_type' => $listingType,
                     'discount' => empty($discount) ? 0 : $discount,
                     'price' => $price,
@@ -667,16 +739,17 @@ class PimProduct extends Model
                         'discount' => $discount,
                         'type' => $discountType,
                     ],
-                    'max_quantity' => $item->max_quantity,
+                    'quantity' => $item->max_quantity,
                     'has_variants' => $item->has_variants,
                     'image' => !empty($image) ? $image : Helper::getProductImagePlaceholder(),
                     'images' => $item->images,
-                    'images1' => $item->images->first(),
+                    'default' => $item->images->first(),
                     'position' => $position,
                     'description' => $item->short_description,
                     'variant_count' => $item->activeVariants->count(),
                     'attribute_count' => $item->attribute->count(),
                     'default_variant_id' => $defaultVariant->variant_id,
+                    'category' => $pimCategory,
                     'category_name' => !empty($category) && !empty($category->parent) ? $category->parent->name : optional($category)->name,
                     'category_id' => !empty($category) && !empty($category->parent) ? $category->parent->id : optional($category)->id,
                     'sub_category_name' => !empty($category) && !empty($category->parent) ? $category->name : null,

@@ -90,5 +90,5 @@ Route::middleware(['tokenValidation'])->group(function () {
     Route::post('/recently-viewed-products',  [RecentlyViewedProductController::class, 'getRecentlyViewedProducts']);
 
 //    Route::post('/closet/create', [CustomerController::class, 'createCloset']);
-    Route::post('/product/{handle}',  [ProductController::class, 'getProductDetail']);
+    Route::post('customer/product/{handle}',  [ProductController::class, 'getProductDetail']);
 });

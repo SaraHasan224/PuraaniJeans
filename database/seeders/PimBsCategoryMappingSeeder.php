@@ -5,15 +5,12 @@ namespace Database\Seeders;
 use App\Helpers\AppException;
 use App\Helpers\Constant;
 use App\Helpers\Helper;
-use App\Helpers\ImageUpload;
 use App\Models\PimBsCategory;
 use App\Models\PimBsCategoryMapping;
 use App\Models\PimCategory;
 use Carbon\Carbon;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\URL;
 
 class PimBsCategoryMappingSeeder extends Seeder
 {

@@ -20,7 +20,6 @@ class PimAttributeAndAttributeOptionsSeeder extends Seeder
         try {
             DB::table('pim_attributes')->truncate();
             DB::table('pim_attribute_options')->truncate();
-            $closet = DB::table('closets')->where('closet_name', "SH Bridals")->first();
 
             $data = [
                 [
@@ -37,7 +36,7 @@ class PimAttributeAndAttributeOptionsSeeder extends Seeder
                 ],
                 [
                     'name' => "Color",
-                    'options' => Constant::COLORS_BY_FILTERS
+                    'options' => array_flip(Constant::COLORS_BY_FILTERS)
                 ],
             ];
 
@@ -46,10 +45,11 @@ class PimAttributeAndAttributeOptionsSeeder extends Seeder
                     'name' => $d['name'],
                     'status' => Constant::Yes
                 ]);
-                foreach ($d['options'] as $opt) {
+                foreach ($d['options'] as $key => $opt) {
                     PimAttributeOption::create([
                         'attribute_id' => $attr->id,
-                        'option_value' => $opt,
+                        'option_label' => $opt,
+                        'option_value' => $key,
                         'status' => Constant::Yes
                     ]);
                 }

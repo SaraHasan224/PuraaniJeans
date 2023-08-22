@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('pim_attribute_options', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('attribute_id')->index();
+            $table->string('option_label')->nullable();
             $table->string('option_value')->nullable();
             $table->boolean('status')->default(Constant::No);
             $table->timestamps();

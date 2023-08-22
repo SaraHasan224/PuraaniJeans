@@ -40,8 +40,6 @@ class PimSeeder extends Seeder
             DB::table('pim_product_variants')->truncate();
             DB::table('pim_product_variant_options')->truncate();
 
-
-
             $closet = DB::table('closets')->where('closet_name', "SH Bridals")->first();
             $brands = PimBrand::updateOrCreate([
                 'closet_id' => $closet->id,

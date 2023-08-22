@@ -11,7 +11,6 @@ use App\Helpers\ImageUpload;
 use App\Http\Controllers\Controller;
 use App\Models\Closet;
 use App\Models\Customer;
-use App\Models\MerchantStore;
 use App\Models\PimAttribute;
 use App\Models\PimAttributeOption;
 use App\Models\PimBrand;
@@ -29,6 +28,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Image;
 use function Ramsey\Uuid\v4;
 use function Symfony\Component\Console\Input\isArray;
 
@@ -75,9 +75,10 @@ class ClosetProductsController extends Controller
         $arrayObj = [];
         foreach ($array as $key => $value) {
             $arrayObj[] = [
-                'label' => $value->option_value,
-                'value' => $value->id,
-                'attribute_id' => $value->attribute_id
+                'label' => $value->option_label,
+                'value' => $value->option_value,
+                'attribute_id' => $value->attribute_id,
+                'option_id' => $value->id
             ];
         }
         return $arrayObj;
@@ -117,10 +118,19 @@ class ClosetProductsController extends Controller
 
     public function addProduct(Request $request)
     {
+        $response = [];
         try {
             $requestData = $request->all();
             DB::beginTransaction();
 
+            $customerId = $requestData['customer_id'];
+            $customer = Customer::findById($customerId);
+            $closet = $customer->closet;
+            if(empty($closet)) {
+                return ApiResponseHandler::failure("You should create a store first.");
+            }
+
+            $requestData['closet_id'] = $closet->id;
             $validator = Validator::make($requestData, PimProduct::getValidationRules('add-product',$requestData));
             if ($validator->fails()) {
                 return ApiResponseHandler::validationError($validator->errors());
@@ -128,14 +138,13 @@ class ClosetProductsController extends Controller
 
             $customerId = $requestData['customer_id'];
             $customer = Customer::findById($customerId);
-            $customerCloset = $customer->closet;
-            if(empty($customerCloset)) {
+            $closet = $customer->closet;
+            if(empty($closet)) {
                 return ApiResponseHandler::failure("You should create a store first.");
             }
 
             $featuredPosition = Constant::No;
             $recommendedPosition = Constant::No;
-            $product = (object)$requestData;
 
 //            if ($requestData['is_featured'] == Constant::Yes) {
 //                $featuredPosition += $featuredPosition + 1;
@@ -147,9 +156,10 @@ class ClosetProductsController extends Controller
             $productSku = $requestData['sku'];
             $requestData['is_featured'] = Constant::No;
             $requestData['is_recommended'] = Constant::No;
+            $freeShipment = array_key_exists('freeShipping', $requestData) ? $requestData['freeShipping'] : 0;
 
             $pimProduct = PimProduct::create([
-                'closet_id' => $customerCloset->id,
+                'closet_id' => $closet->id,
                 'brand_id' => array_key_exists('brands', $requestData) && array_key_exists('value', $requestData['brands']) ? $requestData['brands']['value'] : '',
                 'name' => $requestData['name'],
                 'sku' => $productSku,
@@ -168,15 +178,17 @@ class ClosetProductsController extends Controller
                 'is_recommended' => $requestData['is_recommended'],
                 'recommended_position' => $recommendedPosition,
                 'recommended_at' => $requestData['is_recommended'] == Constant::Yes ? Carbon::now() : null,
+                'free_shipment' => $freeShipment ? Constant::Yes : Constant::No,
+                'enable_world_wide_shipping' => array_key_exists('worldWideShipping', $requestData) ? $requestData['worldWideShipping'] : 0,
+                'shipping_price' => $freeShipment ? null : (array_key_exists('shippingPrice', $requestData) ? $requestData['shippingPrice'] : 0),
             ]);
             #Add PIM Product Images
             $pimProductImages = [];
 
-            foreach ($requestData['images'] as $key2 => $images) {
-                $imgFile = $images;
-                $imgFileName = Helper::clean(trim(strtolower($productSku)));
-                $imgFilePath = "images/closets/" . $customerCloset->id . "/products/" ;
-                $imgImage = Helper::uploadFileToApp($imgFile, $imgFileName, $imgFilePath);
+            foreach ($requestData['images'] as $key2 => $image) {
+                $imgFileName = Helper::clean(trim(strtolower($productSku."-".$key2)));
+                $imgFilePath = "images/closets/" . $closet->id . "/products/" ;
+                $imgImage = Helper::uploadFileToApp($image['preview'], $imgFileName, $imgFilePath);
 
                 $image = PimProductImage::create([
                     'product_id' => $pimProduct->id,
@@ -191,9 +203,9 @@ class ClosetProductsController extends Controller
             #Add PIM Product Categories
             $category = '';
             $productCategory = $requestData['category'];
-            $parentCategory = PimCategory::addParentPimCategory($customerCloset, $productCategory['parent']);
+            $parentCategory = PimCategory::addParentPimCategory($closet, $productCategory['parent']);
             if (!empty($productCategory['child'])) {
-                $category = PimCategory::addChildPimCategory($customerCloset, $parentCategory, $productCategory['child']);
+                $category = PimCategory::addChildPimCategory($closet, $parentCategory, $productCategory['child']);
             }
 
             PimProductCategory::addPimCategory($pimProduct, $parentCategory, $category);
@@ -209,10 +221,10 @@ class ClosetProductsController extends Controller
                         $attr = $attributes['name'];
                         $options = implode(' ', (array)$attributes['value']);
 
-                        $attribute = PimAttribute::saveAttribute($attr);
-                        $productAttribute = PimProductAttribute::saveAttribute($customerCloset, $pimProduct, $attribute, $attr);
+                        $attribute = PimAttribute::getAttributeByName($attr);
+                        $productAttribute = PimProductAttribute::saveAttribute($closet, $pimProduct, $attribute, $attr);
 
-                        $attributeOptions = PimAttributeOption::saveOption($attribute, $options);
+                        $attributeOptions = PimAttributeOption::getOptionByValue($attribute->id, $options);
                         $productAttributeOptions = PimProductAttributeOption::saveProductAttributeOption($pimProduct, $attribute, $productAttribute, $attributeOptions, $options);
 
                         $variantAttribute[$key3][] = [
@@ -240,18 +252,19 @@ class ClosetProductsController extends Controller
                         'price' => $variants['price'],
                         'discount' => $variants['price']-$variants['discounted_price'],
                         'discount_type' => Constant::DISCOUNT_TYPE['flat'],
-                        'image_id' => $pimProductImages[$key3 + 1],
+                        'image_id' => !empty($pimProductImages) ? $pimProductImages[0] : 0,
                         'short_description' => $variants['description'],
                         'status' => Constant::Yes,
                     ]);
                     foreach ($variant['attr'] as $key5 => $attributes) {
                         foreach ($attributes as $attribute) {
+                            $_attr = $attribute;
                             try {
                                 PimProductVariantOption::saveProductAttributeOption([
                                     'product_id' => $pimProduct->id,
                                     'variant_id' => $pimProductVariants->id,
-                                    'attribute_id' => $attribute['attrId'],
-                                    'option_id' => $attribute['optionId'],
+                                    'attribute_id' => $attributes['attrId'],
+                                    'option_id' => $attributes['optionId'],
                                 ]);
                             } catch (\Exception $e) {
                                 AppException::log($e);
@@ -261,12 +274,24 @@ class ClosetProductsController extends Controller
                 }
             }
             DB::commit();
-            return ApiResponseHandler::success([], __('messages.general.success'));
+            $response['all_products'] = self::getCachedAllClosetProducts($request, $closet);
+            return ApiResponseHandler::success($response, "Product added successfully");
         } catch (\Exception $e) {
             DB::rollBack();
             AppException::log($e);
             return ApiResponseHandler::failure(__('messages.general.failed'), $e->getTraceAsString());
         }
+    }
+
+    private function getCachedAllClosetProducts($request, $closet){
+        $page = $request->input('page') ?? 1;
+        $perPage = 10;
+        $listType = Constant::PJ_PRODUCT_LIST['CLOSET_PRODUCTS'];
+        $listOptions = [
+            'closet' => $closet,
+            'page' => $page,
+        ];
+        return PimProduct::getProductsForApp($listType, $perPage, $listOptions);
     }
 
     /**
@@ -313,7 +338,7 @@ class ClosetProductsController extends Controller
             $requestData = $request->all();
             $response = [];
             $requestData['store_slug'] = $closetRef;
-            $validator = Validator::make($requestData, MerchantStore::$validationRules['store']);
+            $validator = Validator::make($requestData, PimProduct::$validationRules['store']);
 
             if ($validator->fails()) {
                 return ApiResponseHandler::validationError($validator->errors());
@@ -379,7 +404,7 @@ class ClosetProductsController extends Controller
         try {
             $response = [];
             $requestData['store_slug'] = $closetRef;
-            $validator = Validator::make($requestData, MerchantStore::$validationRules['store']);
+            $validator = Validator::make($requestData, PimProduct::$validationRules['store']);
 
             if ($validator->fails()) {
                 return ApiResponseHandler::validationError($validator->errors());
@@ -468,7 +493,7 @@ class ClosetProductsController extends Controller
             $requestData = [];
             $requestData['store_slug'] = $closetRef;
             $requestData['category_slug'] = $catSlug;
-            $validator = Validator::make($requestData, MerchantStore::$validationRules['storeCategories']);
+            $validator = Validator::make($requestData, PimProduct::$validationRules['storeCategories']);
 
             if ($validator->fails()) {
                 return ApiResponseHandler::validationError($validator->errors());
