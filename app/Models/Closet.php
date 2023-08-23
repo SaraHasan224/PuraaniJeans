@@ -39,8 +39,9 @@ class Closet extends Model
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class, "customer_id", "id");
+        return $this->belongsTo(Customer::class);
     }
+
     public function products()
     {
         return $this->hasMany(PimProduct::class, 'closet_id', 'id');
@@ -112,8 +113,8 @@ class Closet extends Model
             $query->where('status',Constant::Yes);
         });
         if($type == Constant::PJ_CLOSETS_LIST_TYPES['Trending']) {
-            $query->where('is_trending', Constant::Yes)
-                  ->orderBy('trending_position', 'DESC');
+//            $query->where('is_trending', Constant::Yes)
+//                  ->orderBy('trending_position', 'DESC');
         }else {
             $query->orderBy('closet_name', 'ASC');
 

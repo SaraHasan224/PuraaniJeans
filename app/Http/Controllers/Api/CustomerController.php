@@ -113,7 +113,7 @@ class CustomerController
             'closet_ref' => $closet->closet_reference,
             'email' => $closet->customer->email,
             'logo' => $closet->logo,
-            'banner' => $closet->customer->banner,
+            'banner' => $closet->banner,
             'description' => $closet->about_closet,
         ];
         return ApiResponseHandler::success($response, "You have successfully registered to " . env('APP_NAME') . ".");

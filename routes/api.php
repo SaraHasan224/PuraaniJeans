@@ -55,7 +55,7 @@ Route::post('/filter/featured-products', [FeaturedProductController::class, 'get
 Route::get('/categories', [CategoryController::class, 'getCategories']);
 Route::get('/categories/{slug}', [CategoryController::class, 'getSubCategories']);
 #category products
-Route::get('/categories/{slug}/products', [CategoryProductController::class, 'getProducts']);
+Route::post('/categories/{slug}/products', [CategoryProductController::class, 'getProducts']);
 Route::get('/filter/categories/{slug}/products', [CategoryProductController::class, 'getFilteredCategoryProducts']);
 
 #Closet List

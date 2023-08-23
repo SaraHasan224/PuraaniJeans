@@ -23,9 +23,9 @@ class PimCategory extends Model
         $category = self::updateOrCreate([
             'closet_id' => $closet->id,
             'parent_id' => Constant::No,
-            'pim_cat_reference' => v4(),
         ], [
             'position' => Constant::Yes,
+            'pim_cat_reference' => $bsCategory->slug,
             'name' => $bsCategory->name,
         ]);
 
@@ -40,11 +40,11 @@ class PimCategory extends Model
 
         $category = self::updateOrCreate([
             'closet_id' => $closet->id,
-            'pim_cat_reference' => v4(),
         ], [
             'position' => Constant::Yes,
-            'name' => $bsCategory->name,
             'parent_id' => $parent->id,
+            'pim_cat_reference' => $bsCategory->slug,
+            'name' => $bsCategory->name,
         ]);
 
         return $category;

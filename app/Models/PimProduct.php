@@ -485,6 +485,7 @@ class PimProduct extends Model
             'featured_position',
             'pim_products.position as position',
             'rank',
+            'shipping_price'
         ];
 
         if ($listingType == Constant::PJ_PRODUCT_LIST['RECENTLY_VIEWED_PRODUCTS']) {
@@ -577,7 +578,9 @@ class PimProduct extends Model
                 if(array_key_exists('min', $filters['price_range']) &&  $filters['price_range']['min'] >= 0 && !empty($filters['price_range']['max'])){
                     $filter_min_price = $filters['price_range']['min'];
                     $filter_max_price = $filters['price_range']['max'];
-                    $filteredProducts->whereBetween('pim_products.price', [$filter_min_price, $filter_max_price]);
+                    if($filter_max_price > 0 && $filter_min_price < $filter_max_price) {
+                        $filteredProducts->whereBetween('pim_products.price', [$filter_min_price, $filter_max_price]);
+                    }
                     $filtersApplied = true;
                 }
             }
@@ -602,6 +605,29 @@ class PimProduct extends Model
                 $filteredProducts->where('is_featured', Constant::Yes);
                 $filteredProducts->orderBy('featured_position','ASC');
                 $filtersApplied = true;
+            }
+
+            if($filters['records_range']['show_count'] > 0) {
+                $limitRecord = $filters['records_range']['show_count'];
+            }
+
+            if(!empty($filters['categories'])) {
+                $categories = explode($filters['categories'], ",");
+            }
+            if(!empty($filters['brands'])) {
+                $brands = explode($filters['brands'], ",");
+            }
+            if(!empty($filters['condition'])) {
+                $condition = explode($filters['condition'], ",");
+            }
+            if(!empty($filters['size'])) {
+                $size = explode($filters['size'], ",");
+            }
+            if(!empty($filters['standard'])) {
+                $standard = explode($filters['standard'], ",");
+            }
+            if(!empty($filters['color'])) {
+                $colors = explode($filters['color'], ",");
             }
         }
 
@@ -745,6 +771,7 @@ class PimProduct extends Model
                     'images' => $item->images,
                     'default' => $item->images->first(),
                     'position' => $position,
+                    'shipping_cost' => (int) $item->shipping_price,
                     'description' => $item->short_description,
                     'variant_count' => $item->activeVariants->count(),
                     'attribute_count' => $item->attribute->count(),
@@ -781,29 +808,29 @@ class PimProduct extends Model
                 'slug' => $slug,
                 'filters' => []
             ];
-                $sortByFilters = Constant::SORT_BY_FILTERS;
-                if ($listingType == Constant::PJ_PRODUCT_LIST['FEATURED_PRODUCTS']) {
-                    unset($sortByFilters['featured']);
-                }
-                $productResults['slug'] = $slug;
-                $productResults['filters'] = [
-                    'categories' => PimBsCategory::select('id',"name", "slug")
-                        ->where('status', Constant::Yes)
-                        ->where('parent_id', Constant::No)
-                        ->get(),
-                    'brands' => PimBrand::where('closet_id', Constant::No)
-                        ->select('name', 'id')
-                        ->where('status', Constant::Yes)
-                        ->get(),
-//                    'colors' => Constant::COLORS_BY_FILTERS,
-                    'colors' => [],
-                    'size' => Constant::SIZE_BY_FILTERS,
-                    'sort_by' => $sortByFilters,
-                    'price_range' => [
-                        'max' => $productMax,
-                        'min' => $productMin,
-                    ],
-                ];
+            $conditionAttributeId = PimAttribute::getAttributeByName('Condition')->id;
+            $sizeAttributeId = PimAttribute::getAttributeByName('Size')->id;
+            $standardAttributeId = PimAttribute::getAttributeByName('Standard')->id;
+            $colorAttributeId = PimAttribute::getAttributeByName('Color')->id;
+
+            $sortByFilters = Constant::SORT_BY_FILTERS;
+            if ($listingType == Constant::PJ_PRODUCT_LIST['FEATURED_PRODUCTS']) {
+                unset($sortByFilters['featured']);
+            }
+            $productResults['slug'] = $slug;
+            $productResults['filters'] = [
+                'categories' => PimBsCategory::getAllProductCategories(),
+                'brands' => PimBrand::getAllBrandCategories(),
+                'condition' => self::formatMetaOptions(PimAttributeOption::getByAttributeId($conditionAttributeId)),
+                'size' => self::formatMetaOptions(PimAttributeOption::getByAttributeId($sizeAttributeId)),
+                'standard' => self::formatMetaOptions(PimAttributeOption::getByAttributeId($standardAttributeId)),
+                'color' => self::formatMetaOptions(PimAttributeOption::getByAttributeId($colorAttributeId)),
+                'sort_by' => $sortByFilters,
+                'price_range' => [
+                    'max' => $productMax,
+                    'min' => $productMin,
+                ],
+            ];
             $productResults['slug'] = $slug;
             $productResults['per_page_count'] = $perPage;
             $productResults['sort_by'] = $filtersSortBy;
@@ -811,6 +838,19 @@ class PimProduct extends Model
         }
     }
 
+    private static function formatMetaOptions($array)
+    {
+        $arrayObj = [];
+        foreach ($array as $key => $value) {
+            $arrayObj[] = [
+                'label' => $value->option_label,
+                'value' => $value->option_value,
+                'attribute_id' => $value->attribute_id,
+                'option_id' => $value->id
+            ];
+        }
+        return $arrayObj;
+    }
 
     public static function getPimCategoryProductIds($categoryId) {
         return self::whereHas('category', function ($records) use ($categoryId)

@@ -156,7 +156,7 @@ class ClosetProductsController extends Controller
             $productSku = $requestData['sku'];
             $requestData['is_featured'] = Constant::No;
             $requestData['is_recommended'] = Constant::No;
-            $freeShipment = array_key_exists('freeShipping', $requestData) ? $requestData['freeShipping'] : 0;
+            $freeShipment = array_key_exists('freeShipping', $requestData['shipment']) ? $requestData['shipment']['freeShipping'] : 0;
 
             $pimProduct = PimProduct::create([
                 'closet_id' => $closet->id,
@@ -179,8 +179,9 @@ class ClosetProductsController extends Controller
                 'recommended_position' => $recommendedPosition,
                 'recommended_at' => $requestData['is_recommended'] == Constant::Yes ? Carbon::now() : null,
                 'free_shipment' => $freeShipment ? Constant::Yes : Constant::No,
-                'enable_world_wide_shipping' => array_key_exists('worldWideShipping', $requestData) ? $requestData['worldWideShipping'] : 0,
-                'shipping_price' => $freeShipment ? null : (array_key_exists('shippingPrice', $requestData) ? $requestData['shippingPrice'] : 0),
+                'enable_world_wide_shipping' => array_key_exists('worldWideShipping', $requestData['shipment']) && !empty($requestData['shipment']['worldWideShipping']) ? $requestData['shipment']['worldWideShipping'] : 0,
+                'shipping_price' => $freeShipment ? null : (array_key_exists('shippingPrice', $requestData['shipment']) && !empty($requestData['shipment']['shippingPrice']) ? $requestData['shipment']['shippingPrice'] : 0),
+                'shipment_country' => $freeShipment ? null : (array_key_exists('country', $requestData['shipment']) && !empty($requestData['shipment']['country']) ? $requestData['shipment']['country'] : 0),
             ]);
             #Add PIM Product Images
             $pimProductImages = [];
@@ -250,7 +251,7 @@ class ClosetProductsController extends Controller
                         'sku' => $variant['variantSKU'],
                         'quantity' => $variants['qty'],
                         'price' => $variants['price'],
-                        'discount' => $variants['price']-$variants['discounted_price'],
+                        'discount' => ($variants['discounted_price']) < $variants['price'] ? $variants['price']-$variants['discounted_price'] : 0,
                         'discount_type' => Constant::DISCOUNT_TYPE['flat'],
                         'image_id' => !empty($pimProductImages) ? $pimProductImages[0] : 0,
                         'short_description' => $variants['description'],
@@ -279,7 +280,7 @@ class ClosetProductsController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             AppException::log($e);
-            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getTraceAsString());
+            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
         }
     }
 

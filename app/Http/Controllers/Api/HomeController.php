@@ -90,12 +90,12 @@ class HomeController
         try {
             $response = [
                 'recommended' => $this->getCachedRecommendedProducts(),
-                'brands' => $this->getCachedBrands(),
+                'brands' => $this->getRecommendedStoreBrands(),
             ];
             return ApiResponseHandler::success($response, __('messages.general.success'));
         } catch (\Exception $e) {
             AppException::log($e);
-            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getTraceAsString());
+            return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
         }
     }
 
@@ -186,49 +186,7 @@ class HomeController
                 return PimBsCategory::getAllFeaturedCategories();
 //        });
     }
-    /*
-    private static function getBanners()
-    {
-        return [
 
-            [
-                'index' => 3,
-                'image' => URL::asset('assets/banners/primary_banners/3.png'),
-                'text' => 'Mens Wear',
-                'product_count' => 70,
-                'is_centered' => Constant::Yes,
-            ],
-            [
-                'index' => 1,
-                'image' => URL::asset('assets/banners/primary_banners/1.png'),
-                'text' => 'Shoes',
-                'product_count' => 15,
-                'is_centered' => Constant::No,
-            ],
-            [
-                'index' => 2,
-                'image' => URL::asset('assets/banners/primary_banners/2.png'),
-                'text' => 'Watches',
-                'product_count' => 20,
-                'is_centered' => Constant::No,
-            ],
-            [
-                'index' => 4,
-                'image' => URL::asset('assets/banners/primary_banners/4.png'),
-                'is_centered' => Constant::No,
-                'text' => 'Beauty',
-                'product_count' => 15,
-            ],
-            [
-                'index' => 5,
-                'image' => URL::asset('assets/banners/primary_banners/5.png'),
-                'is_centered' => Constant::No,
-                'text' => 'Hand Bags',
-                'product_count' => 15,
-            ],
-        ];
-    }
-    */
     private static function getAuthBanners()
     {
         return [
@@ -311,8 +269,8 @@ class HomeController
 
     private static function getRecommendedStoreBrands()
     {
-        return PimBrand::where('closet_id', Constant::No)
-            ->select('name', 'icon')
+        return PimBrand::select('id', 'name', 'icon')
+//            ->where('closet_id', Constant::No)
             ->where('status', Constant::Yes)
             ->take(8)
             ->get();
