@@ -18,7 +18,7 @@ use App\Models\Customer;
 use App\Models\PimCategory;
 use App\Models\PimProduct;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Validator;
 use function Ramsey\Uuid\v4;
 
 class ClosetController
@@ -273,9 +273,9 @@ class ClosetController
                 'products' => [],
                 'category' => []
             ];
-            $requestData['store_slug'] = $closetRef;
             $requestData['category_slug'] = $catSlug;
-            $validator = Validator::make($requestData, Closet::$validationRules['storeCategories']);
+            $requestData['closet_ref'] = $closetRef;
+            $validator = Validator::make($requestData, Closet::$validationRules['closet_categories']);
 
             if ($validator->fails())
             {

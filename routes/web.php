@@ -100,7 +100,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/users-list', [UserController::class, 'getListingRecord'])->name('users-list');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('user-edit-form');
     Route::post('/users/edit/{id}', [UserController::class, 'update'])->name('user-edit');
-    Route::post('/users-delete', [UserController::class, 'deleteRecords'])->name('users-delete');
+    Route::post('/users-delete-account', [UserController::class, 'deleteAccount'])->name('users-delete');
+    Route::post('/users-delete/selected', [UserController::class, 'deleteSelectedUsers'])->name('users.selected_delete');
+    Route::post('/user-change-status', [UserController::class, 'changeUserStatus'])->name('users.change_status');
 
     Route::get('/roles', [RoleController::class, 'index'])->name('roles');
 
@@ -112,8 +114,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/closet', [ClosetController::class, 'index'])->name('closet');
     Route::get('/closet-list', [ClosetController::class, 'getListingRecord'])->name('closet-list');
-    Route::get('/closet/{id}/edit', [ClosetController::class, 'edit'])->name('closet-edit-form');
-    Route::post('/closet/edit/{id}', [ClosetController::class, 'update'])->name('closet-edit');
+    Route::get('/closet-product-list/{ref}', [ClosetController::class, 'getProductListingRecord'])->name('closet-product-list');
+    Route::get('/closets/{ref}/edit', [ClosetController::class, 'edit'])->name('closet-edit-form');
+    Route::post('/closet/edit/{ref}', [ClosetController::class, 'update'])->name('closet-edit');
 
     Route::get('/closet/orders', [OrderController::class, 'index'])->name('closet-orders');
     Route::get('/closet/orders-list', [CustomerController::class, 'getListingRecord'])->name('closet-orders-list');
@@ -121,7 +124,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/closet/pim', [PIMController::class, 'index'])->name('closet-pim');
     Route::get('/closet/pim-list', [CustomerController::class, 'getListingRecord'])->name('closet-pim-list');
 
-
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

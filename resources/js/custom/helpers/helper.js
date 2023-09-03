@@ -110,6 +110,7 @@ App.Helpers = {
         $.each($("input[name='data_raw_id[]']:checked"), function () {
             countIds.push($(this).val());
         });
+        console.log("countIds: ", countIds)
         if (countIds.length == 0) {
             App.Helpers.selectRowsFirst("Please select at least one row");
         } else {
@@ -120,14 +121,13 @@ App.Helpers = {
                         if ($(".checkBoxes").is(':checked')) {
                             $(".checkBoxes").click();
                         }
-                        App.Merchant.hideOldMessage();
                         App.Helpers.refreshDataTable();
-                        // if (response.status == "success") {
-                        //   swal("Deleted!", response.message, "success");
-                        //   // location.reload();
-                        // } else {
-                        //   swal("Delete!", response.message, "error");
-                        // }
+                        if (response.status == "success") {
+                          swal("Deleted!", response.message, "success");
+                          // location.reload();
+                        } else {
+                          swal("Delete!", response.message, "error");
+                        }
                     };
                     App.Ajax.post(url, requestData, success, false, {});
                 }
@@ -1303,4 +1303,5 @@ App.Helpers = {
         }
         return tmp_ar;
     },
+
 }

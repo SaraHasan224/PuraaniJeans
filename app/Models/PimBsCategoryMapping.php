@@ -33,7 +33,7 @@ class PimBsCategoryMapping extends Model
         return $findCategory;
     }
 
-    public static function getAllClosetCategoryIds( $bSecureCategoryIds )
+    public static function getAllMappedCategoryIds( $bSecureCategoryIds )
     {
         return self::whereIn('bs_category_id', $bSecureCategoryIds)->pluck('pim_category_id');
     }

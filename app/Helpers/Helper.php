@@ -67,7 +67,7 @@ class Helper
         return (string) $randString."_".strtolower($slug);
     }
 
-    public static function isImageValid($url,$image_placeholder){
+    public static function isImageValid($url,$image_placeholder = ""){
         $image = $image_placeholder;
         // Remove all illegal characters from a url
         $image_url = filter_var($url, FILTER_SANITIZE_URL);

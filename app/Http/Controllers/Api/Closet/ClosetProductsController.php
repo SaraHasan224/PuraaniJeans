@@ -251,7 +251,7 @@ class ClosetProductsController extends Controller
                         'sku' => $variant['variantSKU'],
                         'quantity' => $variants['qty'],
                         'price' => $variants['price'],
-                        'discount' => ($variants['discounted_price']) < $variants['price'] ? $variants['price']-$variants['discounted_price'] : 0,
+                        'discount' => ($variants['discounted_price'] > 0 && ($variants['discounted_price']) < $variants['price']) ? $variants['discounted_price'] : 0,
                         'discount_type' => Constant::DISCOUNT_TYPE['flat'],
                         'image_id' => !empty($pimProductImages) ? $pimProductImages[0] : 0,
                         'short_description' => $variants['description'],
@@ -494,7 +494,7 @@ class ClosetProductsController extends Controller
             $requestData = [];
             $requestData['store_slug'] = $closetRef;
             $requestData['category_slug'] = $catSlug;
-            $validator = Validator::make($requestData, PimProduct::$validationRules['storeCategories']);
+            $validator = Validator::make($requestData, PimProduct::$validationRules['closet_categories']);
 
             if ($validator->fails()) {
                 return ApiResponseHandler::validationError($validator->errors());

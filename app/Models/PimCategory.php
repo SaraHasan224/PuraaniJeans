@@ -17,6 +17,11 @@ class PimCategory extends Model
         return $this->belongsTo(PimCategory::class, 'parent_id', 'id');
     }
 
+    public function parentBSCategory()
+    {
+        return $this->hasOne(PimBsCategory::class, 'slug', 'pim_cat_reference');
+    }
+
     public static function addParentPimCategory($closet, $name){
         $bsCategory = PimBsCategory::getCategoryBySlug($name);
 
@@ -46,7 +51,8 @@ class PimCategory extends Model
             'pim_cat_reference' => $bsCategory->slug,
             'name' => $bsCategory->name,
         ]);
-
+        //Link Closet category to PimBsCategoryMapping
+        PimBsCategoryMapping::mapPimCategory($category, $bsCategory);
         return $category;
     }
 

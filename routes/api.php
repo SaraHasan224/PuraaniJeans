@@ -68,7 +68,7 @@ Route::get('/closet/{reference}', [ClosetController::class, 'getClosetDetails'])
 Route::get('/closet/{slug}/product', [ClosetProductsController::class, 'getClosetProducts']);
 Route::get('/filter/closet/{slug}/product', [ClosetProductsController::class, 'getFilteredClosetProducts']);
 #Closet Category
-Route::get('/closet/{slug}/category/{catSlug}', [ClosetProductsController::class, 'getClosetCategory']);
+Route::get('/closet/{slug}/category/{catSlug}', [ClosetController::class, 'getClosetCategory']);
 Route::get('/closet/{slug}/category/{catSlug}/product', [ClosetProductsController::class, 'getClosetCategoryProducts']);
 //, 'auth:api'
 

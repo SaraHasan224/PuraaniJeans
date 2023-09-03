@@ -28,150 +28,44 @@
             <!-- ALERTS ENDS HERE -->
             <div class="box-body">
                 <!-- /.row -->
-                <section id="section1">
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-12 col-md-12">
-                            <form id="closet_edit_form" class="newFormContainer" method="post" autocomplete="off">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-6 formFieldsWrap">
-
-                                        <div class="form-group">
-                                            <label>First Name *</label>
-                                            <input
-                                                    type="text"
-                                                    name="first_name"
-                                                    maxlength="30"
-                                                    placeholder="First Name"
-                                                    class="form-control"
-                                                    value="{{ !empty(old('first_name')) ? old('first_name') : (!empty($customer) ? $customer->first_name : '') }}"
-                                                    required
-                                            >
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 formFieldsWrap">
-
-                                        <div class="form-group">
-                                            <label>Last Name *</label>
-                                            <input
-                                                    type="text"
-                                                    name="last_name"
-                                                    maxlength="30"
-                                                    placeholder="last_name"
-                                                    class="form-control"
-                                                    value="{{ !empty(old('last_name')) ? old('last_name') : (!empty($customer) ? $customer->last_name : '') }}"
-                                                    required
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 formFieldsWrap">
-                                        <div class="form-group">
-                                            <label>Email *</label>
-                                            <input
-                                                    type="email"
-                                                    name="email"
-                                                    maxlength="100"
-                                                    placeholder="Email"
-                                                    class="form-control"
-                                                    value="{{ !empty(old('email')) ? old('email') : (!empty($customer) ? $customer->email : '') }}"
-                                                    required
-                                            >
-                                        </div>
-
-                                    </div>
-                                    <div class="col-md-6 formFieldsWrap">
-                                        <div class="form-group profileMobileNo">
-                                            <label class="col-12">Mobile no *</label>
-                                            <input
-                                                    type="hidden"
-                                                    name="country_code"
-                                                    id="create_country_code"
-                                            >
-                                            <input
-                                                    type="tel"
-                                                    name="phone"
-                                                    oninput="App.Helpers.validatePhoneNumber(this)"
-                                                    class="form-control col-12"
-                                                    value="{{ !empty(old('phone')) ? old('phone') :  (!empty($customer) ? $customer->phone : '') }}"
-                                                    required
-                                                    id="create_phone"
-                                            >
-                                            <label id="mcc_code_error" class="help-block error"></label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 formFieldsWrap">
-                                        <div class="form-group">
-                                            <label>Username *</label>
-                                            <input
-                                                    type="text"
-                                                    name="username"
-                                                    maxlength="100"
-                                                    placeholder="username"
-                                                    class="form-control"
-                                                    value="{{ !empty(old('username')) ? old('username') : (!empty($customer) ? $customer->username : '') }}"
-                                                    required
-                                            >
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 formFieldsWrap">
-                                        <div class="form-group">
-                                            <div class="form-group switchFromGrp">
-                                                <span class="defaultLabel">Status</span>
-                                                <div class="custom-control custom-switch product-purchase-checkbox">
-                                                    <input value="{{ !empty(old('is_active')) ? old('is_active') :  (!empty($customer) ? $customer->status : '') }}"
-                                                           type="checkbox"
-                                                           checked="checked"
-                                                           name="is_active"
-                                                           class="custom-control-input"
-                                                           id="chbox_is_active"
-                                                    />
-
-                                                    <label class="custom-control-label"
-                                                           for="chbox_is_active"></label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 formFieldsWrap">
-                                        <div class="form-group">
-                                            <div class="form-group switchFromGrp">
-                                                <span class="defaultLabel">Subscription Status</span>
-                                                <div class="custom-control custom-switch product-purchase-checkbox">
-                                                    <input value="{{ !empty(old('subscription_status')) ? old('subscription_status') :  (!empty($customer) ? $customer->subscription_status : '') }}"
-                                                           type="checkbox"
-                                                           checked="checked"
-                                                           name="subscription_status"
-                                                           class="custom-control-input"
-                                                           id="chbox_subscription_status"
-                                                    />
-
-                                                    <label class="custom-control-label"
-                                                           for="chbox_subscription_status"></label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                    <div class="row">
-                                        <div class="col-md-12 formFieldsWrap">
-                                            <div class="form-group">
-                                                <div class="insideButtons">
-                                                    <button id="edit-customer" type="button" class="btn btn-primary"><i
-                                                                class="icon-check-thin newMargin"></i>Save
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
+                {{--<div class="main-card mb-3 card">--}}
+                <div class="card-header">
+                    @if(!empty($data['closet']) && \App\Helpers\Helper::isImageValid($data['closet']['logo']))
+                        <img class="card-closet-logo" src="{{$data['closet']->logo}}"/>
+                    @else
+                        <i class="header-icon lnr-license icon-gradient bg-plum-plate"> </i>
+                    @endif
+                        {{$data['closet']->closet_name}}
+                        <div class="btn-actions-pane-right">
+                        <div class="nav">
+                            <a data-toggle="tab" href="#tab-eg2-0"
+                               class="btn-pill btn-wide active btn btn-outline-alternate btn-sm">Closet</a>
+                            <a data-toggle="tab" href="#tab-eg2-1" id="productInventory"
+                               class="btn-pill btn-wide btn btn-outline-alternate btn-sm">Product Inventory</a>
+                            <a data-toggle="tab" href="#tab-eg2-2"
+                               class="btn-pill btn-wide mr-1 ml-1  btn btn-outline-alternate btn-sm">Customers</a>
+                            <a data-toggle="tab" href="#tab-eg2-3"
+                               class="btn-pill btn-wide  btn btn-outline-alternate btn-sm">Orders</a>
                         </div>
                     </div>
-                </section>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab-eg2-0" role="tabpanel">
+                        @include('closet.closet.tabs.closet')
+                    </div>
+                    <div class="tab-pane" id="tab-eg2-1" role="tabpanel">
+                        @include('closet.closet.tabs.products', [
+                            'closet_ref' => $data['closet']->closet_reference
+                        ])
+                    </div>
+                    <div class="tab-pane" id="tab-eg2-2" role="tabpanel">
+                        @include('closet.closet.tabs.customers')
+                    </div>
+                    <div class="tab-pane" id="tab-eg2-3" role="tabpanel">
+                        @include('closet.closet.tabs.orders')
+                    </div>
+                </div>
+                {{--</div>--}}
             </div>
         </div>
         <!-- /.box-body -->
@@ -179,14 +73,9 @@
 @endsection
 @section('scripts')
     <script>
-        $(document).ready(function () {
-            App.Users.initializeValidations();
-            var countryCode = "{{ $customer->country_code }}";
-            var phoneNumber = "{{ $customer->phone_number }}";
-            var userId = "{{ $customer->id }}";
-            $('#create_phone').val(phoneNumber);
-            App.Users.editUserFormBinding(userId);
-            App.Helpers.getPhoneInput('create_phone', 'create_country_code', true, countryCode, phoneNumber)
-        })
+        const closet_ref = "<?php echo $data['closet']->closet_reference ?>";
+        document.getElementById("productInventory").onclick = function () {
+            App.Closet.initializeClosetProductsDataTable(closet_ref);
+        }
     </script>
 @endsection

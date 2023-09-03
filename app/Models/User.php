@@ -26,7 +26,6 @@ use App\Helpers\Constant;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-    use SoftDeletes;
     use HasRoles;
     use canResetPassword;
     /**
@@ -79,7 +78,7 @@ class User extends Authenticatable
         $rules = [
             'createUser'        => [
                 'name'  => 'required',
-                'email' => 'required|email:rfc,dns|unique:users,email',
+                'email' => 'required|email:rfc,dns|unique:users,email,NULL,id,deleted_at,NULL',
                 'password' => 'required|max:30',
                 'phone' => [
                     'required',
@@ -151,10 +150,28 @@ class User extends Authenticatable
         return false;
     }
 
+    public static function deleteRecords($requestData)
+    {
+        self::whereIn('id', $requestData['delete_ids'])->delete();
+    }
+
+
+    public static function deleteAccount($requestData)
+    {
+        self::where('id', $requestData['id'])->delete();
+    }
+
+    public static function changeRecordStatus($requestData)
+    {
+        self::where('id', $requestData['id'])->update([
+            'status' => $requestData['status']
+        ]);
+    }
+
     public static function getUsersByFilters($filter)
     {
         $data = self::select('id', 'name', 'email', 'country_code', 'phone_number', 'user_type', 'login_attempts', 'last_login', 'status', 'created_at','updated_at','deleted_at');
-        $data = $data->withTrashed()->orderBy('id', 'DESC');
+        $data = $data->orderBy('id', 'DESC');
 
         if (count($filter))
         {
@@ -167,7 +184,7 @@ class User extends Authenticatable
             {
                 $phone = trim($filter['phone']);
                 $phone = Helper::formatPhoneNumber($phone);
-                $data = $data->where('phone', 'LIKE', '%' . $phone . '%');
+                $data = $data->where('phone_number', 'LIKE', '%' . $phone . '%');
             }
 
             if (!empty($filter['email']))

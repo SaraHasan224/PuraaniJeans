@@ -11,9 +11,9 @@ App.Users = {
     },
 
     removeFilters: function () {
-        $('#user_name').val('');
+        $('#name').val('');
         $('#email').val('');
-        $('#status').val('');
+        $('#user_id').val('');
         $('#phone').val('');
         App.Helpers.removeAllfilters("users_table");
     },
@@ -43,7 +43,7 @@ App.Users = {
             d.user_id = $('#user_id').val();
             d.name = $('#name').val();
             d.email = $('#email').val();
-            d.phone = $('#filter_phone').val();
+            d.phone = $('#phone').val();
         };
         let orderColumn = [[2, "desc"]];
         let searchEnabled = true;
@@ -72,6 +72,7 @@ App.Users = {
                 );
 
                 let onSuccess= function (data) {
+                    console.log("success: ", data)
                     if(data.type == "success") {
                         window.location.href = '/users';
                         App.Helpers.showSuccessMessage( data.message );
@@ -81,6 +82,34 @@ App.Users = {
                 App.Ajax.post(url, requestData, onSuccess, false, {});
             }
         });
+    },
+
+    changeStatus: function (id, status) {
+        swal({
+                title: "Are you sure to continue?",
+                text: "You are changing user status.",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "Continue",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+            function (isConfirm) {
+                if (isConfirm) {
+                    let url = App.Helpers.generateApiURL(App.Constants.endPoints.changeUserStatus);
+                    let onSuccess = function (data) {
+                        console.log("success: ", data)
+                        if (data.type == "success") {
+                            App.Helpers.refreshDataTable();
+                        }
+                    }
+                    let requestData = {id, status};
+                    App.Ajax.post(url, requestData, onSuccess, false, {});
+                }else{
+                }
+            });
     },
 
     editUserFormBinding: function (userId) {

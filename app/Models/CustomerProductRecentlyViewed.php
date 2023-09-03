@@ -30,6 +30,10 @@ class CustomerProductRecentlyViewed extends Model
     {
         return self::where('customer_id',$customerId)->get();
     }
+    public static function findCountByClosetProductIds($productIds)
+    {
+        return self::whereIn('product_id',$productIds)->count();
+    }
 
 
     public static function getRecentlyViewedResultsForCustomer($customerId)

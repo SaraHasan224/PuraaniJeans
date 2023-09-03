@@ -34,6 +34,7 @@ class UserController extends Controller
             return view('users.index',$data);
         }catch (\Exception $e){
             AppException::log($e);
+            return redirect()->back()->withErrors($e->getMessage());
             return ApiResponseHandler::failure(__('messages.general.failed'), $e->getMessage());
         }
     }
@@ -69,23 +70,12 @@ class UserController extends Controller
         {
             return ApiResponseHandler::validationError($validator->errors());
         }
-
-//        $image = Auth::user()->image;
-//        if ($request->hasFile('image')) {
-//            $image_tmp = $request->image;
-//            if ($image_tmp->isValid()) {
-//                $extension = $image_tmp->getClientOriginalExtension();
-//                $image = strtolower(trim($request->name)) . '_' . strtotime(Carbon::now()) . "." . $extension;
-//                $image_path = public_path('assets/images/uploads/users/' . $image);
-//                Image::make($image_tmp)->save($image_path);
-//            }
-//        }
         // Retrieve the validated input data...
         $data = $this->storeOrUpdate($requestData, Constant::CRUD_STATES['created']);
         return ApiResponseHandler::success($data);
     }
 
-    private function storeOrUpdate($validated, $state, $image = "", $id = false)
+    private function storeOrUpdate($validated, $state, $id = false)
     {
         DB::beginTransaction();
         if ($state == Constant::CRUD_STATES['created']) {
@@ -119,11 +109,11 @@ class UserController extends Controller
             DB::rollback();
             $return['type'] = 'errors';
             $get_environment = env('APP_ENV', 'local');
-            if ($get_environment == 'local') {
+//            if ($get_environment == 'local') {
                 $return['message'] = $e->getMessage();
-            } else {
-                $return['message'] = "Oopss we are facing some hurdle right now to process this action, please try again";
-            }
+//            } else {
+//                $return['message'] = "Oopss we are facing some hurdle right now to process this action, please try again";
+//            }
             return $return;
         }
     }
@@ -181,18 +171,8 @@ class UserController extends Controller
         {
             return ApiResponseHandler::validationError($validator->errors());
         }
-//        $image = $user->image;
-//        if ($request->hasFile('image')) {
-//            $image_tmp = $request->image;
-//            if ($image_tmp->isValid()) {
-//                $extension = $image_tmp->getClientOriginalExtension();
-//                $image = strtolower(trim($request->name)) . '_' . strtotime(Carbon::now()) . "." . $extension;
-//                $image_path = public_path('assets/images/uploads/users/' . $image);
-//                Image::make($image_tmp)->save($image_path);
-//            }
-//        }
         // Retrieve the validated input data...
-        $data = $this->storeOrUpdate($requestData, Constant::CRUD_STATES['updated'], "", $id);
+        $data = $this->storeOrUpdate($requestData, Constant::CRUD_STATES['updated'], $id);
         return ApiResponseHandler::success($data);
     }
 
@@ -243,8 +223,12 @@ class UserController extends Controller
             })
             ->addColumn('status', function ($rowdata) {
                 $isActive = $rowdata->status;
+                $isOppositeStatus = $rowdata->status == Constant::USER_STATUS['InActive'] ? Constant::USER_STATUS['Active'] : Constant::USER_STATUS['InActive'];
                 $userStatus = array_flip(Constant::USER_STATUS);
-                return '<label class="badge badge-' . Constant::USER_STATUS_STYLE[$isActive] . '"> ' . $userStatus[$isActive] . '</label>';
+                return '<label
+                    class="badge badge-' . Constant::USER_STATUS_STYLE[$isActive] . '"
+                    onClick="App.Users.changeStatus(' . $rowdata->id . ',' . $isOppositeStatus . ')"
+                > ' . $userStatus[$isActive] . '</label>';
             })
             ->addColumn('last_login', function ($rowdata) {
                 if(empty($rowdata->last_login))
@@ -274,33 +258,74 @@ class UserController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function deleteRecords(Request $request)
+    public function deleteAccount(Request $request)
     {
         try
         {
             $requestData = $request->all();
             $validationErrors = Helper::validationErrors($request, [
-                'delete_ids' => 'required',
+                'id' => 'required',
             ]);
-
             if ($validationErrors)
             {
-                return ResponseHandler::validationError($validationErrors);
+                return ApiResponseHandler::validationError($validationErrors);
             }
-            if ($requestData['action'] == 'delete')
-            {
-                User::deleteRecords($requestData);
+            User::deleteAccount($requestData);
+            $return['type'] = 'success';
+            $return['message'] = __('messages.products.deleted');
+            return ApiResponseHandler::success($return);
+        } catch (\Exception $e) {
+            $return['type'] = 'errors';
+            $get_environment = env('APP_ENV', 'local');
+            if ($get_environment == 'local') {
+                $return['message'] = $e->getMessage();
+            } else {
+                $return['message'] = "Oopss we are facing some hurdle right now to process this action, please try again";
             }
-            else
-            {
-                User::updateRecords( $requestData);
-            }
-            return ResponseHandler::success([], __('messages.products.deleted'));
-        }
-        catch (\Exception $e)
-        {
-            return ResponseHandler::serverError($e);
+            return ApiResponseHandler::failure($return);
         }
     }
 
+    public function changeUserStatus(Request $request)
+    {
+        $return = [];
+        try {
+            $requestData = $request->all();
+            User::changeRecordStatus($requestData);
+            $return['type'] = 'success';
+            $return['message'] = "Selected user status changed successfully.";
+            return ApiResponseHandler::success($return);
+        } catch (\Exception $e) {
+            $return['type'] = 'errors';
+            $get_environment = env('APP_ENV', 'local');
+            if ($get_environment == 'local') {
+                $return['message'] = $e->getMessage();
+            } else {
+                $return['message'] = "Oopss we are facing some hurdle right now to process this action, please try again";
+            }
+            return ApiResponseHandler::failure($return);
+        }
+    }
+
+    public function deleteSelectedUsers(Request $request)
+    {
+        $return = [];
+        try {
+            $requestData = $request->all();
+            User::deleteRecords($requestData);
+            $return['type'] = 'success';
+            $return['message'] = "Selected users deleted successfully.";
+            return ApiResponseHandler::success($return);
+        } catch (\Exception $e) {
+            AppException::log($e);
+            $return['type'] = 'errors';
+            $get_environment = env('APP_ENV', 'local');
+            if ($get_environment == 'local') {
+             $return['message'] = $e->getMessage();
+            } else {
+                $return['message'] = "Oopss we are facing some hurdle right now to process this action, please try again";
+            }
+            return ApiResponseHandler::failure($return);
+        }
+    }
 }

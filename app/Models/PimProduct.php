@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use Illuminate\Database\Eloquent\Model;
 use App\Helpers\Constant;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use function Illuminate\Process\options;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +21,7 @@ class PimProduct extends Model
         'store' => [
             'store_slug' => 'required',
         ],
-        'storeCategories' => [
+        'closet_categories' => [
             'store_slug' => 'required|string|exists:merchant_stores,store_slug',
             'category_slug' => 'required|exists:pim_categories,handle'
         ],
@@ -176,6 +177,11 @@ class PimProduct extends Model
         return $this->hasOne(PimBrand::class, 'id', 'brand_id');
     }
 
+    public function shipmentCountryDetails()
+    {
+        return $this->hasOne(Country::class, 'id', 'shipment_country');
+    }
+
     public function images()
     {
         return $this->hasMany(PimProductImage::class, 'product_id', 'id')
@@ -207,6 +213,11 @@ class PimProduct extends Model
     public static function getByHandle($handle)
     {
         return self::where('handle', $handle)->where('status', Constant::Yes)->first();
+    }
+
+    public static function findProductIdsByCloset($closetId)
+    {
+        return self::where('closet_id', $closetId)->where('status', Constant::Yes)->get()->pluck('id');
     }
 
     public static function getProductDetail($productHandle)
@@ -485,7 +496,9 @@ class PimProduct extends Model
             'featured_position',
             'pim_products.position as position',
             'rank',
-            'shipping_price'
+            'shipping_price',
+            'enable_world_wide_shipping',
+            'shipment_country'
         ];
 
         if ($listingType == Constant::PJ_PRODUCT_LIST['RECENTLY_VIEWED_PRODUCTS']) {
@@ -750,7 +763,7 @@ class PimProduct extends Model
                 $image = optional(optional($item)->defaultImage)->url;
                 $pimCategory = [];
                 foreach ($item->category as $_category) {
-                    $pimCategory[] = $_category->category->name;
+                    $pimCategory[] = $_category->category->name." / ". optional(optional($_category->category)->parentCategory)->name;
                 }
                 return [
                     'id' => $item->id,
@@ -938,5 +951,175 @@ class PimProduct extends Model
     {
         $this->status = Constant::No;
         $this->save();
+    }
+
+    public static function getByFilters($filter, $ref)
+    {
+        $fields = [
+            'pim_products.id as id',
+            'name',
+            'price',
+            'brand_id',
+            'handle',
+            'max_quantity',
+            'short_description',
+            'has_variants',
+            'featured_position',
+            'pim_products.position as position',
+            'rank',
+            'status',
+            'shipping_price',
+            'enable_world_wide_shipping',
+            'shipment_country',
+            'created_at'
+        ];
+
+        $products = self::select($fields)
+            ->where('closet_id', $ref)
+            ->with([
+                'defaultImage:id,product_id,url,position',
+                'category.category.parentBSCategory',
+                'shipmentCountryDetails:id,name',
+                'attribute' => function ($query) {
+                    $query->select([
+                        'id',
+                        'product_id',
+                        'attribute_id',
+                        'attribute_value',
+                    ])
+                        ->with(['options:id,product_id,attribute_id,pim_product_attribute_id,option_id,option_value'])
+                        ->whereHas('options');
+                },
+                'attributeOption' => function ($query) {
+                    $query->select([
+                        'id',
+                        'product_id',
+                        'variant_id',
+                        'attribute_id',
+                        'option_id'
+                    ])->whereHas('variant');
+                },
+                "activeVariants" => function ($query) {
+                    $query->select([
+                        'id as variant_id',
+                        'product_variant as variant_name',
+                        'product_id',
+                        'sku',
+                        'quantity as max_quantity',
+                        'price',
+                        'discount',
+                        'discount_type',
+                        'status',
+                        'image_id',
+                        'short_description as variant_short_description',
+                    ])->where('status', Constant::Yes);
+
+                },
+            ])
+            ->whereHas('activeVariants', function ($query) {
+                $query->where('status', Constant::Yes);
+            })->orderBy('id','DESC')->get();
+        /*
+        if (count($filter))
+        {
+            if (!empty($filter['name']))
+            {
+                $data = $data->where('first_name', 'LIKE', '%' . trim($filter['first_name']) . '%')
+                    ->orWhere('last_name', 'LIKE', '%' . trim($filter['last_name']) . '%');
+            }
+            if (!empty($filter['user_name']))
+            {
+                $data = $data->where('username', 'LIKE', '%' . trim($filter['user_name']) . '%');
+            }
+
+            if (!empty($filter['phone']))
+            {
+                $phone = trim($filter['phone']);
+                $phone = Helper::formatPhoneNumber($phone);
+                $data = $data->where('phone', 'LIKE', '%' . $phone . '%');
+            }
+
+            if (!empty($filter['email']))
+            {
+                $data = $data->where('email', 'LIKE', '%' . trim($filter['email']) . '%');
+            }
+
+            if (!empty($filter['last_login']))
+            {
+                $memberSince = trim($filter['last_login']);
+                $data = $data->whereDate('last_login', '>=', date('Y-m-d', strtotime($memberSince)));
+            }
+
+            if (isset($filter['status']))
+            {
+                $data = $data->where('status', $filter['status']);
+            }
+
+            if (isset($filter['subscription_status']))
+            {
+                $data = $data->where('subscription_status', $filter['subscription_status']);
+            }
+        }
+        */
+        $count = $products->count();
+
+        return [
+            'count'   => $count,
+            'offset'  => isset($filter['start']) ? $filter['start'] : 0,
+            'records' => $products
+        ];
+    }
+
+    public static function getClosetListing($perPage = "", $type, $disablePagination = false)
+    {
+        $fields = [
+            'id',
+            'customer_id',
+            'closet_name',
+            'logo',
+            'closet_reference',
+        ];
+        $query = self::select($fields)->where('status', Constant::Yes);
+//
+        $query->whereHas('customer', function($query) {
+            $query->where('status',Constant::Yes);
+        });
+        if($type == Constant::PJ_CLOSETS_LIST_TYPES['Trending']) {
+//            $query->where('is_trending', Constant::Yes)
+//                  ->orderBy('trending_position', 'DESC');
+        }else {
+            $query->orderBy('closet_name', 'ASC');
+
+        }
+
+        $closetList = $query
+            ->whereHas('products')
+            ->paginate($perPage);
+
+        $closetTransformed = $closetList
+            ->getCollection()
+            ->map(function ($item) use($type){
+                if($type == Constant::PJ_CLOSETS_LIST_TYPES['Trending']){
+                    $item['country'] = $item->customer->country->name;
+                }
+                unset($item->customer);
+                unset($item->id);
+                unset($item->customer_id);
+                return $item;
+            })->toArray();
+        if($disablePagination) {
+            return $closetTransformed;
+        }
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $closetTransformed,
+            $closetList->total(),
+            $closetList->perPage(),
+            $closetList->currentPage(), [
+                'path' => \Request::url(),
+                'query' => [
+                    'page' => $closetList->currentPage()
+                ]
+            ]
+        );
     }
 }

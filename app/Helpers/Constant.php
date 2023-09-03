@@ -15,12 +15,14 @@ class Constant
     ];
 
     const USER_TYPES = [
+        'Super-Admin' => 0,
         'Admin'       => 1,
         'Closet'      => 2,
         'Customer'    => 3,
     ];
     const USER_TYPES_STYLE = [
-        1 => "primary",
+        0 => "primary",
+        1 => "info",
         2 => "warning",
         3 => "success",
     ];
@@ -36,6 +38,14 @@ class Constant
         'updated' => 1
     ];
 
+    const PIM_PRODUCT_STATUS = [
+        "InActive" => 0,
+        "Active" => 1,
+    ];
+    const PIM_PRODUCT_STATUS_STYLE = [
+        0 => "danger",
+        1 => "success"
+    ];
 //    const USER_STATUS = [
 //        0 => "In Active",
 //        1 => "Active",

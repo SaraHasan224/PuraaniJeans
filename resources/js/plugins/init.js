@@ -1,7 +1,7 @@
 import 'intl-tel-input';
 import 'owl.carousel';
-import 'sweetalert2';
-import 'sweetalert';
+// import 'sweetalert2';
+// import 'sweetalert';
 import intlTelInput from 'intl-tel-input';
 window.intlTelInput = intlTelInput;
 

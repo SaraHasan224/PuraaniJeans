@@ -21,20 +21,21 @@
         </div>
     </div>
     <?php
-      $storeIds = [];
+      $authId = \Illuminate\Support\Facades\Auth::user()->id;
     ?>
     <div class="text-center d-block card-footer">
         <button
             type="button"
-            onclick="App.UserProfile.viewStoresInModal(this)"
-            text="Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain."
-            title="Delete my account"
-            submitTheme="btn-danger submitModelSuccess"
-            submitText="Delete my account"
+            onclick="App.UserProfile.deleteAccount(this)"
+            {{--text="Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain."--}}
+            {{--title="Delete my account"--}}
+            {{--submitTheme="btn-danger submitModelSuccess"--}}
+            {{--submitText="Delete my account"--}}
+            authId="{{$authId}}"
             class="mr-2 border-0 btn-transition btn btn-outline-danger"
             {{--data-toggle="modal" data-target=".view-stores"--}}
-            data-toggle="modal"
-            data-target="#customModalWrapper"
+            {{--data-toggle="modal"--}}
+            {{--data-target="#customModalWrapper"--}}
         >
             {{ __('Delete my account') }}
         </button>

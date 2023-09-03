@@ -47,12 +47,13 @@ class CategoryProductController extends Controller
                 $result = self::getCachedAllCategoriesProducts( $request, $requestData );
                 return ApiResponseHandler::success( $result, __('messages.general.success') );
             }else {
-                $bSecureCategoryIds = $this->getCachedSubCategoriesIds( $categorySlug );
+                $bSecureCategoryIds = PimBsCategory::getAllSubCategoryIds( $categorySlug );
+//                return $bSecureCategoryIds; //25:62556_silk
                 if( $bSecureCategoryIds )
                 {
-                    $merchantCategoryIds = $this->getCachedMerchantCategories( $categorySlug, $bSecureCategoryIds );
-                    $productIds = $this->getCachedPimCategoryProductIds( $categorySlug, $merchantCategoryIds );
-                    return $productIds;
+                    $merchantCategoryIds = PimBsCategoryMapping::getAllMappedCategoryIds( $bSecureCategoryIds );
+                    $productIds = $this->getCachedPimCategoryProductIds( $categorySlug, $merchantCategoryIds ); //8,9,10,11
+//                return $productIds;
 
                     $response = $this->getCachedProducts( $request, $categorySlug, $merchantCategoryIds, $productIds, $requestData );
 
@@ -69,21 +70,6 @@ class CategoryProductController extends Controller
         }
     }
 
-    public function getCachedMerchantCategories( $categorySlug, $bSecureCategoryIds )
-    {
-//        $cacheKey = 'bsecure_categories_mapped_'.$categorySlug;
-//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($bSecureCategoryIds) {
-        return PimBsCategoryMapping::getAllClosetCategoryIds( $bSecureCategoryIds );
-//        });
-    }
-
-    public function getCachedSubCategoriesIds( $categorySlug )
-    {
-//        $cacheKey = 'get_all_subcategory_ids_'.$categorySlug;
-//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($categorySlug) {
-        return PimBsCategory    ::getAllSubCategoryIds( $categorySlug );
-//        });
-    }
 
     public function getCachedPimCategoryProductIds( $categorySlug, $merchantCategoryIds )
     {
@@ -101,7 +87,7 @@ class CategoryProductController extends Controller
         $listOptions = [
             'filters' => [
                 'records_range' => [
-                    "show_count" =>  !empty($filterData) ? $filterData['records_range']['show_count'] : 24
+                    "show_count" =>  !empty($filterData) && array_key_exists("records_range", $filterData) && !empty($filterData['records_range'])? $filterData['records_range']['show_count'] : 24
                 ],
                 'sort_by' =>  [
                     'newest_arrival' => !empty($filterData) ? $filterData['sort_by']['newest_arrival'] : 1,
@@ -136,24 +122,24 @@ class CategoryProductController extends Controller
             'filter_by_product_ids' => $productIds,
             'filters' => [
                 'records_range' => [
-                    "show_count" =>  !empty($filterData) ? $filterData['records_range']['show_count'] : 24
+                    "show_count" =>  !empty($filterData) && array_key_exists("records_range", $filterData) && !empty($filterData['records_range']) ? $filterData['records_range']['show_count'] : 24
                 ],
                 'sort_by' =>  [
-                    'newest_arrival' => !empty($filterData) ? $filterData['sort_by']['newest_arrival'] : 1,
-                    'featured' => !empty($filterData) ? $filterData['sort_by']['featured'] : 0,
-                    'price_high_to_low' => !empty($filterData) ? $filterData['sort_by']['price_high_to_low'] : 0,
-                    'price_low_to_high' => !empty($filterData) ? $filterData['sort_by']['price_low_to_high'] : 0,
+                    'newest_arrival' => !empty($filterData) && array_key_exists("sort_by", $filterData) && !empty($filterData['sort_by'])  ? $filterData['sort_by']['newest_arrival'] : 1,
+                    'featured' => !empty($filterData) && array_key_exists("sort_by", $filterData) && !empty($filterData['sort_by'])  ? $filterData['sort_by']['featured'] : 0,
+                    'price_high_to_low' => !empty($filterData) && array_key_exists("sort_by", $filterData) && !empty($filterData['sort_by'])  ? $filterData['sort_by']['price_high_to_low'] : 0,
+                    'price_low_to_high' => !empty($filterData) && array_key_exists("sort_by", $filterData) && !empty($filterData['sort_by'])  ? $filterData['sort_by']['price_low_to_high'] : 0,
                 ],
                 'price_range' => [
-                    "max" => !empty($filterData) ? $filterData['price_range']['max'] : -1,
-                    "min" => !empty($filterData) ? $filterData['price_range']['min'] : 0
+                    "max" => !empty($filterData) && array_key_exists("price_range", $filterData) && !empty($filterData['price_range'])  ? $filterData['price_range']['max'] : -1,
+                    "min" => !empty($filterData) && array_key_exists("price_range", $filterData) && !empty($filterData['price_range'])  ? $filterData['price_range']['min'] : 0
                 ],
-                "categories"=> !empty($filterData) ? $filterData['categories'] : "",
-                "brands" => !empty($filterData) ? $filterData['brands'] : "",
-                "condition" => !empty($filterData) ? $filterData['condition'] : "",
-                "size" => !empty($filterData) ? $filterData['size'] : "",
-                "standard" => !empty($filterData) ? $filterData['standard'] : "",
-                "color" => !empty($filterData) ? $filterData['color'] : ""
+                "categories"=> !empty($filterData) && array_key_exists("categories", $filterData) && !empty($filterData['categories'])   ? $filterData['categories'] : "",
+                "brands" => !empty($filterData) && array_key_exists("brands", $filterData) && !empty($filterData['brands'])   ? $filterData['brands'] : "",
+                "condition" => !empty($filterData) && array_key_exists("condition", $filterData) && !empty($filterData['condition'])   ? $filterData['condition'] : "",
+                "size" => !empty($filterData) && array_key_exists("size", $filterData) && !empty($filterData['size'])   ? $filterData['size'] : "",
+                "standard" => !empty($filterData) && array_key_exists("standard", $filterData) && !empty($filterData['standard'])   ? $filterData['standard'] : "",
+                "color" => !empty($filterData) && array_key_exists("color", $filterData) && !empty($filterData['color'])   ? $filterData['color'] : ""
             ]
         ];
         return PimProduct::getProductsForApp($listType, $perPage, $listOptions);

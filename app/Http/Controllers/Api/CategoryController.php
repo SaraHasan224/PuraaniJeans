@@ -84,7 +84,7 @@ class CategoryController extends Controller
     {
         try
         {
-            $category = $this->getCachedCategory( $parentSlug );
+            $category = PimBsCategory::getCategoryBySlug( $parentSlug );
             $parentCategory = [
               'id'      => null,
               'name'    => null,
@@ -106,7 +106,7 @@ class CategoryController extends Controller
                 }
 
                 $response = [
-                    'sub_categories' => $this->getCachedSubCategories( $category ),
+                    'sub_categories' => PimBsCategory::getCategories( $category->id ),
                     'category'       => $categoryDetail,
                     'parent_category'=> $parentCategory,
                 ];
@@ -123,22 +123,6 @@ class CategoryController extends Controller
             AppException::log($e);
             return ApiResponseHandler::failure( __('messages.general.failed'), $e->getMessage() );
         }
-    }
-
-    public function getCachedCategory( $categorySlug )
-    {
-//        $cacheKey = 'get_category_'.$categorySlug;
-//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($categorySlug) {
-            return PimBsCategory::getCategoryBySlug( $categorySlug );
-//        });
-    }
-
-    public function getCachedSubCategories( $category )
-    {
-//        $cacheKey = 'get_subcategories_'.$category->slug;
-//        return Cache::remember($cacheKey, env('CACHE_REMEMBER_SECONDS'), function () use ($category) {
-            return PimBsCategory::getCategories( $category->id );
-//        });
     }
 
 }

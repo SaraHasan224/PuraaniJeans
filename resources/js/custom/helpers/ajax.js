@@ -99,6 +99,7 @@ App.Ajax = {
 
                 if( onSuccess )
                 {
+                    console.log("bosy",data.body )
                     onSuccess(data.body);
                 }
             },

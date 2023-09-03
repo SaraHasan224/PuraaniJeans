@@ -7,9 +7,6 @@ use App\Helpers\Constant;
 use App\Helpers\Helper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
 use function Ramsey\Uuid\v4;
 
 class Closet extends Model
@@ -56,7 +53,7 @@ class Closet extends Model
             'banner' => 'required',
             'icon' => 'required',
         ],
-        'storeCategories' => [
+        'closet_categories' => [
             'closet_ref' => 'required|string|exists:closets,closet_reference',
             'category_slug' => 'required|exists:pim_categories,pim_cat_reference',
         ],
@@ -73,7 +70,7 @@ class Closet extends Model
 
     public static function getByFilters($filter)
     {
-        $data = self::select('id', 'customer_id', 'closet_name', 'closet_reference', 'status', 'logo', 'banner', 'created_at','updated_at','deleted_at');
+        $data = self::select('id', 'customer_id', 'closet_name', 'closet_reference', 'status', 'logo', 'banner', 'is_trending', 'trending_position', 'created_at','updated_at');
         $data = $data->orderBy('id', 'DESC');
 
         if (count($filter))

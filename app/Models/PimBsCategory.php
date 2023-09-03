@@ -77,7 +77,7 @@ class PimBsCategory extends Model
         return self::select('name', 'slug', 'icon', 'product_count')
             ->where('parent_id', $parentId)
             ->where('status', Constant::Yes)
-            ->where('product_count', '>' , 0)
+//            ->where('product_count', '>' , 0)
             ->orderBy('position')
             ->get();
     }

@@ -49,4 +49,17 @@
         </div>
     @endif
 
+    <div class="col-md-12">
+        <div class="alert alert-success" style="display: none;">
+            <span class="message"></span>
+        </div>
+        <div class="alert alert-danger" style="display: none;">
+            <span class="message"></span>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="alert" id="activation_msg_div" style="display: none;">
+            <span id="activation_res_message"></span>
+        </div>
+    </div>
 </div>

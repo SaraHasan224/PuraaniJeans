@@ -203,7 +203,7 @@ class CustomerController extends Controller
                 return $phone;
             })
             ->addColumn('status', function ($rowdata) {
-                $isActive = $rowdata->status;
+                $isActive = !empty($rowdata->status) ? $rowdata->status : Constant::CUSTOMER_STATUS['InActive'];
                 $userStatus = array_flip(Constant::CUSTOMER_STATUS);
                 return '<label class="badge badge-' . Constant::CUSTOMER_STATUS_STYLE[$isActive] . '"> ' . $userStatus[$isActive] . '</label>';
             })
@@ -211,7 +211,7 @@ class CustomerController extends Controller
                 return $rowdata->country_id;
             })
             ->addColumn('subscription_status', function ($rowdata) {
-                $isSubcription = $rowdata->subscription_status;
+                $isSubcription = !empty($rowdata->subscription_status) ? $rowdata->subscription_status : Constant::CUSTOMER_SUBSCRIPTION_STATUS['disabled'];
                 $userStatus = array_flip(Constant::CUSTOMER_SUBSCRIPTION_STATUS);
                 return '<label class="badge badge-' . Constant::CUSTOMER_SUBSCRIPTION_STATUS_STYLE[$isSubcription] . '"> ' . $userStatus[$isSubcription] . '</label>';
             })
