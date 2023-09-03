@@ -132,6 +132,27 @@ class ClosetController extends Controller
                 $target = "_blank";
                 return '<a target="'.$target.'" href="'.$url.'" class="'.$disabledClass.'" >' . $rowdata->closet_name . '</a>';
             })
+            ->addColumn('trending', function ($rowdata) {
+                $disabledClass = "";
+                $isActive = $rowdata->is_trending;
+                $status = array_flip(Constant::CLOSET_TRENDING_STATUS);
+                $oppStatus = (int) !boolval($isActive);
+                $function = "App.Closet.closetTrendingModal('".$rowdata->closet_reference."','".$status[$oppStatus]."','".$oppStatus."')";
+                $text = '<label
+                    class="badge badge-' . Constant::CLOSET_TRENDING_STATUS_STYLE[$isActive] . '"
+                    onclick="'.$function.'"
+                    > ' . $status[$isActive] . '</label>';
+                if($rowdata->is_trending) {
+                    $text .= "<br/> <b>Trending Position: </b>".   $rowdata->trending_position;
+                }
+                return $text;
+            })
+            ->addColumn('customer_name', function ($rowdata) {
+                $disabledClass = !empty($rowdata->customer->deleted_at);
+                $url = url("/customers/" . $rowdata->customer->id.'/edit');
+                $target = "_blank";
+                return '<a target="'.$target.'" href="'.$url.'" class="'.$disabledClass.'" >' . $rowdata->customer->first_name .' '. $rowdata->customer->last_name.'</a>'.'<br/><b>Email:</b> '.$rowdata->customer->email;
+            })
             ->addColumn('status', function ($rowdata) {
                 $isActive = $rowdata->status;
                 $userStatus = array_flip(Constant::USER_STATUS);
@@ -150,7 +171,7 @@ class ClosetController extends Controller
             ->addColumn('updated_at', function ($rowdata) {
                 return Helper::dated_by(null,$rowdata->updated_at);
             })
-            ->rawColumns(['check', 'closet_name', 'logo','banner', 'status','created_at','updated_at'])
+            ->rawColumns(['check', 'closet_name', 'logo','banner', 'trending', 'customer_name', 'status','created_at','updated_at'])
             ->setOffset($data['offset'])
             ->with([
                 "recordsTotal" => $data['count'],
@@ -183,11 +204,6 @@ class ClosetController extends Controller
 
     private function makeProductListingDatatable($data)
     {
-//            'discount_badge' => [
-//                'show' => ($discountedPrice >= $price) ? Constant::No : Constant::Yes,
-//                'discount' => $discount,
-//                'type' => $discountType,
-//            ],
         return DataTables::of($data['records'])
             ->addColumn('check', function ($rowdata) {
                 $disabled = '';
@@ -225,8 +241,21 @@ class ClosetController extends Controller
             })
             ->addColumn('status', function ($rowdata) {
                 $isActive = $rowdata['status'];
-                $userStatus = array_flip(Constant::PIM_PRODUCT_STATUS);
-                return '<label class="badge badge-' . Constant::PIM_PRODUCT_STATUS_STYLE[$isActive] . '"> ' . $userStatus[$isActive] . '</label>';
+                $status = array_flip(Constant::PIM_PRODUCT_STATUS);
+                $oppStatus = (int) !boolval($isActive);
+                $function = "App.Closet.closetProductChangeStatusModal('".$rowdata['handle']."','".$status[$oppStatus]."','".$oppStatus."')";
+                return '<label class="badge badge-' . Constant::PIM_PRODUCT_STATUS_STYLE[$isActive] . '" onClick="'.$function.'"> ' . $status[$isActive] . '</label>';
+            })
+            ->addColumn('is_featured', function ($rowdata) {
+                $isActive = (int) $rowdata['is_featured'];
+                $status = array_flip(Constant::PIM_PRODUCT_FEATURED_STATUS);
+                $oppStatus = (int) !boolval($isActive);
+                $function = "App.Closet.closetProductMarkFeaturedModal('".$rowdata['handle']."','".$status[$oppStatus]."','".$oppStatus."')";
+                $text = '<label class="badge badge-' . Constant::PIM_PRODUCT_FEATURED_STATUS_STYLE[$isActive] . '" onClick="'.$function.'"> ' . $status[$isActive] . '</label>';
+                if(!empty($isActive)) {
+                    $text .= '<br/><span> Position: ' . $rowdata['featured_position']. '</span>';
+                }
+                return $text;
             })
             ->addColumn('image', function ($rowdata) {
                 $image = isset($rowdata['defaultImage'])? optional($rowdata['defaultImage'])->url : Helper::getProductImagePlaceholder();
@@ -265,7 +294,7 @@ class ClosetController extends Controller
             ->addColumn('updated_at', function ($rowdata) {
                 return Helper::dated_by(null,$rowdata['updated_at']);
             })
-            ->rawColumns(['check', 'name', 'bs_category','category_name', 'image','created_at','updated_at','status', 'shipping_price'])
+            ->rawColumns(['check', 'name', 'bs_category','category_name', 'image','created_at','updated_at','status', 'is_featured','shipping_price'])
             ->setOffset($data['offset'])
             ->with([
                 "recordsTotal" => $data['count'],
@@ -296,6 +325,81 @@ class ClosetController extends Controller
                 'follower_count' => CustomerProductRecentlyViewed::findCountByClosetProductIds($closetProductIds),
             ];
             return view('closet.closet.edit', ['module' => "closet", 'data' => $data]);
+        }
+    }
+
+    public function toggleTrendingStatus(Request $request)
+    {
+        try {
+            $requestData = $request->all();
+            $closetRef = $requestData['ref'];
+            $status = $requestData['is_trending'];
+            $position = array_key_exists('position', $requestData) ? $requestData['position'] : 0;
+
+            Closet::updateTrendingStatus($closetRef, $status, $position);
+            $return['type'] = 'success';
+            $return['message'] = 'Trending status updated successfully.';
+            return $return;
+        } catch (\Exception $e) {
+            AppException::log($e);
+            $return['type'] = 'errors';
+            $get_environment = env('APP_ENV', 'local');
+//            if ($get_environment == 'local') {
+                $return['message'] = $e->getMessage();
+//            } else {
+//                $return['message'] = "Oopss we are facing some hurdle right now to process this action, please try again";
+//            }
+            return $return;
+        }
+    }
+
+    public function toggleProductStatus(Request $request)
+    {
+        try {
+            $requestData = $request->all();
+            $handle = $requestData['handle'];
+            $status = $requestData['status'];
+
+            PimProduct::updateStatus($handle, $status);
+            $return['type'] = 'success';
+            $return['message'] = 'Product status has been updated successfully';
+            return $return;
+        } catch (\Exception $e) {
+            AppException::log($e);
+            $return['type'] = 'errors';
+            $get_environment = env('APP_ENV', 'local');
+            if ($get_environment == 'local') {
+                $return['message'] = $e->getMessage();
+            } else {
+                $return['message'] = "Oopss we are facing some hurdle right now to process this action, please try again";
+            }
+            return $return;
+        }
+    }
+
+
+    public function toggleProductFeaturedStatus(Request $request)
+    {
+        try {
+            $requestData = $request->all();
+            $handle = $requestData['handle'];
+            $status = $requestData['is_featured'];
+            $position = array_key_exists('position', $requestData) ? $requestData['position'] : 0;
+
+            PimProduct::updateFeaturedStatus($handle, $status, $position);
+            $return['type'] = 'success';
+            $return['message'] = 'Product feature status has been updated successfully';
+            return $return;
+        } catch (\Exception $e) {
+            AppException::log($e);
+            $return['type'] = 'errors';
+            $get_environment = env('APP_ENV', 'local');
+            if ($get_environment == 'local') {
+                $return['message'] = $e->getMessage();
+            } else {
+                $return['message'] = "Oopss we are facing some hurdle right now to process this action, please try again";
+            }
+            return $return;
         }
     }
 }

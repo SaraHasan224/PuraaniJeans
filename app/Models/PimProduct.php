@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Helpers\Helper;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Helpers\Constant;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use function Illuminate\Process\options;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -973,7 +975,11 @@ class PimProduct extends Model
             'shipping_price',
             'enable_world_wide_shipping',
             'shipment_country',
-            'created_at'
+            'created_at',
+            'is_featured',
+            'featured_position',
+            'featured_at',
+            'featured_by',
         ];
 
         $products = self::select($fields)
@@ -1123,5 +1129,20 @@ class PimProduct extends Model
                 ]
             ]
         );
+    }
+
+    public static function updateFeaturedStatus($handle, $status, $position)
+    {
+        self::where('handle', $handle)->update([
+            'is_featured' => $status,
+            'featured_position' => $position,
+            'featured_at' => Carbon::now(),
+            'featured_by' => Auth::user()->id,
+        ]);
+    }
+
+    public static function updateStatus($handle, $status)
+    {
+        self::where('handle', $handle)->update(['status' => $status]);
     }
 }

@@ -54,6 +54,18 @@ App.Helpers = {
         });
     },
 
+    confirmWithInput: function (text, html, action) {
+        swal({
+                title: text,
+                text: html,
+                type: "input",
+                showCancelButton: true,
+                closeOnConfirm: false,
+                animation: "slide-from-top",
+                inputPlaceholder: "Write something"
+            },action);
+    },
+
     confirm: function (text, action) {
         swal({
             title: "Are you sure?",

@@ -46,6 +46,15 @@ class Constant
         0 => "danger",
         1 => "success"
     ];
+
+    const PIM_PRODUCT_FEATURED_STATUS = [
+        "Non_featured" => 0,
+        "Featured" => 1,
+    ];
+    const PIM_PRODUCT_FEATURED_STATUS_STYLE = [
+        0 => "secondary",
+        1 => "primary"
+    ];
 //    const USER_STATUS = [
 //        0 => "In Active",
 //        1 => "Active",
@@ -78,6 +87,14 @@ class Constant
     const CLOSET_STATUS = [
         "enabled" => 1,
         "disabled" => 2
+    ];
+    const CLOSET_TRENDING_STATUS = [
+        "No" => 0,
+        "Yes" => 1,
+    ];
+    const CLOSET_TRENDING_STATUS_STYLE = [
+        0 => "secondary",
+        1 => "primary"
     ];
     const OTP_MODULES = [
         'users'     => 'User',

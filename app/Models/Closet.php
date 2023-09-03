@@ -71,7 +71,7 @@ class Closet extends Model
     public static function getByFilters($filter)
     {
         $data = self::select('id', 'customer_id', 'closet_name', 'closet_reference', 'status', 'logo', 'banner', 'is_trending', 'trending_position', 'created_at','updated_at');
-        $data = $data->orderBy('id', 'DESC');
+        $data = $data->with('customer')->orderBy('id', 'DESC');
 
         if (count($filter))
         {
@@ -219,4 +219,11 @@ class Closet extends Model
         return $closet;
     }
 
+    public static function updateTrendingStatus($closetRef, $status, $position)
+    {
+        self::where('closet_reference', $closetRef)->update([
+            'is_trending' => $status,
+            'trending_position' => $position,
+        ]);
+    }
 }

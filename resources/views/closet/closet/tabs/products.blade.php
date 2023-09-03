@@ -1,7 +1,7 @@
 <div class="mt-3">
     <div class="main-card mb-3 card">
         <div class="card-body">
-            <table style="width: 100%;" id="closet_table" class="table table-hover table-striped table-bordered">
+            <table style="width: 100%;" id="products_table" class="table table-hover table-striped table-bordered">
                 <thead>
                 <tr>
                     <th>S#</th>
@@ -13,6 +13,7 @@
                     <th>Quantity</th>
                     <th>Image</th>
                     <th>Shipping Cost</th>
+                    <th>Featured</th>
                     <th>Status</th>
                     <th>Created At</th>
                     <th>Updated At</th>

@@ -117,7 +117,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/closet-product-list/{ref}', [ClosetController::class, 'getProductListingRecord'])->name('closet-product-list');
     Route::get('/closets/{ref}/edit', [ClosetController::class, 'edit'])->name('closet-edit-form');
     Route::post('/closet/edit/{ref}', [ClosetController::class, 'update'])->name('closet-edit');
+    Route::post('/closet/change-trending-status', [ClosetController::class, 'toggleTrendingStatus'])->name('closet-toggle-status');
     Route::get('/closet/product/detail/{id}', [ClosetController::class, 'getProductDetail'])->name('closet-product-detail');
+    Route::post('/closet/product/change-status', [ClosetController::class, 'toggleProductStatus'])->name('closet-product-change-status');
+    Route::post('/closet/product/change-featured-status', [ClosetController::class, 'toggleProductFeaturedStatus'])->name('closet-product-change-featured-status');
 
     Route::get('/closet/orders', [OrderController::class, 'index'])->name('closet-orders');
     Route::get('/closet/orders-list', [CustomerController::class, 'getListingRecord'])->name('closet-orders-list');

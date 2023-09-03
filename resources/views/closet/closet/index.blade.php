@@ -50,10 +50,11 @@
                 <tr>
                     <th>S#</th>
                     <th>Name</th>
-                    {{--<th>Customer</th>--}}
+                    <th>Customer</th>
                     <th>Ref</th>
                     <th>Logo</th>
                     <th>Banner</th>
+                    <th>Trending</th>
                     <th>Status</th>
                     <th>Created At</th>
                     <th>Updated At</th>

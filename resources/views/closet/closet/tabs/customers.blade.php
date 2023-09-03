@@ -1,6 +1,6 @@
 <div class="main-card mb-3 card">
     <div class="card-body">
-        <table style="width: 100%;" id="customer_table" class="table table-hover table-striped table-bordered">
+        <table style="width: 100%;" id="closet_customers_table" class="table table-hover table-striped table-bordered">
             <thead>
             <tr>
                 <th>S#</th>

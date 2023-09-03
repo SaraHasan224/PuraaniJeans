@@ -1,17 +1,17 @@
 @extends('layouts.master')
-@section('page_title',env('APP_NAME').' - User Management')
-@section('parent_module_breadcrumb_title','User Management')
+@section('page_title',env('APP_NAME').' - Closets')
+@section('parent_module_breadcrumb_title','Closet Management')
 
-@section('parent_module_icon','lnr-users')
-@section('parent_module_title','Account Management')
+@section('parent_module_icon','pe-7s-diamond')
+@section('parent_module_title','Application')
 
 @section('has_child_breadcrumb_section', true)
 {{--@section('has_child_breadcrumb_actions', true)--}}
 
 @section('child_module_icon','icon-breadcrumb')
-@section('child_module_breadcrumb_title','Users')
+@section('child_module_breadcrumb_title','Closets')
 @section('sub_child_module_icon','icon-breadcrumb')
-@section('sub_child_module_breadcrumb_title','Edit')
+@section('sub_child_module_breadcrumb_title',$data['closet']->closet_name)
 
 @section('has_child_breadcrumb_actions')
 @endsection
@@ -38,7 +38,7 @@
                         {{$data['closet']->closet_name}}
                         <div class="btn-actions-pane-right">
                         <div class="nav">
-                            <a data-toggle="tab" href="#tab-eg2-0"
+                            <a data-toggle="tab" href="#tab-eg2-0" id="closet"
                                class="btn-pill btn-wide active btn btn-outline-alternate btn-sm">Closet</a>
                             <a data-toggle="tab" href="#tab-eg2-1" id="productInventory"
                                class="btn-pill btn-wide btn btn-outline-alternate btn-sm">Product Inventory</a>
@@ -54,9 +54,7 @@
                         @include('closet.closet.tabs.closet')
                     </div>
                     <div class="tab-pane" id="tab-eg2-1" role="tabpanel">
-                        @include('closet.closet.tabs.products', [
-                            'closet_ref' => $data['closet']->closet_reference
-                        ])
+                        @include('closet.closet.tabs.products')
                     </div>
                     <div class="tab-pane" id="tab-eg2-2" role="tabpanel">
                         @include('closet.closet.tabs.customers')
@@ -76,12 +74,12 @@
         const closet_ref = "<?php echo $data['closet']->closet_reference ?>";
         document.getElementById("productInventory").onclick = function () {
             App.Closet.initializeClosetProductsDataTable(closet_ref);
-        }
-        document.getElementById("customers").onclick = function () {
-            App.Closet.initializeClosetCustomerDataTable(closet_ref);
-        }
-        document.getElementById("orders").onclick = function () {
-            App.Closet.initializeClosetOrdersDataTable(closet_ref);
-        }
+        };
+//        document.getElementById("customers").onclick = function () {
+//            App.Closet.initializeClosetCustomerDataTable(closet_ref);
+//        };
+//        document.getElementById("orders").onclick = function () {
+//            App.Closet.initializeClosetOrdersDataTable(closet_ref);
+//        };
     </script>
 @endsection

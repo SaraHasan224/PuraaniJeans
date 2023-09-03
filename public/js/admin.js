@@ -67205,6 +67205,46 @@ App.Closet = {
     $("#closet_name").val('').trigger('change');
     App.Helpers.oTable.draw();
   },
+  closetTrendingModal: function closetTrendingModal(closetRef, statusTitle, status) {
+    var customerStatusValue = statusTitle;
+    if (status == 1) {
+      var action = function action(inputValue) {
+        if (inputValue === null) return false;
+        if (inputValue === "") {
+          swal.showInputError("You need to write something!");
+          return false;
+        }
+        var onSuccess = function onSuccess(response) {
+          App.Helpers.oTable.draw();
+          swal.close();
+        };
+        var requestData = {
+          'ref': closetRef,
+          'is_trending': status,
+          'position': inputValue
+        };
+        var url = App.Helpers.generateApiURL(App.Constants.endPoints.updateClosetTrendingStatus);
+        App.Ajax.post(url, requestData, onSuccess, false, '', 0);
+      };
+      App.Helpers.confirmWithInput('Are you sure?', 'You want to mark selected closet trending status as ' + customerStatusValue.toUpperCase() + '. Kindly add your desired trending closet position below ', action);
+    } else {
+      var _action = function _action(isConfirm) {
+        if (isConfirm) {
+          var onSuccess = function onSuccess(response) {
+            App.Helpers.oTable.draw("closet_table");
+            swal.close();
+          };
+          var requestData = {
+            'ref': closetRef,
+            'is_trending': status
+          };
+          var url = App.Helpers.generateApiURL(App.Constants.endPoints.updateClosetTrendingStatus);
+          App.Ajax.post(url, requestData, onSuccess, false, '', 0);
+        }
+      };
+      App.Helpers.confirm('You want to mark selected closet trending status as' + customerStatusValue.toUpperCase() + '.', _action);
+    }
+  },
   closetProductViewModal: function closetProductViewModal(element, id) {
     var data = $(element).attr('text');
     var modelTitle = $(element).attr('title');
@@ -67225,6 +67265,46 @@ App.Closet = {
     footerSubmitDiv.removeClass("btn-primary");
     footerSubmitDiv.addClass(modelSubmitBtnTheme);
   },
+  closetProductChangeStatusModal: function closetProductChangeStatusModal(handle, statusTitle, status) {
+    var customerStatusValue = statusTitle;
+    var action = function action(isConfirm) {
+      if (isConfirm) {
+        var onSuccess = function onSuccess(response) {
+          App.Helpers.oTable.draw("products_table");
+          swal.close();
+        };
+        var requestData = {
+          'handle': handle,
+          'status': status
+        };
+        var url = App.Helpers.generateApiURL(App.Constants.endPoints.updateClosetProductStatus);
+        App.Ajax.post(url, requestData, onSuccess, false, '', 0);
+      }
+    };
+    App.Helpers.confirm('You want to changed selected product status as ' + customerStatusValue.toUpperCase() + '.', action);
+  },
+  closetProductMarkFeaturedModal: function closetProductMarkFeaturedModal(handle, statusTitle, status) {
+    var customerStatusValue = statusTitle;
+    var action = function action(inputValue) {
+      if (inputValue === null) return false;
+      if (inputValue === "") {
+        swal.showInputError("You need to write something!");
+        return false;
+      }
+      var onSuccess = function onSuccess(response) {
+        App.Helpers.oTable.draw();
+        swal.close();
+      };
+      var requestData = {
+        'handle': handle,
+        'is_featured': status,
+        'position': inputValue
+      };
+      var url = App.Helpers.generateApiURL(App.Constants.endPoints.updateClosetProductFeaturedStatus);
+      App.Ajax.post(url, requestData, onSuccess, false, '', 0);
+    };
+    App.Helpers.confirmWithInput('Are you sure?', 'You want to mark selected product featured status as ' + customerStatusValue.toUpperCase() + '. Kindly add your desired featured position below ', action);
+  },
   initializeDataTable: function initializeDataTable() {
     var table_name = "closet_table";
     var url = App.Helpers.generateApiURL(App.Constants.endPoints.getClosets);
@@ -67242,9 +67322,12 @@ App.Closet = {
       name: "closet_name",
       orderable: true,
       searchable: true
-    },
-    // {data: "customer_name", name: "customer_name", orderable: true, searchable: true},
-    {
+    }, {
+      data: "customer_name",
+      name: "customer_name",
+      orderable: true,
+      searchable: true
+    }, {
       data: "closet_reference",
       name: "closet_reference",
       orderable: true,
@@ -67257,6 +67340,11 @@ App.Closet = {
     }, {
       data: "banner",
       name: "banner",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "trending",
+      name: "trending",
       orderable: true,
       searchable: true
     }, {
@@ -67284,7 +67372,7 @@ App.Closet = {
     App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn, [], true);
   },
   initializeClosetProductsDataTable: function initializeClosetProductsDataTable(ref) {
-    var table_name = "closet_table";
+    var table_name = "products_table";
     var url = App.Helpers.generateApiURL(App.Constants.endPoints.getClosetsProducts) + ref;
     var sortColumn = [[2, "desc"]];
     var columns = [{
@@ -67334,10 +67422,15 @@ App.Closet = {
       orderable: true,
       searchable: true
     }, {
+      data: "is_featured",
+      name: "is_featured",
+      orderable: true,
+      searchable: false
+    }, {
       data: "status",
       name: "status",
       orderable: true,
-      searchable: true
+      searchable: false
     }, {
       data: "created_at",
       name: "created_at",
@@ -67358,7 +67451,7 @@ App.Closet = {
     App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn, [], true);
   },
   initializeClosetCustomerDataTable: function initializeClosetCustomerDataTable(ref) {
-    var table_name = "closet_table";
+    var table_name = "closet_customers_table";
     var url = App.Helpers.generateApiURL(App.Constants.endPoints.getClosetsProducts) + ref;
     var sortColumn = [[2, "desc"]];
     var columns = [{
@@ -67432,7 +67525,7 @@ App.Closet = {
     App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn, [], true);
   },
   initializeClosetOrdersDataTable: function initializeClosetOrdersDataTable(ref) {
-    var table_name = "closet_table";
+    var table_name = "closet_orders_table";
     var url = App.Helpers.generateApiURL(App.Constants.endPoints.getClosetsProducts) + ref;
     var sortColumn = [[2, "desc"]];
     var columns = [{
@@ -70582,7 +70675,10 @@ App.Constants = {
     'editCustomer': '/customer/edit',
     'getClosets': '/closet-list',
     'getClosetsProducts': '/closet-product-list/',
-    'getClosetsProductDetail': '/closet/product/detail/'
+    'getClosetsProductDetail': '/closet/product/detail/',
+    'updateClosetTrendingStatus': '/closet/change-trending-status',
+    'updateClosetProductStatus': '/closet/product/change-status',
+    'updateClosetProductFeaturedStatus': '/closet/product/change-featured-status'
   },
   user_type: {
     1: 'Admin'
@@ -70656,6 +70752,17 @@ App.Helpers = {
       closeOnConfirm: false,
       closeOnCancel: true
     });
+  },
+  confirmWithInput: function confirmWithInput(text, html, action) {
+    swal({
+      title: text,
+      text: html,
+      type: "input",
+      showCancelButton: true,
+      closeOnConfirm: false,
+      animation: "slide-from-top",
+      inputPlaceholder: "Write something"
+    }, action);
   },
   confirm: function confirm(text, action) {
     swal({

@@ -34,6 +34,9 @@ App.Constants = {
       'getClosets': '/closet-list',
       'getClosetsProducts': '/closet-product-list/',
       'getClosetsProductDetail': '/closet/product/detail/',
+      'updateClosetTrendingStatus': '/closet/change-trending-status',
+      'updateClosetProductStatus': '/closet/product/change-status',
+      'updateClosetProductFeaturedStatus': '/closet/product/change-featured-status',
   },
     user_type:{
       1 : 'Admin'
