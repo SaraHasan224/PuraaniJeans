@@ -5698,3 +5698,11 @@ label.error {
   margin-right: 10px;
 }
 
+.class-success {
+  color: #3ac47d !important;
+}
+
+.class-danger {
+  color: #f00 !important;
+}
+

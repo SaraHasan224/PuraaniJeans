@@ -67195,15 +67195,35 @@ App.Closet = {
   initializeValidations: function initializeValidations() {
     $("#search-form").validate();
   },
-  removeFilters: function removeFilters() {
-    $("#customer").val("");
+  removeFilters: function removeFilters(id) {
+    $("#closet_reference").val("");
     $("#closet_name").val("");
-    App.Helpers.removeAllfilters();
+    App.Helpers.removeAllfilters(id);
   },
   removeSelectionFilters: function removeSelectionFilters() {
     $("#customer").val("");
     $("#closet_name").val('').trigger('change');
     App.Helpers.oTable.draw();
+  },
+  closetProductViewModal: function closetProductViewModal(element, id) {
+    var data = $(element).attr('text');
+    var modelTitle = $(element).attr('title');
+    var modelSubmitBtnTheme = $(element).attr('submitTheme');
+    var modelSubmitBtnText = $(element).attr('submitText');
+    var url = App.Helpers.generateApiURL(App.Constants.endPoints.getClosetsProductDetail + id);
+    $("#customModalWrapperLabel").html(modelTitle + " Details");
+    var onSuccess = function onSuccess(data) {
+      var initialDiv = $("#customModalWrapper div.modal-dialog div.modal-content div.modal-body");
+      initialDiv.empty();
+      initialDiv.append(data);
+    };
+    var requestData = {};
+    App.Ajax.get(url, requestData, onSuccess, false, "ignoreSuccessFormatting");
+    var footerSubmitDiv = $("#customModalWrapper").children().children().children('.modal-footer').children('#customModalWrapperSubmitBtn');
+    footerSubmitDiv.empty();
+    footerSubmitDiv.append(modelSubmitBtnText);
+    footerSubmitDiv.removeClass("btn-primary");
+    footerSubmitDiv.addClass(modelSubmitBtnTheme);
   },
   initializeDataTable: function initializeDataTable() {
     var table_name = "closet_table";
@@ -67256,14 +67276,162 @@ App.Closet = {
       searchable: true
     }];
     var postData = function postData(d) {
-      d.customer = $("#customer").val();
       d.closet_name = $("#closet_name").val();
+      d.closet_reference = $("#closet_reference").val();
     };
     var orderColumn = sortColumn;
     var searchEnabled = true;
     App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn, [], true);
   },
   initializeClosetProductsDataTable: function initializeClosetProductsDataTable(ref) {
+    var table_name = "closet_table";
+    var url = App.Helpers.generateApiURL(App.Constants.endPoints.getClosetsProducts) + ref;
+    var sortColumn = [[2, "desc"]];
+    var columns = [{
+      data: 'check',
+      name: 'check',
+      orderable: false,
+      searchable: false,
+      className: 'show'
+    }, {
+      data: "name",
+      name: "name",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "bs_category",
+      name: "bs_category",
+      orderable: true,
+      searchable: false
+    }, {
+      data: "category_name",
+      name: "category_name",
+      orderable: true,
+      searchable: false
+    }, {
+      data: "price",
+      name: "price",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "discounted_price",
+      name: "discounted_price",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "quantity",
+      name: "quantity",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "image",
+      name: "image",
+      orderable: true,
+      searchable: false
+    }, {
+      data: "shipping_price",
+      name: "shipping_price",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "status",
+      name: "status",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "created_at",
+      name: "created_at",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "updated_at",
+      name: "updated_at",
+      orderable: true,
+      searchable: true
+    }];
+    var postData = function postData(d) {
+      // d.customer = $("#customer").val();
+      // d.closet_name = $("#closet_name").val();
+    };
+    var orderColumn = sortColumn;
+    var searchEnabled = true;
+    App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn, [], true);
+  },
+  initializeClosetCustomerDataTable: function initializeClosetCustomerDataTable(ref) {
+    var table_name = "closet_table";
+    var url = App.Helpers.generateApiURL(App.Constants.endPoints.getClosetsProducts) + ref;
+    var sortColumn = [[2, "desc"]];
+    var columns = [{
+      data: 'check',
+      name: 'check',
+      orderable: false,
+      searchable: false,
+      className: 'show'
+    }, {
+      data: "name",
+      name: "name",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "bs_category",
+      name: "bs_category",
+      orderable: true,
+      searchable: false
+    }, {
+      data: "category_name",
+      name: "category_name",
+      orderable: true,
+      searchable: false
+    }, {
+      data: "price",
+      name: "price",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "discounted_price",
+      name: "discounted_price",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "quantity",
+      name: "quantity",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "image",
+      name: "image",
+      orderable: true,
+      searchable: false
+    }, {
+      data: "shipping_price",
+      name: "shipping_price",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "status",
+      name: "status",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "created_at",
+      name: "created_at",
+      orderable: true,
+      searchable: true
+    }, {
+      data: "updated_at",
+      name: "updated_at",
+      orderable: true,
+      searchable: true
+    }];
+    var postData = function postData(d) {
+      // d.customer = $("#customer").val();
+      // d.closet_name = $("#closet_name").val();
+    };
+    var orderColumn = sortColumn;
+    var searchEnabled = true;
+    App.Helpers.CreateDataTableIns(table_name, url, columns, postData, searchEnabled, orderColumn, [], true);
+  },
+  initializeClosetOrdersDataTable: function initializeClosetOrdersDataTable(ref) {
     var table_name = "closet_table";
     var url = App.Helpers.generateApiURL(App.Constants.endPoints.getClosetsProducts) + ref;
     var sortColumn = [[2, "desc"]];
@@ -70320,8 +70488,13 @@ App.Ajax = {
           App.Helpers.showSuccessMessage(data.message);
         }
         if (onSuccess) {
-          console.log("bosy", data.body);
-          onSuccess(data.body);
+          if (additionalOptions == 'ignoreSuccessFormatting') {
+            console.log("custom body", data);
+            onSuccess(data);
+          } else {
+            console.log("body", data.body);
+            onSuccess(data.body);
+          }
         }
       },
       error: function error(xhr, textStatus, errorThrown) {
@@ -70408,7 +70581,8 @@ App.Constants = {
     'getCustomers': '/customers-list',
     'editCustomer': '/customer/edit',
     'getClosets': '/closet-list',
-    'getClosetsProducts': '/closet-product-list/'
+    'getClosetsProducts': '/closet-product-list/',
+    'getClosetsProductDetail': '/closet/product/detail/'
   },
   user_type: {
     1: 'Admin'

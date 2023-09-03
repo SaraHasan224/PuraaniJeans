@@ -33,6 +33,7 @@ App.Constants = {
       'editCustomer': '/customer/edit',
       'getClosets': '/closet-list',
       'getClosetsProducts': '/closet-product-list/',
+      'getClosetsProductDetail': '/closet/product/detail/',
   },
     user_type:{
       1 : 'Admin'

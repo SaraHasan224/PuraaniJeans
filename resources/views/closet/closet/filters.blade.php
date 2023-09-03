@@ -7,16 +7,6 @@
             <div class="form-group">
                 <input
                         type="text"
-                        name="customer"
-                        id="customer"
-                        placeholder="Customer Name"
-                        class="form-control mr-3"
-                />
-            </div>
-
-            <div class="form-group">
-                <input
-                        type="text"
                         name="closet_name"
                         id="closet_name"
                         placeholder="Closet Name"
@@ -24,10 +14,20 @@
                 />
             </div>
 
+            <div class="form-group">
+                <input
+                        type="text"
+                        name="closet_reference"
+                        id="closet_reference"
+                        placeholder="Closet Reference"
+                        class="form-control mr-3"
+                />
+            </div>
+
 
             <div class="form-group filterButtons">
                 <button type="submit" class="btn btn-primary filter-col mr-2">Search</button>
-                <input type="button" onclick="App.Customer.removeFilters();"
+                <input type="button" onclick="App.Closet.removeFilters('closet_table');"
                        class="btn btn-primary filter-col mr-2" value="Remove Filters"/>
             </div>
 

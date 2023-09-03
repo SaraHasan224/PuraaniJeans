@@ -99,8 +99,13 @@ App.Ajax = {
 
                 if( onSuccess )
                 {
-                    console.log("bosy",data.body )
-                    onSuccess(data.body);
+                    if(additionalOptions == 'ignoreSuccessFormatting'){
+                        console.log("custom body",data )
+                        onSuccess(data);
+                    }else {
+                        console.log("body",data.body )
+                        onSuccess(data.body);
+                    }
                 }
             },
 

@@ -42,9 +42,9 @@
                                class="btn-pill btn-wide active btn btn-outline-alternate btn-sm">Closet</a>
                             <a data-toggle="tab" href="#tab-eg2-1" id="productInventory"
                                class="btn-pill btn-wide btn btn-outline-alternate btn-sm">Product Inventory</a>
-                            <a data-toggle="tab" href="#tab-eg2-2"
+                            <a data-toggle="tab" href="#tab-eg2-2" id="customers"
                                class="btn-pill btn-wide mr-1 ml-1  btn btn-outline-alternate btn-sm">Customers</a>
-                            <a data-toggle="tab" href="#tab-eg2-3"
+                            <a data-toggle="tab" href="#tab-eg2-3" id="orders"
                                class="btn-pill btn-wide  btn btn-outline-alternate btn-sm">Orders</a>
                         </div>
                     </div>
@@ -76,6 +76,12 @@
         const closet_ref = "<?php echo $data['closet']->closet_reference ?>";
         document.getElementById("productInventory").onclick = function () {
             App.Closet.initializeClosetProductsDataTable(closet_ref);
+        }
+        document.getElementById("customers").onclick = function () {
+            App.Closet.initializeClosetCustomerDataTable(closet_ref);
+        }
+        document.getElementById("orders").onclick = function () {
+            App.Closet.initializeClosetOrdersDataTable(closet_ref);
         }
     </script>
 @endsection

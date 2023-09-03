@@ -77,9 +77,15 @@ class Closet extends Model
         {
             if (!empty($filter['closet_name']))
             {
-                $data = $data->where('closet_name', 'LIKE', '%' . trim($filter['name']) . '%');
+                $data = $data->where('closet_name', 'LIKE', '%' . trim($filter['closet_name']) . '%');
+            }
+            if (!empty($filter['closet_reference']))
+            {
+                $data = $data->where('closet_reference', $filter['closet_reference']);
             }
         }
+
+
 
         $count = $data->count();
 

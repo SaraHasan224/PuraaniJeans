@@ -111,18 +111,6 @@
                                         </i>Closets
                                     </a>
                                 </li>
-                                <li class="{{ (Request::is('closet/orders') ||  Request::is('/closet/orders')) ? 'mm-active' : '' }}">
-                                    <a href="{{ URL::to('/closet/orders') }}">
-                                        <i class="metismenu-icon">
-                                        </i>Orders
-                                    </a>
-                                </li>
-                                <li class="{{ (Request::is('closet/pim') ||  Request::is('/closet/pim')) ? 'mm-active' : '' }}">
-                                    <a href="{{ URL::to('/closet/pim') }}">
-                                        <i class="metismenu-icon">
-                                        </i>Product Inventory
-                                    </a>
-                                </li>
                             </ul>
                         </li>
                         <li class="{{ (Request::is('customers') ||  Request::is('/customers')) ? 'mm-active' : '' }}">

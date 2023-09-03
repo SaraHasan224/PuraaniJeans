@@ -117,6 +117,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/closet-product-list/{ref}', [ClosetController::class, 'getProductListingRecord'])->name('closet-product-list');
     Route::get('/closets/{ref}/edit', [ClosetController::class, 'edit'])->name('closet-edit-form');
     Route::post('/closet/edit/{ref}', [ClosetController::class, 'update'])->name('closet-edit');
+    Route::get('/closet/product/detail/{id}', [ClosetController::class, 'getProductDetail'])->name('closet-product-detail');
 
     Route::get('/closet/orders', [OrderController::class, 'index'])->name('closet-orders');
     Route::get('/closet/orders-list', [CustomerController::class, 'getListingRecord'])->name('closet-orders-list');

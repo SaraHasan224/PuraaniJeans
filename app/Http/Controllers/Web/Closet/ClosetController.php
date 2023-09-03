@@ -30,6 +30,71 @@ class ClosetController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *
+     *     path="/api/product/{productId}",
+     *     tags={"Products"},
+     *     summary="Product detail",
+     *     operationId="getProductDetail",
+     *
+     *     @OA\Response(response=200,description="Success"),
+     *
+     *     @OA\Parameter(
+     *         name="productId",
+     *         in="path",
+     *         description="product id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\RequestBody(
+     *         description="Get product detail",
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="referrer_type",
+     *                     example="Featured Product",
+     *                     description="referrer type",
+     *                     type="string"
+     *                 )
+     *              )
+     *         )
+     *     ),
+     * )
+     */
+
+    public function getProductDetail(Request $request, $id) {
+        try {
+            $result = [];
+            $requestData = $request->all();
+
+            $products = PimProduct::getById($id);
+            if (!empty($products)) {
+                $requestData['product_id'] = $products->id;
+                $result = PimProduct::getProductDetail($products->handle);
+            }
+            $productStatus = array_flip(\App\Helpers\Constant::PIM_PRODUCT_STATUS);
+            return view('closet.closet.tabs.products_show', [
+                'product' => $result,
+                'productStyleStatus' => Constant::PIM_PRODUCT_STATUS_STYLE[$products->status],
+                'productStatus' => $productStatus[$products->status]
+            ]);
+        } catch (\Exception $e) {
+            AppException::log($e);
+            $return['type'] = 'errors';
+            $get_environment = env('APP_ENV', 'local');
+            if ($get_environment == 'local') {
+                $return['message'] = $e->getMessage();
+            } else {
+                $return['message'] = "Oopss we are facing some hurdle right now to process this action, please try again";
+            }
+            return ApiResponseHandler::failure($return, $return['message']);
+        }
+    }
+
 
     /**
      * Get list of the specified resource from storage.
@@ -129,6 +194,19 @@ class ClosetController extends Controller
                 return '<input type="checkbox" ' . $disabled . ' name="data_raw_id[]"  class="theClass" value="' . $rowdata['id'] . '">';
             })
             ->addColumn('name', function ($rowdata) {
+                $id = $rowdata['id'];
+                return '<button
+                            type="button"
+                            onclick="App.Closet.closetProductViewModal(this, '.$id.')"
+                            title="'.$rowdata['name'].' Details"
+                            submitTheme="btn-danger submitModelSuccess"
+                            submitText="Close"
+                            class="mr-2 border-0 btn-transition btn btn-outline-danger"
+                            data-toggle="modal"
+                            data-target="#customModalWrapper"
+                                >
+                                ' . $rowdata['name'] . '
+                        </button>';
                 return '<span>' . $rowdata['name'] . '</span>';
             })
             ->addColumn('bs_category', function ($rowdata) {

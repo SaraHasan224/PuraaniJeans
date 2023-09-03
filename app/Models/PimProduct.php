@@ -240,6 +240,8 @@ class PimProduct extends Model
         $product = self::where("handle",$productHandle)
             ->select($fields)
             ->with([
+                'shipmentCountryDetails:id,name',
+                'category',
                 'defaultImage:id,product_id,url,position',
                 'closet' => function($query) {
                     $query->select([

@@ -1,14 +1,10 @@
-{{--<!-- FILTERS VIEW STARTS HERE -->--}}
-@include('closet.closet.filters')
-{{--<!-- FILTERS VIEW ENDS HERE -->--}}
 <div class="main-card mb-3 card">
     <div class="card-body">
-        <table style="width: 100%;" id="closet_table" class="table table-hover table-striped table-bordered">
+        <table style="width: 100%;" id="orders_table" class="table table-hover table-striped table-bordered">
             <thead>
             <tr>
                 <th>S#</th>
                 <th>Name</th>
-                {{--<th>Customer</th>--}}
                 <th>Ref</th>
                 <th>Logo</th>
                 <th>Banner</th>
