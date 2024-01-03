@@ -9,6 +9,21 @@ class PimBrand extends Model
 {
     protected $guarded = [];
 
+    public function getIconAttribute($value)
+    {
+        return asset("storage/".$value);
+    }
+
+    public static function getAllBrands()
+    {
+        return self::select('id', 'name', 'icon')->where('status',Constant::Yes)->get()->toArray();
+    }
+
+    public static function getAllBrandCategories()
+    {
+        return self::select('id as value', 'name as label', 'icon')->where('status',Constant::Yes)->get()->toArray();
+    }
+
     public static function saveBrand($name)
     {
         return self::firstOrCreate(['name' => $name]);

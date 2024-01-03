@@ -6,78 +6,65 @@ use App\Helpers\Constant;
 use App\Helpers\Helper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use function Ramsey\Uuid\v4;
 
 class PimCategory extends Model
 {
     protected $guarded = [];
 
-    public function getNameAttribute($value)
+    public function parentCategory()
     {
-        $localizedName = $this->attributes[Helper::getLocalizedColumn('name')];
-        if (empty($localizedName))
-        {
-            return $value;
-        }
-
-        return $localizedName;
+        return $this->belongsTo(PimCategory::class, 'parent_id', 'id');
     }
 
-    public function getBannerAttribute($value)
+    public function parentBSCategory()
     {
-        if (empty($value))
-        {
-            return Helper::getProductImagePlaceholder(true);
-        }
-        $image = env('ENV_FOLDER') . $value;
-        return Helper::getImgixImage($image, false);
+        return $this->hasOne(PimBsCategory::class, 'slug', 'pim_cat_reference');
     }
 
-    public function getImageAttribute($value)
-    {
-        if (empty($value))
-        {
-            return Helper::getProductImagePlaceholder(true);
-        }
-        $image = env('ENV_FOLDER') . $value;
-        return Helper::getImgixImage($image, false,200);
+    public static function addParentPimCategory($closet, $name){
+        $bsCategory = PimBsCategory::getCategoryBySlug($name);
+
+        $category = self::updateOrCreate([
+            'closet_id' => $closet->id,
+            'parent_id' => Constant::No,
+        ], [
+            'position' => Constant::Yes,
+            'pim_cat_reference' => $bsCategory->slug,
+            'name' => $bsCategory->name,
+        ]);
+
+        //Link Closet category to PimBsCategoryMapping
+        PimBsCategoryMapping::mapPimCategory($category, $bsCategory);
+
+        return $category;
     }
 
-    public static function getStoreCategoryBySlug($catSlug, $storeId)
-    {
-        return self::where('handle', $catSlug)->where('store_id', $storeId)->where('is_active', Constant::Yes)->first();
+    public static function addChildPimCategory($closet, $parent, $name){
+        $bsCategory = PimBsCategory::getCategoryBySlug($name);
+
+        $category = self::updateOrCreate([
+            'closet_id' => $closet->id,
+        ], [
+            'position' => Constant::Yes,
+            'parent_id' => $parent->id,
+            'pim_cat_reference' => $bsCategory->slug,
+            'name' => $bsCategory->name,
+        ]);
+        //Link Closet category to PimBsCategoryMapping
+        PimBsCategoryMapping::mapPimCategory($category, $bsCategory);
+        return $category;
     }
 
-    public static function saveCategorywithMapping($productId, $productData)
+
+    public static function getClosetCategory($closetId)
     {
-        $categories = $productData['categories'];
-        if(isset($productData['shopify_single_category']) && !empty( $productData['shopify_single_category'] ))
-        {
-            $categories = [$productData['shopify_single_category']];
-        }
+        return self::select('name', 'pim_cat_reference', 'image')->where('closet_id', $closetId)->orderBy('position', "ASC")->get()->toArray();
+    }
 
-        $categoryIds = [];
-        foreach($categories as $category)
-        {
-            $categoryId = self::updateOrCreate(
-              [
-                'store_id' => $productData['store_id'],
-                'name' => $category['title']
-              ],
-              [
-                'name_ur' => $category['title'],
-                'is_imported' => Constant::Yes,
-                'handle' => Str::slug($category['title']),
-                'batch_id' => $productData['batch_id']
-              ]
-            )->id;
 
-            PimProductCategory::mapProductCategory($productId, $categoryId);
-            $categoryIds[] = $categoryId;
-        }
-
-        if(empty($productData['shopify_single_category']))
-        {
-            PimProductCategory::deleteMappings( $productId, $categoryIds );
-        }
+    public static function getClosetCategoryByCategoryRef($catSlug,$closetId)
+    {
+        return self::where('closet_id', $closetId)->where('pim_cat_reference', $catSlug)->first();
     }
 }

@@ -6,14 +6,13 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 
-
 /**
  * @OA\Info(
  *      version="",
  *      title="Puraani Jeans APIs",
  *      description="Puraani Jeans API documentation",
  *      @OA\Contact(
- *          email="developer@pjeans.com"
+ *          email="developer@puranijeans.com"
  *      ),
  *      @OA\License(
  *          name="Apache 2.0",
@@ -24,6 +23,7 @@ use Illuminate\Routing\Controller as BaseController;
  *      url=L5_SWAGGER_CONST_HOST,
  *      description=L5_SWAGGER_CONST_ENV
  * )
+ *
  * @OA\SecurityScheme(
  *     type="apiKey",
  *     description="user access token",
@@ -46,7 +46,6 @@ use Illuminate\Routing\Controller as BaseController;
  *     securityScheme="client_secret"
  * )
  */
-
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;

@@ -31,6 +31,18 @@ class PimProductAttribute extends Model
         return $this->hasMany(PimProductAttributeOption::class, 'pim_product_attribute_id', 'id');
     }
 
+    public static function saveAttribute($closet, $pimProduct, $attribute, $attributeName)
+    {
+        $pimAttribute =  self::firstOrCreate([
+            'closet_id' => $closet->id,
+            'product_id' => $pimProduct->id,
+            'attribute_id' => $attribute->id,
+            'attribute_value' => $attributeName,
+        ]);
+
+        return $pimAttribute;
+    }
+
     public static function mapProductAttribute($productId, $attributeId, $attributeValue)
     {
         return self::updateOrCreate([

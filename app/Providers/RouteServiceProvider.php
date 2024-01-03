@@ -11,26 +11,13 @@ use Illuminate\Support\Facades\Route;
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * This namespace is applied to your controller routes.
-     *
-     * In addition, it is set as the URL generator's root namespace.
-     *
-     * @var string
-     */
-    protected $namespace = 'App\Http\Controllers';
-
-    protected $apiVersion = ['namespace' => 'App\Http\Controllers\Api'];
-
-    protected $webVersion =  ['namespace' => 'App\Http\Controllers\Web'];
-
-    /**
      * The path to your application's "home" route.
      *
      * Typically, users are redirected here after authentication.
      *
      * @var string
      */
-    public const HOME = '/home';
+    public const HOME = '/dashboard';
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.
@@ -43,12 +30,10 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->routes(function () {
             Route::middleware('api')
-                ->namespace( $this->apiVersion['namespace'] )
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
 
             Route::middleware('web')
-                ->namespace( $this->webVersion['namespace'] )
                 ->group(base_path('routes/web.php'));
         });
     }

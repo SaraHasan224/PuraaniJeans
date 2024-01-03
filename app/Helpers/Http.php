@@ -58,4 +58,44 @@ class Http
     public static function getApiPossibleCodes(){
         return array_values( self::$Codes );
     }
+
+    public static function getIpDetails($request, $event, $identifier, $description = "")
+    {
+        $defaultCountry = [
+            'country_name' => 'Pakistan'
+        ];
+//        $ipFound = false;
+        $ipStackPermissionsEnabled = env('APP_ENV') == Constant::APP_ENV_TYPES['production'] || env('IPSTACK_API_ENABLED');
+        $enableIpStackApiCall = in_array($event, ["one-tap-customer-identifier", "access-token"]);
+        try {
+            if ($ipStackPermissionsEnabled && $enableIpStackApiCall) {
+//                if (!$ipFound) {
+                $ip = Helper::getUserIP($request);
+                $ipDetails = IpStack::getIpDetails($ip, $identifier, $description);
+                if (isset($ipDetails['country_name']) && !empty($ipDetails['country_name'])) {
+                    $defaultCountry = $ipDetails;
+                    return $defaultCountry;
+                }
+//                }
+            }
+
+            if(!$ipStackPermissionsEnabled || !$enableIpStackApiCall){
+                $ipCountry = $request->header(Constant::REQUEST_HEADERS['cf_ip_country']);
+                if (!empty($ipCountry)) {
+                    $country = Country::getCountryDataFromCode($ipCountry);
+                    if ($country) {
+//                        $ipFound = true;
+                        $defaultCountry['country_name'] = $country->name;
+                        return $defaultCountry;
+                    } else {
+                        throw new \Exception("Unidentified country ip request is triggered");
+                    }
+                }
+            }
+
+            return $defaultCountry;
+        } catch (\Exception $e) {
+            AppException::log($e);
+        }
+    }
 }

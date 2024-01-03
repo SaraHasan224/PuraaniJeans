@@ -1,0 +1,33 @@
+a, label{
+  &.error {
+    color: #e81e27;
+  }
+}
+.form-group {
+  .insideButtons {
+    display: flex;
+    align-items: center;
+    margin: 35px 0 0;
+  }
+  label {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 17px;
+    display: flex;
+    align-items: center;
+    color: #3c4257;
+  }
+}
+
+.card-closet-logo {
+  width: 70px;
+  margin-right: 10px;
+}
+
+.class-success {
+  color: #3ac47d !important;
+}
+.class-danger {
+  color: #f00 !important;
+}

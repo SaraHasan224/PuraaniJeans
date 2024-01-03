@@ -41,9 +41,8 @@ return [
             'provider' => 'users',
         ],
         'api' => [
-            'driver' => 'passport', // set this to passport
+            'driver' => 'passport', //update this line
             'provider' => 'customers',
-            'hash' => false,
         ],
     ],
 
@@ -68,6 +67,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],
+        'customers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Customer::class,
         ],
 
         // 'users' => [
@@ -102,6 +105,11 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+        'customers' => [
+            'provider' => 'customers',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
     ],
 
     /*
@@ -115,6 +123,6 @@ return [
     |
     */
 
-    'password_timeout' => 10800,
+//    'password_timeout' => 10800,
 
 ];
